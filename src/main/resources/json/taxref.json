@@ -1,0 +1,23 @@
+{
+  "taxonList": [
+    {
+      "id": null,
+      "scientificNameAuthorship": "Linnaeus, 1758",
+      "tribu": "Tribue",
+      "subFamily": "Sous famille",
+      "url": "url",
+      "rank": "genus",
+      "scientificName": "Canis Linnaeus, 1758",
+      "kingdom": "Animalia",
+      "phylum": "Chordata",
+      "class": "Mammalia",
+      "order": "Carnivora",
+      "family": "Canidae",
+      "genus": "Canis",
+      "species": "Espece",
+      "referentialVersion": "v23",
+      "referentialName": "GBIF",
+      "vernacularNameFr": "Nom vernaculaire"
+    }
+  ]
+}

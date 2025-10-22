@@ -1,0 +1,188 @@
+{
+ "properties": {
+    "catalog_number": {
+      "type": "keyword"
+    },
+    "ccollection_name_en": {
+      "type": "text",
+      "fields": {
+        "keyword": {
+          "type": "keyword",
+          "ignore_above": 256,
+          "normalizer": "keyword_normalizer"
+        }
+      },
+      "analyzer": "folding",
+      "fielddata": true
+    },
+    "collection_id": {
+      "type": "keyword"
+    },
+    "collection_name_fr": {
+      "type": "text",
+      "fields": {
+        "keyword": {
+          "type": "keyword",
+          "ignore_above": 256,
+          "normalizer": "keyword_normalizer"
+        }
+      },
+      "analyzer": "folding",
+      "fielddata": true
+    },
+    "continent": {
+      "type": "text",
+      "fields": {
+        "keyword": {
+          "type": "keyword",
+          "ignore_above": 256,
+          "normalizer": "keyword_normalizer"
+        }
+      },
+      "analyzer": "folding",
+      "fielddata": true
+    },
+    "country": {
+      "type": "keyword",
+      "ignore_above": 256,
+      "normalizer": "keyword_normalizer"
+    },
+    "county": {
+      "type": "keyword",
+      "ignore_above": 256,
+      "normalizer": "keyword_normalizer"
+    },
+    "decimal_latitude": {
+      "type": "float",
+      "index": false
+    },
+    "decimal_longitude": {
+      "type": "float",
+      "index": false
+    },
+    "family": {
+      "type": "text",
+      "fields": {
+        "keyword": {
+          "type": "keyword",
+          "ignore_above": 256,
+          "normalizer": "keyword_normalizer"
+        }
+      },
+      "analyzer": "folding",
+      "fielddata": true
+    },
+    "genus": {
+      "type": "text",
+      "fields": {
+        "keyword": {
+          "type": "keyword",
+          "ignore_above": 256,
+          "normalizer": "keyword_normalizer"
+        }
+      },
+      "analyzer": "folding",
+      "fielddata": true
+    },
+    "id": {
+      "type": "keyword",
+      "ignore_above": 256
+    },
+    "identification_by_ids": {
+      "type": "text",
+      "fields": {
+        "keyword": {
+          "type": "keyword",
+          "ignore_above": 256,
+          "normalizer": "keyword_normalizer"
+        }
+      },
+      "analyzer": "folding",
+      "fielddata": true
+    },
+    "institution_id": {
+      "type": "keyword"
+    },
+    "institution_logo_url": {
+      "type": "keyword"
+    },
+    "institution_name": {
+      "type": "text",
+      "fields": {
+        "keyword": {
+          "type": "keyword",
+          "ignore_above": 256,
+          "normalizer": "keyword_normalizer"
+        }
+      },
+      "analyzer": "folding",
+      "fielddata": true
+    },
+    "island": {
+      "type": "keyword",
+      "ignore_above": 256,
+      "normalizer": "keyword_normalizer"
+    },
+    "media_url": {
+      "type": "keyword",
+      "ignore_above": 512
+    },
+    "municipality": {
+      "type": "text",
+      "analyzer": "folding"
+    },
+    "recorded_by": {
+      "type": "text",
+      "fields": {
+        "keyword": {
+          "type": "keyword",
+          "ignore_above": 256,
+          "normalizer": "keyword_normalizer"
+        }
+      },
+      "analyzer": "folding",
+      "fielddata": true
+    },
+    "scientific_names": {
+      "type": "text",
+      "fields": {
+        "keyword": {
+          "type": "keyword",
+          "ignore_above": 256,
+          "normalizer": "keyword_normalizer"
+        }
+      },
+      "analyzer": "folding",
+      "fielddata": true
+    },
+    "species": {
+      "type": "text",
+      "fields": {
+        "keyword": {
+          "type": "keyword",
+          "ignore_above": 256,
+          "normalizer": "keyword_normalizer"
+        }
+      },
+      "analyzer": "folding",
+      "fielddata": true
+    },
+    "vernacular_names": {
+      "type": "text",
+      "fields": {
+        "keyword": {
+          "type": "keyword",
+          "ignore_above": 256,
+          "normalizer": "keyword_normalizer"
+        }
+      },
+      "analyzer": "folding",
+      "fielddata": true
+    },
+    "water_body": {
+      "type": "keyword",
+      "ignore_above": 256,
+      "normalizer": "keyword_normalizer"
+    }
+  }
+}

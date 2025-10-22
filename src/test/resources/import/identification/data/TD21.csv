@@ -1,0 +1,10 @@
+NOM_COLLECTION;NUMERO_INVENTAIRE;VERBATIM_DETERMINATION;DOUTE_DETERMINATION;TYPE;AUTEUR_DETERMINATION;DETERMINATION_ANNEE;DETERMINATION_MOIS;DETERMINATION_JOUR;NOM_SCIENTIFIQUE;AUTEURS_TAXON;NOM_VERNACULAIRE;FAMILLE;SOUS_FAMILLE;GENRE;SOUS_GENRE;EPITHETE_SPECIFIQUE;EPITHETE_INFRA_SPECIFIQUE;REGNE;EMBRANCHEMENT;ORDRE
+UCB Lyon 1;UCBL-FSL 15234;Hecticoceras zieteni;false;Holotype;Jacques Franklin;not;a;date;Hecticoceras zieteni;Tsytovitch, 1911;Lorem;Oppeliidae;;Hecticoceras;;zieteni;;Animalia;Mollusca;Ammonitida
+UCB Lyon 1;UCBL-FSL 15234;Nerinea (Ptygmatis) rioryi;false;Holotype;Jacques Franklin;2020;1;23;Nerinea (Ptygmatis) rioryi;Sayn, 1932;;Nerineidae;Lorem;Nerinea;Ptygmatis;rioryi;Lorem;Animalia;Mollusca;
+UCB Lyon 1;UCBL-FSL 15234;Walchia (Lebachia ?) schlotheimii;false;Holotype;Jacques Franklin;2020;3;;Walchia (Lebachia ?) schlotheimii;Brongniart, 1849;Lorem;;;Walchia;Lebachia;schlotheimii;;Plantae;Pinophyta;Voltziales
+UCB Lyon 1;UCBL-FSL 15234;Brachyodus borbonicus;false;Holotype;Jacques Franklin;;;;Brachyodus borbonicus;(Gervais, 1852);;Anthracotheriidae;;Brachyodus;;borbonicus;;Animalia;Chordata;Cetartiodactyla
+UCB Lyon 1;UCBL-FSL 931;;true;;Jacques Franklin & Pierre Lemauve;;;;Smittina sp.;;Lorem;Mucronellidae;;Smittina;;sp.;;Animalia;Bryozoa;Cheilostomata
+UCB Lyon 1;UCBL-FSL 931;;je ne sais pas;;Jacques Franklin & Pierre Lemauve;;;;Cylindrobullina gr. de miliola;d'Orbigny, 1847;;Cylindrobullinidae;;Cylindrobullina;;miliola;;Animalia;Mollusca;
+UCB Lyon 1;UCBL-FSL 931;;?;Syntype;Jacques Franklin & Pierre Lemauve;;;;Ostrea (Pycnodonta) perirregularis;Doncieux, 1911;Lorem;Ostreidae;Lorem;Ostrea;Pycnodonta;perirregularis;;Animalia;Mollusca;Ostreida
+UCB Lyon 1;UCBL-FSL 10421;;false;;Jacques Franklin & Pierre Lemauve;;;;Coroniceras (Pararnioceras) planaries;(Reyn√®s, 1879);;Arietitidae;;Coroniceras;Pararnioceras;planaries;Lorem;Animalia;Mollusca;Ammonitida
+UCB Lyon 1;UCBL-FSL 10421;;false;Syntype;Jacques Franklin & Pierre Lemauve;;;;Hecticoceras romani;Lemoine, 1932;;Oppeliidae;;Hecticoceras;;romani;;Animalia;Mollusca;Ammonitida

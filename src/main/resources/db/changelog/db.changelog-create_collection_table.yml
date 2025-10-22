@@ -1,0 +1,72 @@
+databaseChangeLog:
+  - changeSet:
+      id: init-collection-table
+      author: ZBO
+      changes:
+        - createTable:
+            tableName: collection
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: type_collection
+                  type: clob
+                  constraints:
+                    nullable: true
+              - column:
+                  name: collection_name_fr
+                  type: varchar
+                  constraints:
+                    nullable: true
+              - column:
+                  name: collection_name_en
+                  type: clob
+                  constraints:
+                    nullable: true
+              - column:
+                  name: description_fr
+                  type: clob
+                  constraints:
+                    nullable: true
+              - column:
+                  name: institution_id
+                  type: int
+                  constraints:
+                    nullable: false
+              - column:
+                  name: description_en
+                  type: clob
+                  constraints:
+                    nullable: true
+              - column:
+                  name: fk_institution_id
+                  type: uuid
+                  constraints:
+                    nullable: false
+              - column:
+                  name: data_change_ts
+                  type: timestamp
+
+
+#       - addForeignKeyConstraint:
+#           baseColumnNames: institution_id
+#            baseTableName: collection
+#            constraintName: institution_id
+#            onDelete: CASCADE
+#            onUpdate: CASCADE
+#            referencedColumnNames: id
+#            referencedTableName: institution
+#            validate: true
+#        - addForeignKeyConstraint:
+#            baseColumnNames: fk_institution_id
+#            baseTableName: collection
+#            constraintName: fk_institution_id
+#            onDelete: CASCADE
+#            onUpdate: CASCADE
+#            referencedColumnNames: institution_id
+#            referencedTableName: institution
+#            validate: true

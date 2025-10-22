@@ -1,0 +1,14 @@
+databaseChangeLog:
+  - changeSet:
+      id: add-column-taxon-table
+      author: DTH
+      changes:
+        - addColumn:
+            tableName: taxon
+            columns:
+              - column:
+                  name: sub_family
+                  type: varchar2 (255)
+              - column:
+                  name: referential_taxon_id
+                  type: varchar2 (255)

@@ -1,0 +1,302 @@
+[
+  {
+    "collectionId": "8342cf1d-f202-4c10-9037-2e2406ce7331",
+    "specimen": {
+      "scientificName": "string",
+      "ownerInstitutionCode": "string",
+      "legacyId": "P01073735",
+      "institutionCode": "string",
+      "collectionName": "string",
+      "collectionCode": "string",
+      "catalogNumber": "string",
+      "recordNumber": "string",
+      "basisOfRecord": "PreservedSpecimen",
+      "preparations": "string",
+      "individualCount": "string",
+      "sex": "string",
+      "lifeStage": "string",
+      "occurrenceRemarks": "string",
+      "legalStatus": "string",
+      "donor": "string",
+      "state": "string",
+      "identifications": [
+        {
+          "errorMessage": null,
+          "verbatimIdentification": null,
+          "identificationVerificationStatus": null,
+          "identifiedByID": "string",
+          "dateIdentified": "2012-01-01",
+          "currentDetermination": true,
+          "typeStatus": null,
+          "identificationRemarks": null,
+          "taxon": [
+            {
+              "levelType": "MASTER",
+              "scientificName": "genre indet.",
+              "scientificNameAuthorship": null,
+              "kingdom": null,
+              "phylum": null,
+              "vernacularName": "string",
+              "taxonRemarks": null,
+              "family": "Myrsinaceae",
+              "genus": "Myrsine",
+              "subgenus": null,
+              "taxonClass": "Aves",
+              "specificEpithet": "sp.",
+              "infraspecificEpithet": null
+            }
+          ]
+        }
+      ],
+      "geologicalContext": {
+        "verbatimEpoch": "string",
+        "ageAbsolute": "string",
+        "range": "string",
+        "earliestAgeOrLowestStage": "string",
+        "latestAgeOrHighestStage": "string",
+        "earliestEpochOrLowestSeries": "string",
+        "latestEpochOrHighestSeries": "string",
+        "earliestPeriodOrLowestSystem": "string",
+        "latestPeriodOrHighestSystem": "string",
+        "earliestEraOrLowestErathem": "string",
+        "latestEraOrHighestErathem": "string",
+        "earliestEonOrLowestEonothem": "string",
+        "latestEonOrHighestEonothem": "string",
+        "lowestBiostratigraphicZone": "string",
+        "highestBiostratigraphicZone": "string",
+        "group": "string",
+        "formation": "string",
+        "member": "string",
+        "bed": "string",
+        "otherLithostratigraphicTerms": "string"
+      },
+      "collectionEvent": {
+        "noCollectionInformation": true,
+        "eventDate": "string",
+        "interpretedDate": true,
+        "recordedBy": "string",
+        "fieldNumber": "string",
+        "fieldNotes": "string",
+        "eventRemarks": "string",
+        "verbatimLocality": "string",
+        "sensitiveLocation": true,
+        "minimumElevationInMeters": 0,
+        "maximumElevationInMeters": 0,
+        "interpretedAltitude": true,
+        "minimumDepthInMeters": 0,
+        "maximumDepthInMeters": 0,
+        "interpretedDepth": true,
+        "decimalLatitude": 0,
+        "decimalLongitude": 0,
+        "geodeticDatum": "string",
+        "georeferenceSources": "string",
+        "habitat": "string",
+        "location": {
+          "municipality": "string",
+          "stateProvince": "string",
+          "region": "string",
+          "county": "string",
+          "country": "string",
+          "continent": "string",
+          "countryCode": "str",
+          "waterBody": "string",
+          "islandGroup": "string",
+          "island": "string",
+          "locationRemarks": "string"
+        }
+      },
+      "literatures": [
+        {
+          "identifier": "string",
+          "authors": "string",
+          "date": "2022",
+          "title": "string",
+          "review": "string",
+          "volume": "string",
+          "number": "string",
+          "pages": "string",
+          "publisher": "string",
+          "publicationPlace": "string",
+          "editors": "string",
+          "bookTitle": "string",
+          "pageNumber": "string",
+          "citation": "string",
+          "language": "str",
+          "keywords": "string",
+          "description": "string",
+          "url": "string",
+          "remarks": "string"
+        }
+      ],
+      "medias": [
+        {
+          "creator": "string",
+          "contributor": "string",
+          "license": "string",
+          "source": "string",
+          "description": "string",
+          "fileName": "string",
+          "mediaUrl": "string"
+        }
+      ],
+      "other": {
+        "linkGerBank": "string",
+        "linkBold": "string",
+        "linkOther": "string",
+        "financialAid": "string",
+        "computerizationProgram": "string",
+        "remarks": "string"
+      }
+    }
+  },
+  {
+    "collectionId": "9a342a92-6fe8-48d3-984e-d1731c051666",
+    "specimen": {
+      "scientificName": "string",
+      "ownerInstitutionCode": "string",
+      "legacyId": "P01073735",
+      "institutionCode": "string",
+      "collectionName": "string",
+      "collectionCode": "string",
+      "catalogNumber": "string",
+      "recordNumber": "string",
+      "basisOfRecord": "PreservedSpecimen",
+      "preparations": "string",
+      "individualCount": "string",
+      "sex": "string",
+      "lifeStage": "string",
+      "occurrenceRemarks": "string",
+      "legalStatus": "string",
+      "donor": "string",
+      "state": "string",
+      "identifications": [
+        {
+          "errorMessage": null,
+          "verbatimIdentification": null,
+          "identificationVerificationStatus": null,
+          "identifiedByID": "string",
+          "dateIdentified": "2012-01-01",
+          "currentDetermination": true,
+          "typeStatus": null,
+          "identificationRemarks": null,
+          "taxon": [
+            {
+              "levelType": "MASTER",
+              "scientificName": "genre indet.",
+              "scientificNameAuthorship": null,
+              "kingdom": null,
+              "phylum": null,
+              "vernacularName": "string",
+              "taxonRemarks": null,
+              "family": "Myrsinaceae",
+              "genus": "Myrsine",
+              "subgenus": null,
+              "taxonClass": "Aves",
+              "specificEpithet": "sp.",
+              "infraspecificEpithet": null
+            }
+          ]
+        }
+      ],
+      "geologicalContext": {
+        "verbatimEpoch": "string",
+        "ageAbsolute": "string",
+        "range": "string",
+        "earliestAgeOrLowestStage": "string",
+        "latestAgeOrHighestStage": "string",
+        "earliestEpochOrLowestSeries": "string",
+        "latestEpochOrHighestSeries": "string",
+        "earliestPeriodOrLowestSystem": "string",
+        "latestPeriodOrHighestSystem": "string",
+        "earliestEraOrLowestErathem": "string",
+        "latestEraOrHighestErathem": "string",
+        "earliestEonOrLowestEonothem": "string",
+        "latestEonOrHighestEonothem": "string",
+        "lowestBiostratigraphicZone": "string",
+        "highestBiostratigraphicZone": "string",
+        "group": "string",
+        "formation": "string",
+        "member": "string",
+        "bed": "string",
+        "otherLithostratigraphicTerms": "string"
+      },
+      "collectionEvent": {
+        "noCollectionInformation": true,
+        "eventDate": "string",
+        "interpretedDate": true,
+        "recordedBy": "string",
+        "fieldNumber": "string",
+        "fieldNotes": "string",
+        "eventRemarks": "string",
+        "verbatimLocality": "string",
+        "sensitiveLocation": true,
+        "minimumElevationInMeters": 0,
+        "maximumElevationInMeters": 0,
+        "interpretedAltitude": true,
+        "minimumDepthInMeters": 0,
+        "maximumDepthInMeters": 0,
+        "interpretedDepth": true,
+        "decimalLatitude": 0,
+        "decimalLongitude": 0,
+        "geodeticDatum": "string",
+        "georeferenceSources": "string",
+        "habitat": "string",
+        "location": {
+          "municipality": "string",
+          "stateProvince": "string",
+          "region": "string",
+          "county": "string",
+          "country": "string",
+          "continent": "string",
+          "countryCode": "str",
+          "waterBody": "string",
+          "islandGroup": "string",
+          "island": "string",
+          "locationRemarks": "string"
+        }
+      },
+      "literatures": [
+        {
+          "identifier": "string",
+          "authors": "string",
+          "date": "2022",
+          "title": "string",
+          "review": "string",
+          "volume": "string",
+          "number": "string",
+          "pages": "string",
+          "publisher": "string",
+          "publicationPlace": "string",
+          "editors": "string",
+          "bookTitle": "string",
+          "pageNumber": "string",
+          "citation": "string",
+          "language": "str",
+          "keywords": "string",
+          "description": "string",
+          "url": "string",
+          "remarks": "string"
+        }
+      ],
+      "medias": [
+        {
+          "creator": "string",
+          "contributor": "string",
+          "license": "string",
+          "source": "string",
+          "description": "string",
+          "fileName": "string",
+          "mediaUrl": "string"
+        }
+      ],
+      "other": {
+        "linkGerBank": "string",
+        "linkBold": "string",
+        "linkOther": "string",
+        "financialAid": "string",
+        "computerizationProgram": "string",
+        "remarks": "string"
+      }
+    }
+  }
+]

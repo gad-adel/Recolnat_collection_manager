@@ -1,0 +1,15 @@
+databaseChangeLog:
+  - changeSet:
+      id: rename-colum-inventory_id
+      author: ZBO
+      changes:
+        - renameColumn:
+            newColumnName: legacy_id
+            oldColumnName: inventory_id
+            columnDataType: varchar(255)
+            tableName: specimen
+        - renameColumn:
+            newColumnName: life_stage
+            oldColumnName: occurrence_status
+            columnDataType: varchar(50)
+            tableName: specimen

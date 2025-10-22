@@ -1,0 +1,110 @@
+databaseChangeLog:
+  - changeSet:
+      id: init-collection-event-table
+      author: YEK
+      changes:
+        - createTable:
+            tableName: collection_event
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: no_collection_information
+                  type: boolean
+              - column:
+                  name: decimal_latitude
+                  type: decimal
+              - column:
+                  name: decimal_longitude
+                  type: decimal
+              - column:
+                  name: event_date
+                  type: varchar2 (100)
+              - column:
+                  name: event_remarks
+                  type: clob
+              - column:
+                  name: location_remarks
+                  type: clob
+              - column:
+                  name: field_notes
+                  type: clob
+              - column:
+                  name: field_number
+                  type: varchar2 (200)
+              - column:
+                  name: geodetic_datum
+                  type: varchar2 (45)
+              - column:
+                  name: georeference_sources
+                  type: varchar2 (255)
+              - column:
+                  name: habitat
+                  type: varchar2 (500)
+              - column:
+                  name: interpreted_date
+                  type: boolean
+              - column:
+                  name: interpreted_depth
+                  type: boolean
+              - column:
+                  name: maximum_elevation_in_meters
+                  type: integer
+              - column:
+                  name: maximum_depth_in_meters
+                  type: integer
+              - column:
+                  name: minimum_depth_in_meters
+                  type: integer
+              - column:
+                  name: minimum_elevation_in_meters
+                  type: integer
+              - column:
+                  name: recordedby
+                  type: varchar2 (300)
+              - column:
+                  name: sensitive_location
+                  type: boolean
+              - column:
+                  name: verbatim_locality
+                  type: varchar2 (2000)
+              - column:
+                  name: interpreted_altitude
+                  type: boolean
+              - column:
+                  name: municipality
+                  type: varchar2 (200)
+              - column:
+                  name: state_province
+                  type: varchar2 (255)
+              - column:
+                  name: region
+                  type: clob
+              - column:
+                  name: county
+                  type: varchar2 (255)
+              - column:
+                  name: continent
+                  type: varchar2 (45)
+              - column:
+                  name: country_code
+                  type: varchar2 (3)
+              - column:
+                  name: country
+                  type: varchar2 (255)
+              - column:
+                  name: water_body
+                  type: clob
+              - column:
+                  name: island
+                  type: clob
+              - column:
+                  name: island_group
+                  type: clob
+              - column:
+                  name: data_change_ts
+                  type: timestamp

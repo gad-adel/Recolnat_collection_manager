@@ -1,0 +1,25 @@
+# POUR TEST TYPE H2
+spring:
+  datasource:
+    url: jdbc:h2:mem:testdb
+    hikari:
+      driver-class-name: org.h2.Driver
+      jdbc-url: jdbc:h2:mem:testdb
+  banner:
+    location: banner.txt
+  jpa:
+    open-in-view: false
+    generate-ddl: true
+    show-sql: ${JPA_SHOW_SQL:true}
+  liquibase:
+    enabled: false
+
+application:
+  title: ^project.name^
+  version: ^project.version^
+
+caching:
+  statistics:
+    statisticsTTL: ${STATS_TTL:3600000}
+
+

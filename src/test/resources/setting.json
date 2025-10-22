@@ -1,0 +1,28 @@
+{
+  "index": {
+    "number_of_shards": "1",
+    "analysis": {
+          "normalizer": {
+            "keyword_normalizer": {
+              "filter": [
+                "lowercase",
+                "asciifolding"
+              ],
+              "type": "custom",
+              "char_filter": []
+            }
+          },
+          "analyzer": {
+            "folding": {
+              "filter": [
+                "lowercase",
+                "asciifolding"
+              ],
+              "type": "custom",
+              "tokenizer": "whitespace"
+            }
+          }
+        },
+    "number_of_replicas": "1"
+  }
+}

@@ -1,0 +1,131 @@
+databaseChangeLog:
+  - changeSet:
+      id: init-import-table
+      author: DTH
+      changes:
+        - createTable:
+            tableName: import
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: timestamp
+                  type: timestamp
+                  constraints:
+                    nullable: false
+              - column:
+                  name: user_name
+                  type: text
+                  constraints:
+                    nullable: false
+              - column:
+                  name: email
+                  type: text
+                  constraints:
+                    nullable: false
+              - column:
+                  name: institution_id
+                  type: uuid
+                  constraints:
+                    nullable: false
+              - column:
+                  name: status
+                  type: text
+                  constraints:
+                    nullable: false
+              - column:
+                  name: added_specimen_count
+                  type: int8
+                  defaultValueNumeric: "0"
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_specimen_count
+                  type: int8
+                  defaultValueNumeric: "0"
+                  constraints:
+                    nullable: false
+              - column:
+                  name: added_identification_count
+                  type: int8
+                  defaultValueNumeric: "0"
+                  constraints:
+                    nullable: false
+              - column:
+                  name: added_literature_count
+                  type: int8
+                  defaultValueNumeric: "0"
+                  constraints:
+                    nullable: false
+        - createTable:
+            tableName: import_file
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: fk_import_id
+                  type: uuid
+                  constraints:
+                    nullable: false
+              - column:
+                  name: file_type
+                  type: text
+                  constraints:
+                    nullable: false
+              - column:
+                  name: file_name
+                  type: text
+                  constraints:
+                    nullable: false
+              - column:
+                  name: line_count
+                  type: int8
+                  constraints:
+                    nullable: false
+              - column:
+                  name: mode
+                  type: text
+        - createTable:
+            tableName: specimen_update
+            columns:
+              - column:
+                  name: fk_specimen_id
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: fk_import_id
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: mode
+                  type: text
+        - addForeignKeyConstraint:
+            baseColumnNames: fk_import_id
+            baseTableName: specimen_update
+            constraintName: fk_import_id
+            onDelete: CASCADE
+            onUpdate: CASCADE
+            referencedColumnNames: id
+            referencedTableName: import
+            validate: true
+        - addForeignKeyConstraint:
+            baseColumnNames: fk_specimen_id
+            baseTableName: specimen_update
+            constraintName: fk_specimen_id
+            onDelete: CASCADE
+            onUpdate: CASCADE
+            referencedColumnNames: id
+            referencedTableName: specimen
+            validate: true

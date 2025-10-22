@@ -1,0 +1,77 @@
+databaseChangeLog:
+  - changeSet:
+      id: init-geological-context-table
+      author: YEK
+      changes:
+        - createTable:
+            tableName: geological_context
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: age_absolute
+                  type: clob
+              - column:
+                  name: bed
+                  type: varchar2 (100)
+              - column:
+                  name: earliest_age_or_lowest_stage
+                  type: varchar2 (100)
+              - column:
+                  name: earliest_eon_or_lowest_eonothem
+                  type: varchar2 (100)
+              - column:
+                  name: earliest_epoch_or_lowest_series
+                  type: varchar2 (100)
+              - column:
+                  name: earliest_era_or_lowest_erathem
+                  type: varchar2 (100)
+              - column:
+                  name: earliest_period_or_lowest_system
+                  type: varchar2 (100)
+              - column:
+                  name: formation
+                  type: varchar2 (100)
+              - column:
+                  name: highest_biostratigraphic_zone
+                  type: varchar2 (100)
+              - column:
+                  name: latest_age_or_highest_stage
+                  type: varchar2 (100)
+              - column:
+                  name: latest_eon_or_highest_eonothem
+                  type: varchar2 (100)
+              - column:
+                  name: latest_epoch_or_highest_series
+                  type: varchar2 (100)
+              - column:
+                  name: latest_era_or_highest_erathem
+                  type: varchar2 (100)
+              - column:
+                  name: latest_period_or_highest_system
+                  type: varchar2 (100)
+              - column:
+                  name: lowest_biostratigraphic_zone
+                  type: varchar2 (100)
+              - column:
+                  name: member
+                  type: varchar2 (100)
+              - column:
+                  name: other_lithostratigraphic_terms
+                  type: clob
+              - column:
+                  name: range
+                  type: varchar2 (255)
+              - column:
+                  name: verbatim_epoch
+                  type: varchar2 (100)
+              - column:
+                  name: geo_group
+                  type: varchar2 (100)
+              - column:
+                  name: data_change_ts
+                  type: timestamp

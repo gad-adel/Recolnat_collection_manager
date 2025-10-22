@@ -1,0 +1,11 @@
+databaseChangeLog:
+  - changeSet:
+      id: add-column-collection_code
+      author: DTH
+      changes:
+        - addColumn:
+            tableName: collection
+            columns:
+              - column:
+                  name: collection_code
+                  type: text

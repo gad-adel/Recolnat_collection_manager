@@ -1,0 +1,25 @@
+{
+    "donor": "Donar-2",
+    "collectionEvent": {
+        "decimalLatitude": 0,
+        "decimalLongitude": 0,
+        "eventDate": "25/05/1998-24/01/1999",
+        "eventRemarks": "string",
+        "fieldNotes": "string",
+        "fieldNumber": "fieldNumber",
+        "geodeticDatum": "geodeticDatum",
+        "georeferenceSources": "string",
+        "habitat": "string",
+        "interpretedAltitude": true,
+        "interpretedDate": true,
+        "interpretedDepth": true,
+        "maximumDepthInMeters": 0,
+        "maximumElevationInMeters": 0,
+        "minimumDepthInMeters": 0,
+        "minimumElevationInMeters": 0,
+        "noCollectionInformation": true,
+        "recordedBy": "string",
+        "sensitiveLocation": true,
+        "verbatimLocality": "string"
+    }
+}

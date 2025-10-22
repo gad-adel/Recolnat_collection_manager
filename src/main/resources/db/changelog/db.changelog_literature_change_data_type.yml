@@ -1,0 +1,13 @@
+databaseChangeLog:
+  - changeSet:
+      id: modifyDataType of title literature
+      author: YEK
+      changes:
+        - modifyDataType:
+            columnName: title
+            newDataType: varchar(600)
+            tableName: literature
+        - modifyDataType:
+            columnName: book_title
+            newDataType: clob
+            tableName: literature

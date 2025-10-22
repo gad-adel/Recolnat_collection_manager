@@ -1,0 +1,65 @@
+variables:
+  PROJECT_CI: collection-manager
+  SONAR_TOKEN: sqp_8bc562e402468fa167ef871214cdaa55c2a50c6e
+
+include:
+  - project: 'recolnat/backend-multirepo/templates'  # Remplacez par le chemin de votre projet template
+    ref: 'main'  # Remplacez par la branche du modèle de CI que vous souhaitez utiliser
+    file: 'ci-template.yaml'
+
+build-dev:
+  stage: build
+  script:
+    - export APP_VERSION="dev"
+    - echo "Compiling the code..."
+    - mvn $MAVEN_CLI_OPTS -Drevision=$APP_VERSION clean compile -f ./pom.xml
+  artifacts:
+    name: ${CI_COMMIT_REF_SLUG}-${CI_JOB_NAME}
+    expire_in: 1 day
+    paths:
+      - target/
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "push" && ($CI_COMMIT_BRANCH == "develop")
+      when: on_success
+    - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
+      when: on_success
+    - if: $CI_PIPELINE_SOURCE == "web"
+      when: on_success
+
+sonarqube-track:
+  stage: test
+  when: manual
+
+Unit-Tests:
+  stage: test
+  needs:
+    - job: build-dev
+  script:
+    - mvn $MAVEN_CLI_OPTS test -Dspring.profiles.active=ci -Dmaven.main.skip
+  artifacts:
+    paths:
+      - target/jacoco-output/jacoco-unit-tests.exec
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "push" && ($CI_COMMIT_BRANCH == "develop")
+      when: on_success
+    - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
+      when: on_success
+    - if: $CI_PIPELINE_SOURCE == "web"
+      when: on_success
+
+Integration-Tests:
+  stage: test
+  needs:
+    - job: build-dev
+  script:
+    - mvn $MAVEN_CLI_OPTS verify -P with-integration-tests -Dmaven.main.skip
+  artifacts:
+    paths:
+      - target/jacoco-output/jacoco-integration-tests.exec
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "push" && ($CI_COMMIT_BRANCH == "develop")
+      when: on_success
+    - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
+      when: on_success
+    - if: $CI_PIPELINE_SOURCE == "web"
+      when: on_success

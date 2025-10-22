@@ -1,0 +1,27 @@
+{
+  "total": 20,
+  "prefix": "canis",
+  "fieldName": "scientificName",
+  "suggestions": [
+    "Canis",
+    "Canis Linnaeus, 1758",
+    "Canis Sclater, 1883",
+    "Canis accitanus Garrido & Arribas, 2008",
+    "Canis adustus",
+    "Canis adustus Sundevall, 1847",
+    "Canis adustus adustus",
+    "Canis adustus bweha",
+    "Canis adustus bweha Heller, 1914",
+    "Canis adustus grayi",
+    "Canis adustus grayi Hilzheimer, 1906",
+    "Canis adustus kaffensis",
+    "Canis adustus kaffensis Neumann, 1902",
+    "Canis adustus lateralis",
+    "Canis adustus lateralis P.L.Sclater, 1870",
+    "Canis adustus notatus",
+    "Canis adustus notatus Heller, 1914",
+    "Canis africanus Pohle, 1928",
+    "Canis alopex Linnaeus, 1758",
+    "Canis alpinus"
+  ]
+}

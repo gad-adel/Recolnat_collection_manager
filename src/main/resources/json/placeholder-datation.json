@@ -1,0 +1,12 @@
+[
+   "earliestAgeOrLowestStage",
+   "latestAgeOrHighestStage",
+   "earliestEpochOrLowestSeries",
+   "latestEpochOrHighestSeries",
+   "earliestPeriodOrLowestSystem",
+   "latestPeriodOrHighestSystem",
+   "earliestEraOrLowestErathem",
+   "latestEraOrHighestErathem",
+   "earliestEonOrLowestEonothem",
+   "latestEonOrHighestEonothem"
+]

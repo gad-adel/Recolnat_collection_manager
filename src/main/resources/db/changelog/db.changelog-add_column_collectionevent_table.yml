@@ -1,0 +1,11 @@
+databaseChangeLog:
+  - changeSet:
+      id: add-column-collection-event-table
+      author: ZBO
+      changes:
+        - addColumn:
+            tableName: collection_event
+            columns:
+              - column:
+                  name: locality
+                  type: varchar2 (250)

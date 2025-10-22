@@ -1,0 +1,154 @@
+#POUR ENVIRONNEMENT TEST REMOTE
+logging:
+  level:
+    root: ${ROOT_LOG_LEVEL:INFO}
+    org:
+      hibernate:
+        type: ERROR
+        SQL: ERROR
+        orm.jdbc.bind: ERROR
+        type.descriptor.sql: ERROR
+      springframework:
+        security: ERROR
+        web: ERROR
+    recolnat:
+      collection:
+        manager: ${COLLECTION_LOG_LEVEL:ERROR}
+
+spring:
+  liquibase:
+    contexts: dev
+    enabled: ${LIQUIBASE_ACTIVE:false}
+  #    enabled: ${LIQUIBASE_ACTIVE:true}
+
+  application:
+    name: collection-manager
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    #    username: ${DATABASE_USR:itv}
+    #    password: ${DATABASE_PWD:itv}
+    #    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/itv}
+    username: ${DATABASE_USR:collections_owner_user}
+    password: ${DATABASE_PWD:izvtlJ9j50frtbxrURIx}
+    url: ${DATABASE_URL:jdbc:postgresql://192.168.132.7:5432/collections?currentSchema=collections}
+    hikari:
+      maximum-pool-size: 10
+      connection-timeout: 10000
+      initialization-fail-timeout: 60000
+      max-lifetime: ${MAX_LIFE:600000}
+  banner:
+    location: banner.txt
+
+  jpa:
+    database: postgresql
+    open-in-view: false
+    generate-ddl: false
+    properties:
+      hibernate.generate_statistics: ${HIBERNATE_METRICS:true}
+      hibernate.format_sql: true
+      hibernate.jdbc.batch_size: 200
+      hibernate.order_inserts: true
+      hibernate.order_updates: true
+      dialect: org.recolnat.collection.manager.common.config.PostgreSQL10DialectUUID
+
+
+  security:
+    oauth2:
+      resourceserver:
+        opaquetoken:
+          #         introspection-uri: ${AUTH_SERVER_INTRO:http://localhost:8089/auth/realms/recolnat-oauth2/protocol/openid-connect/token/introspect}
+          #         client-id: ${CLIENT_ID:collection-manager-oidc}
+          #         client-secret: ${CLIENT_SECRET:ee5jLU9Z27S1SNyusPI5o8ODmcjJ0Mw5}
+          introspection-uri: ${AUTH_SERVER_INTRO:https://recolnat-test.mnhn.fr/auth/realms/recolnat-oauth2/protocol/openid-connect/token/introspect}
+          client-id: ${CLIENT_ID:collection-manager-oidc}
+          client-secret: ${CLIENT_SECRET:lTjmYLGADIbOi0haHbj0PKHD1x1CDInC}
+  mvc:
+    throw-exception-if-no-handler-found: true
+  web:
+    resources:
+      add-mappings: false
+  servlet:
+    multipart:
+      max-file-size: 16000KB
+      max-request-size: 16000KB
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+      cors:
+        allow-credentials: false
+        allowed-headers: true
+        allowed-methods: "*"
+        exposed-headers: "*"
+        allowed-origins: "*"
+  metrics:
+    distribution:
+      percentiles-histogram:
+        http:
+          server:
+            requests: true
+    tags:
+      application: ${spring.application.name}
+  tracing:
+    enabled: false
+    sampling.probability: 1.0
+
+authorisation:
+  base_url: ${AUTH_SERVER_API:#{'https://recolnat-test.mnhn.fr/authorisation-api'}}
+
+mediatheque:
+  stream:
+    base_url: ${MEDIATHEQUE_URL:#{'https://mediatheque.mnhn.fr/service/private/media/'}}
+  header:
+    key: ${MEDIATHEQUE_KEY:clientKey}
+    value: ${MEDIATHEQUE_KEY_VAL:b81ea986-20f7-4ea1-a3fd-1d935f487d5d}
+  connect:
+    timeout: ${MEDIATHEQUE_TIMEOUT:1000}
+
+taxonRef:
+  api:
+    base_url: ${TAXON_REF_SERVER_API:#{'http://dock-pas1.arzt.mnhn.fr:8098'}}
+    api_key_name: ${TAXON_REF_SERVER_API_KEY_NAME:API_KEY}
+    api_key_value: ${TAXON_REF_SERVER_API_KEY_VALUE:2e33b1d0-8540-420f-80dd-fff973149946}
+    mock: ${TAXON_REF_SERVER_MOCK:false}
+
+keycloak:
+  auth-server-url-OpenApi: ${AUTH_SERVER:https://recolnat-test.mnhn.fr/auth/realms/recolnat-oauth2}
+
+elasticsearch:
+  #   uris: ${ES_URI:http://localhost:9200}
+  #   connection-timeout: 100000
+  #   socket-timeout: 10000
+  #   https-ignore_certif: ${ES_IGNORE_ALL_HTTPS_CERTIF:false}
+  #   https-certificate: ${ES_WITH_HTTPS_CERTIF:false}
+  #   https-truststore: ${ES_WITH_HTTPS_TRUSTSTORE:false}
+  uris: ${ES_URI:https://192.168.30.51:9200}
+  username: ${ES_USERNAME:recolnat_cluster_user}
+  password: ${ES_SECRET:Mnhn@2024}
+  connection-timeout: 100000
+  socket-timeout: 10000
+  https-ignore_certif: ${ES_IGNORE_ALL_HTTPS_CERTIF:true}
+  https-certificate: ${ES_WITH_HTTPS_CERTIF:false}
+  https-truststore: ${ES_WITH_HTTPS_TRUSTSTORE:false}
+
+index:
+  specimen: ${INDEX_SPECIMEN:rcn_specimen_short_test}
+
+application:
+  title: ^project.name^
+  version: ^project.version^
+
+caching:
+  statistics:
+    statisticsTTL: ${STATS_TTL:3600000}
+
+springdoc:
+  show-actuator: true
+  show-oauth2-endpoints: true
+  swagger-ui:
+    csrf.enabled: false
+    oauth:
+      appName: ^project.name^
+      clientId: ${AUTH_CLIENT_ID:recolnat-test-oidc}
+      clientSecret: ${CLIENT_SECRET:lTjmYLGADIbOi0haHbj0PKHD1x1CDInC}

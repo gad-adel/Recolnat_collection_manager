@@ -1,0 +1,69 @@
+databaseChangeLog:
+  - changeSet:
+      id: init-media-table
+      author: YEK
+      changes:
+        - createTable:
+            tableName: media
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: contributor
+                  type: varchar(50)
+              - column:
+                  name: creator
+                  type: varchar(255)
+              - column:
+                  name: description
+                  type: varchar(255)
+                  constraints:
+                    nullable: true
+              - column:
+                  name: license
+                  type: varchar(255)
+                  constraints:
+                    nullable: true
+              - column:
+                  name: source
+                  type: varchar(255)
+                  constraints:
+                    nullable: true
+              - column:
+                  name: media_url
+                  type: varchar(255)
+                  constraints:
+                    nullable: true
+              - column:
+                  name: media_name
+                  type: varchar(255)
+                  constraints:
+                    nullable: true
+              - column:
+                  name: data_change_ts
+                  type: timestamp
+              - column:
+                  name: fk_id_specimen
+                  type: uuid
+                  constraints:
+                    nullable: true
+              - column:
+                  name: is_cover
+                  type: boolean
+                  defaultValueBoolean: false
+                  constraints:
+                    nullable: false
+        - addForeignKeyConstraint:
+            baseColumnNames: fk_id_specimen
+            baseTableName: media
+            constraintName: fk_id_specimen_media
+            onDelete: CASCADE
+            onUpdate: CASCADE
+            referencedColumnNames: id
+            referencedTableName: specimen
+            validate: true
+

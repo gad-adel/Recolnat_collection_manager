@@ -1,0 +1,6048 @@
+openapi: 3.0.3
+info:
+  title: Recolnat
+  description: |-
+    Le réseau national des collections naturalistes 
+    est une infrastructure de recherche française dont l'objectif est 
+    de produire un corpus de données basé sur les collections d'histoire naturelle de France, 
+    permettant de valoriser les recherches au service de l'étude de la géo- et de la biodiversité actuelle et passée.
+    Liens utiles:
+    - [RECOLNAT](https://fr.wikipedia.org/wiki/RECOLNAT)
+  version: "1.0"
+  termsOfService: http://swagger.io/terms/
+  contact:
+    email: apiteam@mnhn.fr
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+externalDocs:
+  description: Find out more about RECOLNAT
+  url: https://fr.wikipedia.org/wiki/RECOLNAT
+servers:
+  - url: https://petstore3.swagger.io/api/v3
+tags:
+  - name: Recolnat collection management
+    description: api to manage tech hot subjects
+security:
+  - collection-oidc: [ ] # <--- Use the same name as specified in securitySchemes*, here without scope
+paths:
+
+  /v1/import:
+    get:
+      operationId: getAllImports
+      tags:
+        - Import
+      summary: Récupère la liste des imports d'une institution
+      parameters:
+        - name: institutionId
+          required: true
+          in: query
+          description: Identifiant de l'institution
+          schema:
+            type: string
+            format: uuid
+        - name: page
+          required: true
+          in: query
+          schema:
+            type: integer
+            format: int32
+            minimum: 0
+          description: number of page to retrieve
+          example:
+            id: 1
+        - name: size
+          required: true
+          in: query
+          schema:
+            type: integer
+            format: int32
+          description: number of elements per page to retrieve
+          example:
+            id: 10
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ImportPageResponse'
+        '401':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Unauthorized'
+        '403':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Forbidden'
+        '409':
+          description: Applicative Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Conflict'
+        '500':
+          description: error server
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnexpectedError'
+
+  /v1/import/file/{fileId}/download:
+    get:
+      operationId: getImportFile
+      tags:
+        - Import
+      summary: Récupère un fichier d'import
+      parameters:
+        - name: fileId
+          required: true
+          in: path
+          schema:
+            type: string
+            format: uuid
+            description: Identificant du fichier à récupérer
+          example: 386ff0b0-a6cc-11ec-b909-0242ac120002
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: string
+                format: binary
+        '401':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Unauthorized'
+        '403':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Forbidden'
+        '409':
+          description: Applicative Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Conflict'
+        '500':
+          description: error server
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnexpectedError'
+
+  /v1/import/validate:
+    post:
+      operationId: validate
+      tags:
+        - Import
+      summary: Enregistre en base une demande d'import
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                specimen:
+                  type: string
+                  format: binary
+                identification:
+                  type: string
+                  format: binary
+                publication:
+                  type: string
+                  format: binary
+                institutionId:
+                  description: Identifiant de l'institution sur laquelle on veut faire l'import
+                  type: string
+                  format: uuid
+                  example: 386ff0b0-a6cc-11ec-b909-0242ac120002
+                importMode:
+                  description: Mode d'import (REPLACE, IGNORE)
+                  type: string
+                  enum:
+                    - replace
+                    - ignore
+              required:
+                - institutionId
+      responses:
+        '201':
+          description: Successful operation
+          headers:
+            specimenId:
+              description: Specimen Identifier created
+              required: true
+              schema:
+                type: string
+        '401':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Unauthorized'
+        '403':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Forbidden'
+        '409':
+          description: Applicative Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Conflict'
+        '500':
+          description: error server
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnexpectedError'
+
+  /v1/import/check:
+    post:
+      operationId: check
+      tags:
+        - Import
+      summary: Vérification des données de l'import
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                specimen:
+                  type: string
+                  format: binary
+                identification:
+                  type: string
+                  format: binary
+                publication:
+                  type: string
+                  format: binary
+                institutionId:
+                  description: Identifiant de l'institution sur laquelle on veut faire l'import
+                  type: string
+                  format: uuid
+                  example: 386ff0b0-a6cc-11ec-b909-0242ac120002
+              required:
+                - institutionId
+      responses:
+        '200':
+          description: Successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ImportCheckResponse'
+        '401':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Unauthorized'
+        '403':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Forbidden'
+        '409':
+          description: Applicative Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Conflict'
+        '500':
+          description: error server
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnexpectedError'
+  /v1/import/specimen/check:
+    post:
+      operationId: checkSpecimens
+      tags:
+        - ImportSpecimen
+      summary: Vérification des données de spécimen
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  description: Fichier à uploader
+                  type: string
+                  format: binary
+                institutionId:
+                  description: Identifiant de l'institution sur laquelle on veut faire l'import
+                  type: string
+                  format: uuid
+                  example: 386ff0b0-a6cc-11ec-b909-0242ac120002
+              required:
+                - file
+                - institutionId
+      responses:
+        '200':
+          description: Successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ImportCheckDataResponse'
+        '401':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Unauthorized'
+        '403':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Forbidden'
+        '409':
+          description: Applicative Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Conflict'
+        '500':
+          description: error server
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnexpectedError'
+
+  /v1/import/identification/check:
+    post:
+      operationId: checkIdentifications
+      tags:
+        - ImportIdentification
+      summary: Vérification des données de détermination
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  description: Fichier à uploader
+                  type: string
+                  format: binary
+                institutionId:
+                  description: Identifiant de l'institution sur laquelle on veut faire l'import
+                  type: string
+                  format: uuid
+                  example: 386ff0b0-a6cc-11ec-b909-0242ac120002
+              required:
+                - file
+                - institutionId
+      responses:
+        '200':
+          description: Successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ImportCheckDataResponse'
+        '401':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Unauthorized'
+        '403':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Forbidden'
+        '409':
+          description: Applicative Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Conflict'
+        '500':
+          description: error server
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnexpectedError'
+
+  /v1/import/publication/check:
+    post:
+      operationId: checkPublications
+      tags:
+        - ImportPublication
+      summary: Vérification des données de publication
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  description: Fichier à uploader
+                  type: string
+                  format: binary
+                institutionId:
+                  description: Identifiant de l'institution sur laquelle on veut faire l'import
+                  type: string
+                  format: uuid
+                  example: 386ff0b0-a6cc-11ec-b909-0242ac120002
+              required:
+                - file
+                - institutionId
+      responses:
+        '200':
+          description: Successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ImportCheckDataResponse'
+        '401':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Unauthorized'
+        '403':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Forbidden'
+        '409':
+          description: Applicative Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Conflict'
+        '500':
+          description: error server
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnexpectedError'
+
+  /v1/specimens:
+    get:
+      operationId: retrieveAllSpecimen
+      tags:
+        - Specimen
+      summary: Retrieve All Specimen
+      parameters:
+        - name: q
+          required: false
+          in: query
+          description: String to look for in scientific name or catalog number
+          schema:
+            type: string
+        - name: state
+          required: false
+          in: query
+          schema:
+            $ref: '#/components/schemas/OperationType'
+        - name: currentDetermination
+          in: query
+          description: >
+            display specimen with currentDetermination:
+             * `true` - filter on identification current
+             * `false` - all identification
+          schema:
+            default: true
+            type: boolean
+        - name: levelType
+          in: query
+          description: >
+            display specimen with taxon levelType defines:
+             * `true` -  filter on taxon levelType equals MASTER
+             * `false` - none filters on levelType taxon
+          schema:
+            default: true
+            type: boolean
+        - name: page
+          required: true
+          in: query
+          schema:
+            type: integer
+            format: int32
+            minimum: 0
+          description: number of page to retrieve
+          example:
+            id: 1
+        - name: size
+          required: true
+          in: query
+          schema:
+            type: integer
+            format: int32
+          description: number of elements per page to retrieve
+          example:
+            id: 10
+        - name: columnSort
+          required: false
+          in: query
+          description: >
+            Sort type:
+              * `modifiedAt` - Default
+              * `catalogNumber` 
+              * `collection` 
+              * `name` 
+              * `state` 
+          schema:
+            type: string
+            default: modifiedAt
+            enum:
+              - state
+              - catalogNumber
+              - collection
+              - name
+              - modifiedAt
+        - name: typeSort
+          in: query
+          description: >
+            Sort order:
+             * `ASC` - Ascending, from A to Z
+             * `DESC` - Descending, from Z to A
+          schema:
+            default: DESC
+            type: string
+            enum:
+              - ASC
+              - DESC
+        - name: institution_id
+          required: false
+          in: query
+          description: Id of the institution of the specimens
+          schema:
+            type: string
+            format: uuid
+          example: 386ff0b0-a6cc-11ec-b909-0242ac120002
+        - name: collection_id
+          required: false
+          in: query
+          description: Id of the collection of the specimens
+          schema:
+            type: string
+            format: uuid
+          example: 386ff0b0-a6cc-11ec-b909-0242ac120002
+        - name: collection_code
+          required: false
+          in: query
+          description: Code of the collection of the specimens (case insensitive)
+          schema:
+            type: string
+          example: CHE
+        - name: family
+          required: false
+          in: query
+          description: Family of the specimens (case insensitive)
+          schema:
+            type: string
+          example: Blenniidae
+        - name: genus
+          required: false
+          in: query
+          description: Genus of the specimens (case insensitive)
+          schema:
+            type: string
+          example: Salaria
+        - name: specific_epithet
+          required: false
+          in: query
+          description: Specific epithet of the specimens (case insensitive)
+          schema:
+            type: string
+          example: basilisca
+        - name: start_date
+          required: false
+          in: query
+          description: Minimum date of collect (ISO 8601 YYYY-MM-DD)
+          schema:
+            type: string
+          example: 2023-12-18
+        - name: end_date
+          required: false
+          in: query
+          description: Maximum date of collect (ISO 8601 YYYY-MM-DD)
+          schema:
+            type: string
+        - name: collector
+          required: false
+          in: query
+          description: Person who collected the specimen
+          schema:
+            type: string
+          example: 2023-12-18
+        - name: continent
+          required: false
+          in: query
+          description: Query specimen where continent field contains this value (case insensitive)
+          schema:
+            type: string
+        - name: country
+          required: false
+          in: query
+          description: Query specimen where country field contains this value (case insensitive)
+          schema:
+            type: string
+        - name: nominative_collection
+          required: false
+          in: query
+          description: Query specimen where nominative collection field contains this value (case insensitive)
+          schema:
+            type: string
+        - name: storage_name
+          required: false
+          in: query
+          description: Query specimen where storage name field contains this value (case insensitive)
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SpecimenIntegrationPageResponse'
+        '401':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Unauthorized'
+        '403':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Forbidden'
+        '409':
+          description: Applicative Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Conflict'
+        '500':
+          description: error server
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnexpectedError'
+    patch:
+      operationId: updateMultipleSpecimen
+      tags:
+        - Specimen
+      summary: update multiple specimen
+      parameters:
+        - name: id
+          required: false
+          in: query
+          schema:
+            type: array
+            items:
+              type: string
+              format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SpecimenIntegrationMergeRequest'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+                  format: uuid
+        '401':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Unauthorized'
+        '403':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Forbidden'
+        '409':
+          description: Applicative Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Conflict'
+        '500':
+          description: error server
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnexpectedError'
+    post:
+      operationId: addSpecimen
+      tags:
+        - Specimen integration
+        - Specimen determination
+      summary: Specimen integration
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SpecimenIntegrationRequest'
+      responses:
+        '201':
+          description: Successful operation
+          headers:
+            specimenId:
+              description: Specimen Identifier created
+              required: true
+              schema:
+                type: string
+        '401':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Unauthorized'
+        '403':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Forbidden'
+        '409':
+          description: Applicative Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Conflict'
+        '500':
+          description: error server
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnexpectedError'
+
+  /v1/specimens/nominative-collection/autocomplete:
+    get:
+      operationId: getNominativeCollections
+      tags:
+        - Specimen
+      summary: Retrieves specimen nominative collections
+      parameters:
+        - name: q
+          in: query
+          description: Prefix of the nominative collection
+          required: true
+          schema:
+            type: string
+        - name: size
+          in: query
+          description: Maximum number of nominative collections to return
+          required: false
+          schema:
+            type: integer
+            default: 5
+      responses:
+        '200':
+          description: A list of nominative collections
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AutoCompleteResponse'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequest'
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFound'
+
+  /v1/specimens/storage-name/autocomplete:
+    get:
+      operationId: getStorageNames
+      tags:
+        - Specimen
+      summary: Retrieves specimen storage names
+      parameters:
+        - name: q
+          in: query
+          description: Prefix of the storage name
+          required: true
+          schema:
+            type: string
+        - name: size
+          in: query
+          description: Maximum number of items to return
+          required: false
+          schema:
+            type: integer
+            default: 5
+      responses:
+        '200':
+          description: A list of string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AutoCompleteResponse'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequest'
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFound'
+
+  /v1/collections/{collectionId}:
+    get:
+      operationId: getCollection
+      tags:
+        - Retrieve collections
+      summary: Récupère une collection par son identifiant
+      parameters:
+        - name: collectionId
+          required: true
+          in: path
+          schema:
+            type: string
+            format: uuid
+            description: collection id
+          example: 386ff0b0-a6cc-11ec-b909-0242ac120002
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CollectionDetail'
+        '401':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Unauthorized'
+        '403':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Forbidden'
+        '409':
+          description: Applicative Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Conflict'
+        '500':
+          description: error server
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnexpectedError'
+    put:
+      operationId: updateCollection
+      tags:
+        - Collection integration
+      summary: Met à jour une collection
+      parameters:
+        - name: collectionId
+          required: true
+          in: path
+          schema:
+            type: string
+            format: uuid
+            description: collection id
+          example: 386ff0b0-a6cc-11ec-b909-0242ac120002
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CollectionUpdate'
+      responses:
+        '201':
+          description: Successful operation
+          headers:
+            specimenId:
+              description: Collection created
+              required: true
+              schema:
+                type: string
+        '401':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Unauthorized'
+        '403':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Forbidden'
+        '409':
+          description: Applicative Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Conflict'
+        '500':
+          description: error server
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnexpectedError'
+    delete:
+      operationId: deleteCollection
+      tags:
+        - Collection integration
+      summary: Supprime une collection
+      parameters:
+        - name: collectionId
+          required: true
+          in: path
+          schema:
+            type: string
+            format: uuid
+            description: collection id
+          example: 386ff0b0-a6cc-11ec-b909-0242ac120002
+      responses:
+        '200':
+          description: Successful operation
+        '401':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Unauthorized'
+        '403':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Forbidden'
+        '409':
+          description: Applicative Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Conflict'
+        '500':
+          description: error server
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnexpectedError'
+
+  /v1/collections:
+    post:
+      operationId: addCollection
+      tags:
+        - Collection integration
+      summary: Collection integration
+
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CollectionIntegrationRequest'
+      responses:
+        '201':
+          description: Successful operation
+          headers:
+            specimenId:
+              description: Collection created
+              required: true
+              schema:
+                type: string
+        '401':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Unauthorized'
+        '403':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Forbidden'
+        '409':
+          description: Applicative Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Conflict'
+        '500':
+          description: error server
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnexpectedError'
+    get:
+      operationId: fetchAllCollections
+      tags:
+        - Retrieve collections
+      summary: Retrieve all collections
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CollectionResponse'
+        '401':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Unauthorized'
+        '403':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Forbidden'
+        '409':
+          description: Applicative Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Conflict'
+        '500':
+          description: error server
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnexpectedError'
+
+  /v1/collections/visibles:
+    get:
+      operationId: getCollectionVisibles
+      tags:
+        - Retrieve collections
+      summary: Retrieve visibles collections
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/UserCollection'
+        '401':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Unauthorized'
+        '403':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Forbidden'
+        '409':
+          description: Applicative Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Conflict'
+        '500':
+          description: error server
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnexpectedError'
+
+  /v1/collections/options:
+    get:
+      operationId: getCollectionOptions
+      tags:
+        - Retrieve collections
+      summary: Retrieve collections
+      parameters:
+        - name: lng
+          required: false
+          in: header
+          schema:
+            type: string
+            format: string
+            description: user language
+          example:
+            lng: fr
+        - name: institution_id
+          required: false
+          in: query
+          description: Id of the institution of the collections
+          schema:
+            type: string
+            format: uuid
+          example: 386ff0b0-a6cc-11ec-b909-0242ac120002
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/CollectionOption'
+        '401':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Unauthorized'
+        '403':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Forbidden'
+        '409':
+          description: Applicative Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Conflict'
+        '500':
+          description: error server
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnexpectedError'
+
+  /v1/collections/with-code:
+    get:
+      operationId: getCollectionsWithCode
+      tags:
+        - Retrieve collections
+      summary: Retrieve collections with code
+      parameters:
+        - name: lng
+          required: false
+          in: header
+          schema:
+            type: string
+            format: string
+            description: user language
+          example:
+            lng: fr
+        - name: institution_id
+          required: false
+          in: query
+          description: Id of the institution of the collections
+          schema:
+            type: string
+            format: uuid
+          example: 386ff0b0-a6cc-11ec-b909-0242ac120002
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/CollectionWithCode'
+        '401':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Unauthorized'
+        '403':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Forbidden'
+        '409':
+          description: Applicative Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Conflict'
+        '500':
+          description: error server
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnexpectedError'
+
+  /v1/specimens/exists:
+    get:
+      operationId: exists
+      tags:
+        - Retrieve integration infos
+      summary: Specimen integration
+      parameters:
+        - name: specimen_id
+          required: false
+          in: query
+          schema:
+            type: string
+            format: uuid
+            description: specimen target identifier
+          example: 44386ff0b0-a6cc-11ec-b909-0242ac120075
+        - name: collection_id
+          required: true
+          in: query
+          schema:
+            type: string
+            format: uuid
+            description: collection target identifier
+          example: 44386ff0b0-a6cc-11ec-b909-0242ac120075
+        - name: catalog_number
+          required: true
+          in: query
+          schema:
+            type: string
+            description: catalog number target
+          example: "12345"
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: boolean
+        '401':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Unauthorized'
+        '403':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Forbidden'
+        '409':
+          description: Applicative Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Conflict'
+        '500':
+          description: error server
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnexpectedError'
+
+  /v1/specimens/draft:
+    post:
+      operationId: addSpecimenAsDraft
+      tags:
+        - Specimen integration as draft
+        - Specimen determination
+      summary: Specimen integration as draft
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SpecimenIntegrationRequest'
+      responses:
+        '201':
+          description: Successful operation
+          headers:
+            specimenId:
+              description: Specimen Identifier created
+              required: true
+              schema:
+                type: string
+            collectionId:
+              description: Specimen Identifier created
+              required: true
+              schema:
+                type: string
+        '401':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Unauthorized'
+        '403':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Forbidden'
+        '409':
+          description: Applicative Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Conflict'
+        '500':
+          description: error server
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnexpectedError'
+
+  /v1/specimens/review:
+    post:
+      operationId: addSpecimenAsReviewed
+      tags:
+        - Specimen integration as reviewed
+        - Specimen determination
+      summary: Specimen integration as draft
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SpecimenIntegrationRequest'
+      responses:
+        '201':
+          description: Successful operation
+          headers:
+            specimenId:
+              description: Specimen Identifier created
+              required: true
+              schema:
+                type: string
+            collectionId:
+              description: Specimen Identifier created
+              required: true
+              schema:
+                type: string
+        '401':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Unauthorized'
+        '403':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Forbidden'
+        '409':
+          description: Applicative Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Conflict'
+        '500':
+          description: error server
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnexpectedError'
+
+  /v1/specimens/{specimenId}:
+    get:
+      operationId: getSpecimenById
+      tags:
+        - Retrieve integration infos
+        - Retrieve integration other infos
+        - Specimen determination
+      summary: Specimen integration
+      parameters:
+        - name: specimenId
+          required: true
+          in: path
+          schema:
+            type: string
+            format: uuid
+            description: specimen identifier
+          example:
+            id: 386ff0b0-a6cc-11ec-b909-0242ac120002
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminSpecimen'
+        '401':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Unauthorized'
+        '403':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Forbidden'
+        '409':
+          description: Applicative Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Conflict'
+        '500':
+          description: error server
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnexpectedError'
+    put:
+      operationId: updateSpecimen
+      tags:
+        - specimen management
+      summary: Update specimen integration
+      parameters:
+        - name: specimenId
+          required: true
+          in: path
+          schema:
+            type: string
+            format: uuid
+            description: specimen identifier
+          example:
+            id: 386ff0b0-a6cc-11ec-b909-0242ac120002
+
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SpecimenIntegrationRequest'
+      responses:
+        '200':
+          description: Successful operation
+          headers:
+            specimenId:
+              description: Specimen Identifier created
+              required: true
+              schema:
+                type: string
+            collectionId:
+              description: Specimen Identifier created
+              required: true
+              schema:
+                type: string
+        '401':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Unauthorized'
+        '403':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Forbidden'
+        '409':
+          description: Applicative Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Conflict'
+        '500':
+          description: error server
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnexpectedError'
+
+    delete:
+      operationId: deleteSpecimen
+      tags:
+        - specimen management
+      summary: Delete specimen integration
+      parameters:
+        - name: specimenId
+          required: true
+          in: path
+          schema:
+            type: string
+            format: uuid
+            description: specimen identifier
+          example:
+            id: 386ff0b0-a6cc-11ec-b909-0242ac120002
+
+      responses:
+        '200':
+          description: Successful operation
+        '401':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Unauthorized'
+        '403':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Forbidden'
+        '409':
+          description: Applicative Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Conflict'
+        '500':
+          description: error server
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnexpectedError'
+
+
+
+  /v1/specimens/{specimenId}/draft:
+    put:
+      operationId: updateSpecimenAsDraft
+      tags:
+        - specimen management
+      summary: Update specimen as draft
+      parameters:
+        - name: specimenId
+          required: true
+          in: path
+          schema:
+            type: string
+            format: uuid
+            description: specimen identifier
+          example:
+            id: 386ff0b0-a6cc-11ec-b909-0242ac120002
+
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SpecimenIntegrationRequest'
+      responses:
+        '200':
+          description: Successful operation
+          headers:
+            specimenId:
+              description: Specimen Identifier created
+              required: true
+              schema:
+                type: string
+            collectionId:
+              description: Specimen Identifier created
+              required: true
+              schema:
+                type: string
+        '401':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Unauthorized'
+        '403':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Forbidden'
+        '409':
+          description: Applicative Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Conflict'
+        '500':
+          description: error server
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnexpectedError'
+
+  /v1/specimens/{specimenId}/review:
+    put:
+      operationId: updateSpecimenAsReviewed
+      tags:
+        - specimen management
+      summary: Update specimen as reviewed
+      parameters:
+        - name: specimenId
+          required: true
+          in: path
+          schema:
+            type: string
+            format: uuid
+            description: specimen identifier
+          example:
+            id: 386ff0b0-a6cc-11ec-b909-0242ac120002
+
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SpecimenIntegrationRequest'
+      responses:
+        '200':
+          description: Successful operation
+          headers:
+            specimenId:
+              description: Specimen Identifier created
+              required: true
+              schema:
+                type: string
+            collectionId:
+              description: Specimen Identifier created
+              required: true
+              schema:
+                type: string
+        '401':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Unauthorized'
+        '403':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Forbidden'
+        '409':
+          description: Applicative Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Conflict'
+        '500':
+          description: error server
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnexpectedError'
+
+  /v1/specimens/{specimenId}/medias:
+    patch:
+      operationId: saveMedia
+      tags:
+        - Specimen Media
+      summary: Specimen Media
+      parameters:
+        - name: specimenId
+          required: true
+          in: path
+          schema:
+            type: string
+            format: uuid
+            description: specimen identifier
+          example:
+            id: 123e4567-e89b-42d3-a456-556642440000
+
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                fileName:
+                  type: array
+                  items:
+                    type: string
+                    format: binary
+      responses:
+        '201':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+                  format: string
+
+  /v1/specimens/{specimenId}/medias/draft:
+    patch:
+      operationId: saveMediaDraft
+      tags:
+        - Specimen Media
+      summary: Specimen Media
+      parameters:
+        - name: specimenId
+          required: true
+          in: path
+          schema:
+            type: string
+            format: uuid
+            description: specimen identifier
+          example:
+            id: 123e4567-e89b-42d3-a456-556642440000
+
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                fileName:
+                  type: array
+                  items:
+                    type: string
+                    format: binary
+      responses:
+        '201':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+                  format: string
+
+  /v1/specimens/{specimenId}/medias/review:
+    patch:
+      operationId: saveMediaReviewed
+      tags:
+        - Specimen Media
+      summary: Specimen Media
+      parameters:
+        - name: specimenId
+          required: true
+          in: path
+          schema:
+            type: string
+            format: uuid
+            description: specimen identifier
+          example:
+            id: 123e4567-e89b-42d3-a456-556642440000
+
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                fileName:
+                  type: array
+                  items:
+                    type: string
+                    format: binary
+      responses:
+        '201':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+                  format: string
+
+  /v1/specimens/{specimenId}/medias/{mediaId}:
+    put:
+      operationId: updateMedia
+      tags:
+        - Specimen update Media
+      summary: Specimen Update Media
+      parameters:
+        - name: specimenId
+          required: true
+          in: path
+          schema:
+            type: string
+            format: uuid
+            description: specimen identifier
+          example:
+            id: 123e4567-e89b-42d3-a456-556642440000
+        - name: mediaId
+          required: true
+          in: path
+          schema:
+            type: string
+            format: uid
+            description: media identifier
+          example:
+            id: 16482182703108OdX4G4jfSyes7mN
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                fileName:
+                  type: string
+                  format: binary
+      responses:
+        '201':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+                  format: string
+
+  /v1/institutions/{institutionId}/collections:
+    get:
+      operationId: getCollections
+      tags:
+        - Retrieve collections
+      summary: Retrieve collections by institution id
+      parameters:
+        - name: institutionId
+          required: true
+          in: path
+          schema:
+            type: string
+            format: uuid
+            description: institution id
+          example:
+            institutionId: 123e4567-e89b-42d3-a456-556642440000
+        - name: lng
+          required: false
+          in: header
+          schema:
+            type: string
+            format: string
+            description: user language
+          example:
+            lng: fr
+        - name: page
+          required: true
+          in: query
+          schema:
+            type: integer
+            format: int32
+            minimum: 0
+            description: number of page to retrieve
+          example:
+            id: 1
+        - name: size
+          required: true
+          in: query
+          schema:
+            type: integer
+            format: int32
+            description: number of elements per page to retrieve
+          example:
+            id: 10
+        - name: q
+          required: false
+          in: query
+          description: String to look for in collection name
+          schema:
+            type: string
+            default: ""
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CollectionDashboardPageResponse'
+        '401':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Unauthorized'
+        '403':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Forbidden'
+        '409':
+          description: Applicative Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Conflict'
+        '500':
+          description: error server
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnexpectedError'
+
+  /v1/institutions/{institutionId}/nominative-collections:
+    get:
+      operationId: getNominativeCollectionsByInstitution
+      tags:
+        - Retrieve collections
+      summary: Retrieve nominative collections by institution id
+      parameters:
+        - name: institutionId
+          required: true
+          in: path
+          schema:
+            type: string
+            format: uuid
+            description: institution id
+          example:
+            institutionId: 123e4567-e89b-42d3-a456-556642440000
+        - name: page
+          required: true
+          in: query
+          schema:
+            type: integer
+            format: int32
+            minimum: 0
+            description: number of page to retrieve
+          example:
+            id: 1
+        - name: size
+          required: true
+          in: query
+          schema:
+            type: integer
+            format: int32
+            description: number of elements per page to retrieve
+          example:
+            id: 10
+        - name: q
+          required: false
+          in: query
+          description: String to look for in nominative collection name
+          schema:
+            type: string
+            default: ""
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NominativeCollectionDashboardPageResponse'
+        '401':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Unauthorized'
+        '403':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Forbidden'
+        '409':
+          description: Applicative Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Conflict'
+        '500':
+          description: error server
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnexpectedError'
+
+  /v1/institutions/{institutionId}/users:
+    get:
+      operationId: getUsers
+      tags:
+        - Retrieve users
+      summary: Retrieve users by institution id
+      parameters:
+        - name: institutionId
+          required: true
+          in: path
+          schema:
+            type: string
+            format: uuid
+            description: institution id
+          example:
+            institutionId: 123e4567-e89b-42d3-a456-556642440000
+        - name: page
+          required: true
+          in: query
+          schema:
+            type: integer
+            format: int32
+            minimum: 0
+            description: number of page to retrieve
+          example:
+            id: 1
+        - name: size
+          required: true
+          in: query
+          schema:
+            type: integer
+            format: int32
+            description: number of elements per page to retrieve
+          example:
+            id: 10
+        - name: q
+          required: false
+          in: query
+          description: String to look for in user name
+          schema:
+            type: string
+            default: ""
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserDashboardPageResponse'
+        '401':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Unauthorized'
+        '403':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Forbidden'
+        '409':
+          description: Applicative Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Conflict'
+        '500':
+          description: error server
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnexpectedError'
+  /v1/public/institutions/{institutionId}/statistics:
+    get:
+      operationId: getInstitutionStatistics
+      tags:
+        - Public institution
+      summary: Retrieve institution statistics by institutionId
+      parameters:
+        - name: institutionId
+          in: path
+          required: true
+          description: The UUID of the institution.
+          schema:
+            type: string
+            format: uuid
+          example: "50f4978a-da62-4fde-8f38-5003bd43ff64"
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InstitutionStatistics'
+        '401':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Unauthorized'
+        '403':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Forbidden'
+        '409':
+          description: Applicative Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Conflict'
+        '500':
+          description: error server
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnexpectedError'
+
+  /v1/public/institutions/{institutionId}/nominative-collections:
+    get:
+      operationId: getNominativeCollectionsByInstitutionId
+      tags:
+        - Public institution
+      summary: Retrieve institution nominative-collections by institutionId
+      parameters:
+        - name: institutionId
+          in: path
+          required: true
+          description: The UUID of the institution.
+          schema:
+            type: string
+            format: uuid
+          example: "50f4978a-da62-4fde-8f38-5003bd43ff64"
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+                  format: string
+        '401':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Unauthorized'
+        '403':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Forbidden'
+        '409':
+          description: Applicative Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Conflict'
+        '500':
+          description: error server
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnexpectedError'
+
+  /v1/public/institutions/{institutionId}/mids:
+    get:
+      operationId: getInstitutionMids
+      tags:
+        - Public institution
+      summary: Retrieve institution mids by institutionId
+      parameters:
+        - name: institutionId
+          in: path
+          required: true
+          description: The UUID of the institution.
+          schema:
+            type: string
+            format: uuid
+          example: "50f4978a-da62-4fde-8f38-5003bd43ff64"
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: integer
+                  format: int64
+        '401':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Unauthorized'
+        '403':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Forbidden'
+        '409':
+          description: Applicative Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Conflict'
+        '500':
+          description: error server
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnexpectedError'
+
+  /v1/domains:
+    get:
+      operationId: getAllDomain
+      tags:
+        - Retrieve all domain
+      summary: Retrieve all domain
+
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+                  format: string
+        '401':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Unauthorized'
+        '403':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Forbidden'
+        '409':
+          description: Applicative Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Conflict'
+        '500':
+          description: error server
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnexpectedError'
+  /v1/public/institutions/{institutionId}/domain-statistics:
+    get:
+      operationId: getDomainSpecimenCounts
+      tags:
+        - Public institution
+      summary: Retrieve institution domain-statistics by institutionId
+      parameters:
+        - name: institutionId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DomainSpecimenCount'
+        '401':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Unauthorized'
+        '403':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Forbidden'
+        '409':
+          description: Applicative Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Conflict'
+        '500':
+          description: error server
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnexpectedError'
+
+  /v1/public/institutions/{institutionId}/collection-descriptions:
+    get:
+      operationId: getCollectionsDescriptions
+      tags:
+        - Public institution
+      summary: Retrieve by collection all descriptions in the institution
+      parameters:
+        - name: institutionId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: lng
+          required: false
+          in: header
+          schema:
+            type: string
+            format: string
+            description: user language
+          example:
+            lng: fr
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CollectionDescription'
+        '401':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Unauthorized'
+        '403':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Forbidden'
+        '409':
+          description: Applicative Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Conflict'
+        '500':
+          description: error server
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnexpectedError'
+
+  /v1/placeholderDatations:
+    get:
+      operationId: getAllPlaceholderDatation
+      tags:
+        - Retrieve placeholder datation
+      summary: Retrieve all placeholder datation
+
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+                  format: string
+        '401':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Unauthorized'
+        '403':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Forbidden'
+        '409':
+          description: Applicative Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Conflict'
+        '500':
+          description: error server
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnexpectedError'
+  /v1/datations:
+    get:
+      operationId: getDatation
+      tags:
+        - Retrieve datation fields
+      summary: Retrieve datation fields
+      parameters:
+        - in: query
+          required: false
+          name: eonothem
+          schema:
+            type: string
+          description: filter by eonothem
+        - in: query
+          required: false
+          name: eratheme
+          schema:
+            type: string
+          description: filter by eratheme
+        - in: query
+          required: false
+          name: system
+          schema:
+            type: string
+          description: filter by system
+        - in: query
+          required: false
+          name: epoch
+          schema:
+            type: string
+          description: filter by epoch
+        - in: query
+          required: false
+          name: age
+          schema:
+            type: string
+          description: filter by age
+
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DatationResponse'
+        '401':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Unauthorized'
+        '403':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Forbidden'
+        '409':
+          description: Applicative Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Conflict'
+        '500':
+          description: error server
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnexpectedError'
+  /v1/referential/taxons/suggestions:
+    get:
+      operationId: getSuggestions
+      tags:
+        - Retrieve Taxons Refs
+      summary: Retrieve taxon suggestions
+      parameters:
+        - in: query
+          required: true
+          name: scientificName
+          schema:
+            type: string
+          description: prefix search by scientificName
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                items:
+                  type: string
+        '401':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Unauthorized'
+        '403':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Forbidden'
+        '409':
+          description: Applicative Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Conflict'
+        '500':
+          description: error server
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnexpectedError'
+
+  /v1/taxons/genera/autocomplete:
+    get:
+      operationId: getTaxonGenera
+      tags:
+        - Retrieve Taxons Resource
+      summary: Retrieves taxons genera
+      parameters:
+        - name: q
+          in: query
+          description: Prefix of the genera name
+          required: true
+          schema:
+            type: string
+        - name: family
+          in: query
+          description: Family (taxonomic rank)
+          required: false
+          schema:
+            type: string
+        - name: size
+          in: query
+          description: Maximum number of genera to return
+          required: false
+          schema:
+            type: integer
+            default: 5
+      responses:
+        '200':
+          description: A list of genera names
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AutoCompleteResponse'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequest'
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFound'
+
+  /v1/taxons/specific-epithets/autocomplete:
+    get:
+      operationId: getTaxonSpecificEpithet
+      tags:
+        - Retrieve Taxons Resource
+      summary: Retrieves taxons specific epithet
+      parameters:
+        - name: q
+          in: query
+          description: Prefix of the specific epithet
+          required: true
+          schema:
+            type: string
+        - name: genus
+          in: query
+          description: Genus
+          required: false
+          schema:
+            type: string
+        - name: size
+          in: query
+          description: Maximum number of specific epithet to return
+          required: false
+          schema:
+            type: integer
+            default: 5
+      responses:
+        '200':
+          description: A list of specific epithet names
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AutoCompleteResponse'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequest'
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFound'
+
+  /v1/collection-events/countries/autocomplete:
+    get:
+      operationId: getCountriesByPrefix
+      tags:
+        - Retrieve  integration infos
+      summary: Retrieves specimens countries
+      parameters:
+        - name: q
+          in: query
+          description: Prefix of countries
+          required: true
+          schema:
+            type: string
+        - name: size
+          in: query
+          description: Maximum number of countries to return
+          required: false
+          schema:
+            type: integer
+            default: 5
+      responses:
+        '200':
+          description: A list of countries names
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AutoCompleteResponse'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequest'
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFound'
+
+  /v1/collection-events/continents/autocomplete:
+    get:
+      operationId: getContinentsByPrefix
+      tags:
+        - Retrieve  integration infos
+      summary: Retrieves specimens continents
+      parameters:
+        - name: q
+          in: query
+          description: Prefix of continents
+          required: true
+          schema:
+            type: string
+        - name: size
+          in: query
+          description: Maximum number of continents to return
+          required: false
+          schema:
+            type: integer
+            default: 5
+      responses:
+        '200':
+          description: A list of continents names
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AutoCompleteResponse'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequest'
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFound'
+
+  /v1/collection-events/collectors/autocomplete:
+    get:
+      operationId: getRecordersByPrefix
+      tags:
+        - Retrieve  integration infos
+      summary: Retrieves specimens collectors
+      parameters:
+        - name: q
+          in: query
+          description: Prefix of recorders
+          required: true
+          schema:
+            type: string
+        - name: size
+          in: query
+          description: Maximum number of recorders to return
+          required: false
+          schema:
+            type: integer
+            default: 5
+      responses:
+        '200':
+          description: A list of specific recorders names
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AutoCompleteResponse'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequest'
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFound'
+
+  /v1/referential/taxons:
+    get:
+      operationId: findTaxons
+      tags:
+        - Retrieve Taxons Refs
+      summary: Retrieve taxon refs
+      parameters:
+        - in: query
+          required: true
+          name: scientificName
+          schema:
+            type: string
+          description: exact match search by scientificName
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: "#/components/schemas/Taxon"
+        '401':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Unauthorized'
+        '403':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Forbidden'
+        '409':
+          description: Applicative Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Conflict'
+        '500':
+          description: error server
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnexpectedError'
+  /v1/taxons/families/autocomplete:
+    get:
+      operationId: getTaxonFamilies
+      tags:
+        - Retrieve Taxons Resource
+      summary: Retrieves taxons families
+      parameters:
+        - name: q
+          in: query
+          description: Prefix of the family name
+          required: true
+          schema:
+            type: string
+        - name: size
+          in: query
+          description: Maximum number of families to return
+          required: false
+          schema:
+            type: integer
+            default: 5
+      responses:
+        '200':
+          description: A list of family names
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AutoCompleteResponse'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequest'
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFound'
+  /v1/collections/specimens/bulk-validate:
+    patch:
+      operationId: bulk-validate
+      tags:
+        - Bulk validate
+      summary: Bulk validate
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              items:
+                $ref: "#/components/schemas/CollectionSpecificationIdPairs"
+      responses:
+        '200':
+          description: Successful operation
+          headers:
+            CollectionSpecificationIdPairs:
+              description: List of pairs of collectionId/ specificationId validated
+              required: true
+              schema:
+                type: array
+                nullable: false
+                minItems: 1
+                items:
+                  $ref: "#/components/schemas/CollectionSpecificationIdPairs"
+  /v1/institutions:
+    post:
+      operationId: addInstitution
+      tags:
+        - Institution
+      summary: Institution integration
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/InstitutionRequest"
+      responses:
+        '201':
+          description: Successful operation
+          headers:
+            institutionId:
+              description: Institution Identifier created
+              required: true
+              schema:
+                type: string
+        '401':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Unauthorized'
+        '403':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Forbidden'
+        '409':
+          description: Applicative Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Conflict'
+        '500':
+          description: error server
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnexpectedError'
+    get:
+      operationId: getInstitutions
+      parameters:
+        - name: page
+          required: true
+          in: query
+          schema:
+            type: integer
+            format: int32
+            minimum: 0
+            description: number of page to retrieve
+          example:
+            id: 1
+        - name: size
+          required: true
+          in: query
+          schema:
+            type: integer
+            format: int32
+            description: number of elements per page to retrieve
+          example:
+            id: 10
+        - name: q
+          required: false
+          in: query
+          description: String to look for in institution name
+          schema:
+            type: string
+        - in: query
+          required: false
+          name: partnerType
+          schema:
+            enum:
+              - PARTNER
+              - DATA_PROVIDER
+              - MEMBER
+          description: partnerType filter (PARTNER, DATA_PROVIDER, MEMBER)
+
+      tags:
+        - Institution
+      summary: Retrieve institutions
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InstitutionDashboardResponse'
+        '401':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Unauthorized'
+        '403':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Forbidden'
+        '409':
+          description: Applicative Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Conflict'
+        '500':
+          description: error server
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnexpectedError'
+
+  /v1/institutions/{institutionId}:
+    get:
+      operationId: getInstitutionDetails
+      tags:
+        - Institution
+      summary: Retrieve collections of intitution
+      parameters:
+        - name: institutionId
+          required: true
+          in: path
+          schema:
+            type: string
+            format: uuid
+            description: institution id
+          example: 386ff0b0-a6cc-11ec-b909-0242ac120002
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InstitutionDetailResponse'
+        '401':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Unauthorized'
+        '403':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Forbidden'
+        '409':
+          description: Applicative Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Conflict'
+        '500':
+          description: error server
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnexpectedError'
+    put:
+      operationId: updateInstitution
+      tags:
+        - Institution
+      summary: Update intitution
+      parameters:
+        - name: institutionId
+          required: true
+          in: path
+          schema:
+            type: string
+            format: uuid
+            description: institution id
+          example: 386ff0b0-a6cc-11ec-b909-0242ac120002
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/InstitutionRequest"
+      responses:
+        '200':
+          description: Successful operation
+        '401':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Unauthorized'
+        '403':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Forbidden'
+        '409':
+          description: Applicative Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Conflict'
+        '500':
+          description: error server
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnexpectedError'
+  /v1/institutions/{institutionId}/logo:
+    patch:
+      operationId: addLogoInstitution
+      tags:
+        - Institution
+      summary: Add Logo Of Institution
+      parameters:
+        - name: institutionId
+          required: true
+          in: path
+          schema:
+            type: string
+            format: uuid
+            example: 386ff0b0-a6cc-11ec-b909-0242ac120002
+      requestBody:
+        required: true
+        content:
+          multipart/form-data: # Media type
+            schema: # Request payload
+              type: object
+              properties:
+                logo:
+                  description: logo file to be uploaded
+                  type: string
+                  format: binary
+              required:
+                - logo
+      responses:
+        '201':
+          description: Successful operation
+          headers:
+            institutionId:
+              description: Institution Identifier created
+              required: true
+              schema:
+                type: string
+        '401':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Unauthorized'
+        '403':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Forbidden'
+        '409':
+          description: Applicative Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Conflict'
+        '500':
+          description: error server
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnexpectedError'
+  /v1/institutions/partners:
+    get:
+      operationId: getInstitutionPartner
+      tags:
+        - Institution
+      summary: Retrieve all institution partner
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PartnerResponse"
+        '401':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Unauthorized'
+        '403':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Forbidden'
+        '409':
+          description: Applicative Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Conflict'
+        '500':
+          description: error server
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnexpectedError'
+
+  /v1/institutions/options:
+    get:
+      operationId: getInstitutionOptions
+      tags:
+        - Institution
+      summary: Retrieve institutions
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/InstitutionOption'
+        '401':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Unauthorized'
+        '403':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Forbidden'
+        '409':
+          description: Applicative Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Conflict'
+        '500':
+          description: error server
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnexpectedError'
+
+  /v1/articles:
+    get:
+      operationId: getArticles
+      parameters:
+        - name: page
+          required: true
+          in: query
+          schema:
+            type: integer
+            format: int32
+            minimum: 0
+            description: number of page to retrieve
+          example:
+            id: 1
+        - name: size
+          required: true
+          in: query
+          schema:
+            type: integer
+            format: int32
+            description: number of elements per page to retrieve
+          example:
+            id: 10
+        - name: q
+          required: false
+          in: query
+          description: String to look for in article title
+          schema:
+            type: string
+        - name: state
+          required: false
+          in: query
+          description: State of the article
+          schema:
+            $ref: '#/components/schemas/ArticleState'
+      tags:
+        - Article
+      summary: Retrieve articles
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ArticleDashboardResponse'
+        '401':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Unauthorized'
+        '403':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Forbidden'
+        '409':
+          description: Applicative Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Conflict'
+        '500':
+          description: error server
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnexpectedError'
+    post:
+      operationId: addArticle
+      tags:
+        - Article
+      summary: add Article
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - content
+                - title
+                - author
+                - creationDate
+                - state
+              properties:
+                title:
+                  type: string
+                content:
+                  type: string
+                author:
+                  type: string
+                creationDate:
+                  type: string
+                  description: date creation article , format YYYY-MM-JJ
+                  example: 2023-12-18
+                media:
+                  type: string
+                  format: binary
+                state:
+                  $ref: "#/components/schemas/ArticleState"
+      responses:
+        '201':
+          description: Successful creation
+          headers:
+            articleId:
+              description: article identifier
+              required: true
+              schema:
+                type: string
+        '401':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Unauthorized'
+        '403':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Forbidden'
+        '409':
+          description: Applicative Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Conflict'
+        '500':
+          description: error server
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnexpectedError'
+
+  /v1/articles/{id}:
+    get:
+      operationId: getArticleById
+      tags:
+        - Article
+      summary: get Article By Id
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+            format: uuid
+            description: article identifier
+            example:
+              id: 386ff0b0-a6cc-11ec-b909-0242ac120002
+
+      responses:
+        '200':
+          description: Successful retrieval
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ArticleResponse'
+        '401':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Unauthorized'
+        '403':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Forbidden'
+        '409':
+          description: Applicative Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Conflict'
+        '500':
+          description: error server
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnexpectedError'
+    put:
+      operationId: UpdateArticleById
+      tags:
+        - Article
+      summary: Update Article by Id
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+            format: uuid
+            description: article identifier
+            example:
+              id: 386ff0b0-a6cc-11ec-b909-0242ac120002
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Article'
+      responses:
+        '200':
+          description: Successful creation
+          headers:
+            articleId:
+              description: article identifier
+              required: true
+              schema:
+                type: string
+        '401':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Unauthorized'
+        '403':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Forbidden'
+        '409':
+          description: Applicative Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Conflict'
+        '500':
+          description: error server
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnexpectedError'
+    delete:
+      operationId: deleteArticle
+      tags:
+        - Article
+      summary: Delete an article
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+            format: uuid
+            description: article identifier
+            example:
+              id: 386ff0b0-a6cc-11ec-b909-0242ac120002
+      responses:
+        '200':
+          description: Successful creation
+        '401':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Unauthorized'
+        '403':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Forbidden'
+        '409':
+          description: Applicative Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Conflict'
+        '500':
+          description: error server
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnexpectedError'
+
+  /v1/public/articles/{id}:
+    get:
+      operationId: getPublicArticleById
+      tags:
+        - visibilite public
+      summary: get Article By Id (for public acces)
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+            format: uuid
+            description: article identifier
+            example:
+              id: 386ff0b0-a6cc-11ec-b909-0242ac120002
+
+      responses:
+        '200':
+          description: Successful retrieval
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ArticleResponse'
+        '401':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Unauthorized'
+        '403':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Forbidden'
+        '409':
+          description: Applicative Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Conflict'
+        '500':
+          description: error server
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnexpectedError'
+  /v1/public/articles:
+    get:
+      operationId: getPublicArticles
+      tags:
+        - visibilite public
+      summary: Retrieve all articles by pages  (for public acces)
+      parameters:
+        - in: query
+          required: true
+          name: page
+          schema:
+            type: integer
+            format: int32
+          description: page to access
+        - in: query
+          required: true
+          name: size
+          schema:
+            type: integer
+            format: int32
+          description: size of elements per page
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ArticleResultPageResponse'
+        '401':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Unauthorized'
+        '403':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Forbidden'
+        '409':
+          description: Applicative Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Conflict'
+        '500':
+          description: error server
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnexpectedError'
+  /v1/public/specimens/{specimenId}:
+    get:
+      operationId: getPublicSpecimen
+      tags:
+        - visibilite public
+      summary: get specimen from Id. Fetch specimen (for public acces)
+      parameters:
+        - name: specimenId
+          required: true
+          in: path
+          schema:
+            type: string
+            format: uuid
+            description: specimen identifier
+          example:
+            id: 123e4567-e89b-42d3-a456-556642440000
+      responses:
+        '200':
+          description: return specimen details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublicSpecimen'
+        '401':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Unauthorized'
+        '403':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Forbidden'
+        '409':
+          description: Applicative Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Conflict'
+        '500':
+          description: error server
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnexpectedError'
+
+  /v1/public/collections/{id}:
+    get:
+      operationId: retrievePublicCollectionById
+      tags:
+        - visibilite public
+      summary: retrieve collection by identifier (for public acces)
+      parameters:
+        - in: path
+          required: true
+          name: id
+          schema:
+            type: string
+          description: collection identifier
+      responses:
+        '200':
+          description: retrieve collection identifier
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CollectionPublic"
+  /v1/public/institutions:
+    get:
+      operationId: getPublicInstitutions
+      tags:
+        - Public institution
+      summary: Retrieve institutions (for public acces)
+      parameters:
+        - name: page
+          required: true
+          in: query
+          schema:
+            type: integer
+            format: int32
+            minimum: 0
+            description: number of page to retrieve
+          example:
+            id: 1
+        - name: size
+          required: true
+          in: query
+          schema:
+            type: integer
+            format: int32
+            description: number of elements per page to retrieve
+          example:
+            id: 10
+        - in: query
+          required: true
+          name: partnerType
+          schema:
+            enum:
+              - PARTNER
+              - DATA_PROVIDER
+              - MEMBER
+          description: partnerType filter (PARTNER, DATA_PROVIDER, MEMBER)
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InstitutionResponse'
+        '401':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Unauthorized'
+        '403':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Forbidden'
+        '409':
+          description: Applicative Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Conflict'
+        '500':
+          description: error server
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnexpectedError'
+  /v1/public/institutions/{institutionUUID}:
+    get:
+      operationId: getPublicInstitution
+      tags:
+        - Public institution
+      summary: Retrieve collections of intitution (for public acces)
+      parameters:
+        - name: institutionUUID
+          required: true
+          in: path
+          schema:
+            type: string
+            format: uuid
+            description: institution uuid
+          example:
+            id: 15cce2c7-22a3-4357-8e1d-777d4c01aded
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InstitutionDetailPublicResponse'
+        '401':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Unauthorized'
+        '403':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Forbidden'
+        '409':
+          description: Applicative Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Conflict'
+        '500':
+          description: error server
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnexpectedError'
+
+  /v1/public/programs:
+    post:
+      operationId: getPublicInstitutionPrograms
+      tags:
+        - visibilite public
+      summary: Retrieve intitutions list for display name and logo (for public acces)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              nullable: false
+              properties:
+                codeinstitutions:
+                  type: array
+                  items:
+                    type: string
+                    format: string
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/InstitutionsProgramResponse"
+        '401':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Unauthorized'
+        '403':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Forbidden'
+        '409':
+          description: Applicative Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Conflict'
+        '500':
+          description: error server
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnexpectedError'
+  /v1/public/statistics:
+    get:
+      tags:
+        - visibilite public
+      summary: get home page statistics (for public acces)
+      operationId: getStatistic
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StatisticsResult'
+        '401':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Unauthorized'
+        '403':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Forbidden'
+        '409':
+          description: Applicative Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Conflict'
+        '500':
+          description: error server
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnexpectedError'
+    put:
+      tags:
+        - visibilite public
+      operationId: UpdateStatistics
+      summary: Update statistics counts
+      responses:
+        '204':
+          description: Successful updated statistics operation
+        '409':
+          description: Applicative Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Conflict'
+        '500':
+          description: error server
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnexpectedError'
+  /v1/public/validelastic:
+    get:
+      tags:
+        - visibilite public
+      summary: test connection elastic (ping) (for public acces)
+      operationId: validElasticConnection
+      responses:
+        '200':
+          description: Successful operation
+        '403':
+          description: Not found or Forbidden
+        '409':
+          description: Applicative Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Conflict'
+        '500':
+          description: error server
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnexpectedError'
+  /v1/public/indexExist:
+    get:
+      tags:
+        - visibilite public
+      summary: test si l index elastic existe (for public acces)
+      operationId: indexElasticExist
+      parameters:
+        - in: query
+          required: true
+          name: indexName
+          schema:
+            type: string
+            description: nom de l index elastic
+          example:
+            name: recolnat_specimen
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  exist:
+                    type: boolean
+                example:
+                  exist: true
+        '409':
+          description: Applicative Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Conflict'
+        '500':
+          description: error server
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnexpectedError'
+  /v1/public/listInstitutions:
+    post:
+      operationId: getPublicListInstitutions
+      tags:
+        - visibilite public
+      summary: Retrieve institutions from  uuid id list  (for public acces)
+      requestBody:
+        required: true
+        content:
+          application/json: # Media type
+            schema: # Request payload
+              type: array
+              items:
+                type: string
+                format: uuid
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InstitutionListResponse'
+        '401':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Unauthorized'
+        '403':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Forbidden'
+        '409':
+          description: Applicative Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Conflict'
+        '500':
+          description: error server
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnexpectedError'
+  /v1/public/listCollections:
+    post:
+      operationId: getPublicListCollections
+      tags:
+        - visibilite public
+      summary: Retrieve collections from  uuid id list  (for public acces)
+      requestBody:
+        required: true
+        content:
+          application/json: # Media type
+            schema: # Request payload
+              type: array
+              items:
+                type: string
+                format: uuid
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CollectionListResponse'
+        '401':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Unauthorized'
+        '403':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Forbidden'
+        '409':
+          description: Applicative Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Conflict'
+        '500':
+          description: error server
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnexpectedError'
+components:
+  securitySchemes:
+    collection-oidc: # <--- Arbitrary name for the security scheme. Used to refer to it from elsewhere.
+      type: openIdConnect
+      openIdConnectUrl: http://sample.com/realms/recolnat-oauth2/.well-known/openid-configuration
+  schemas:
+    CollectionIntegrationRequest:
+      description: Collection integration data request
+      type: object
+      nullable: false
+      properties:
+        domain:
+          type: string
+          nullable: false
+          example: Botanique
+        collectionNameFr:
+          type: string
+          example: Nom
+          nullable: false
+        collectionNameEn:
+          type: string
+          example: Name
+        descriptionFr:
+          type: string
+        descriptionEn:
+          type: string
+        collectionCode:
+          type: string
+        institutionId:
+          type: string
+          format: uuid
+          nullable: false
+          example: 22b05ae9-25b6-4880-b4ca-52b91bf6bdf6
+    CollectionUpdate:
+      description: Collection update model
+      type: object
+      nullable: false
+      properties:
+        domain:
+          type: string
+          nullable: false
+          example: Botanique
+        collectionNameFr:
+          type: string
+          example: Nom
+          nullable: false
+        collectionNameEn:
+          type: string
+          example: Name
+        descriptionFr:
+          type: string
+        descriptionEn:
+          type: string
+        collectionCode:
+          type: string
+
+    AdminSpecimenCreate:
+      type: object
+      nullable: false
+      properties:
+        institutionId:
+          type: string
+          format: uuid
+          example: 22b05ae9-25b6-4880-b4ca-52b91bf6bdf6
+          nullable: false
+        collectionId:
+          type: string
+          format: uuid
+          example: 22b05ae9-25b6-4880-b4ca-52b91bf6bdf6
+          nullable: false
+        catalogNumber:
+          type: string
+          nullable: false
+        recordNumber:
+          type: string
+        basisOfRecord:
+          type: string
+        preparations:
+          type: string
+        individualCount:
+          type: string
+        sex:
+          type: string
+        lifeStage:
+          type: string
+        occurrenceRemarks:
+          type: string
+        legalStatus:
+          type: string
+        donor:
+          type: string
+        nominativeCollection:
+          type: string
+        identifications:
+          type: array
+          items:
+            $ref: '#/components/schemas/Identification'
+        geologicalContext:
+          $ref: '#/components/schemas/GeologicalContext'
+        collectionEvent:
+          $ref: '#/components/schemas/CollectionEvent'
+        literatures:
+          type: array
+          items:
+            $ref: '#/components/schemas/Literature'
+        medias:
+          type: array
+          items:
+            $ref: '#/components/schemas/Media'
+        other:
+          $ref: '#/components/schemas/Other'
+        management:
+          $ref: '#/components/schemas/Management'
+
+    SpecimenCreateRequest:
+      type: object
+      nullable: false
+      properties:
+        institutionId:
+          type: string
+          format: uuid
+          example: 22b05ae9-25b6-4880-b4ca-52b91bf6bdf6
+          nullable: false
+        collectionId:
+          type: string
+          format: uuid
+          nullable: false
+        catalogNumber:
+          type: string
+          nullable: false
+
+
+    # Ajout et modification d'un spécimen depuis l'administration
+    SpecimenIntegrationRequest:
+      description: Specimen integration data request
+      type: object
+      nullable: false
+      properties:
+        institutionId:
+          type: string
+          format: uuid
+          example: 22b05ae9-25b6-4880-b4ca-52b91bf6bdf6
+        collectionId:
+          type: string
+          format: uuid
+          example: 22b05ae9-25b6-4880-b4ca-52b91bf6bdf6
+        catalogNumber:
+          type: string
+        recordNumber:
+          type: string
+        basisOfRecord:
+          type: string
+        preparations:
+          type: string
+        individualCount:
+          type: string
+        sex:
+          type: string
+        lifeStage:
+          type: string
+        occurrenceRemarks:
+          type: string
+        legalStatus:
+          type: string
+        donor:
+          type: string
+        state:
+          type: string
+        createdBy:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        nominativeCollection:
+          type: string
+        identifications:
+          type: array
+          items:
+            $ref: '#/components/schemas/Identification'
+        geologicalContext:
+          $ref: '#/components/schemas/GeologicalContext'
+        collectionEvent:
+          $ref: '#/components/schemas/CollectionEvent'
+        literatures:
+          type: array
+          items:
+            $ref: '#/components/schemas/Literature'
+        medias:
+          type: array
+          items:
+            $ref: '#/components/schemas/Media'
+        other:
+          $ref: '#/components/schemas/Other'
+        management:
+          $ref: '#/components/schemas/Management'
+
+    SpecimenIntegrationMergeRequest:
+      description: Specimen integration data request
+      type: object
+      nullable: false
+      properties:
+        catalogNumber:
+          type: string
+        recordNumber:
+          type: string
+        basisOfRecord:
+          type: string
+        preparations:
+          type: string
+        individualCount:
+          type: string
+        sex:
+          type: string
+        lifeStage:
+          type: string
+        occurrenceRemarks:
+          type: string
+        legalStatus:
+          type: string
+        donor:
+          type: string
+        geologicalContext:
+          $ref: '#/components/schemas/GeologicalContext'
+        collectionEvent:
+          $ref: '#/components/schemas/CollectionEvent'
+
+    PublicSpecimen:
+      description: Modèle représentant un spécimen sur la partie publique de l'application
+      type: object
+      nullable: false
+      properties:
+        id:
+          type: string
+          nullable: false
+          example: f4b71ce1-9f8a-4dca-af89-4b61d6ec6884
+        catalogNumber:
+          type: string
+          nullable: false
+        collectionCode:
+          type: string
+        collectionName:
+          type: string
+          nullable: false
+        collectionId:
+          type: string
+          format: uuid
+          nullable: false
+        institutionCode:
+          type: string
+          nullable: false
+        institutionName:
+          type: string
+          nullable: false
+        nominativeCollection:
+          type: string
+        recordNumber:
+          type: string
+        basisOfRecord:
+          type: string
+        individualCount:
+          type: string
+        sex:
+          type: string
+        lifeStage:
+          type: string
+        occurrenceRemarks:
+          type: string
+        legalStatus:
+          type: string
+        donor:
+          type: string
+        preparations:
+          type: string
+        identifications:
+          type: array
+          nullable: false
+          items:
+            $ref: '#/components/schemas/PublicIdentification'
+        medias:
+          type: array
+          nullable: false
+          items:
+            $ref: '#/components/schemas/PublicMedia'
+        collectionEvent:
+          $ref: '#/components/schemas/PublicCollectionEvent'
+        other:
+          $ref: '#/components/schemas/PublicOther'
+        geologicalContext:
+          $ref: '#/components/schemas/PublicGeologicalContext'
+        literatures:
+          type: array
+          nullable: false
+          items:
+            $ref: '#/components/schemas/PublicLiterature'
+
+    PublicGeologicalContext:
+      type: object
+      properties:
+        earliestAgeOrLowestStage:
+          type: string
+        latestAgeOrHighestStage:
+          type: string
+        earliestEpochOrLowestSeries:
+          type: string
+        latestEpochOrHighestSeries:
+          type: string
+        earliestPeriodOrLowestSystem:
+          type: string
+        latestPeriodOrHighestSystem:
+          type: string
+        earliestEraOrLowestErathem:
+          type: string
+        latestEraOrHighestErathem:
+          type: string
+        earliestEonOrLowestEonothem:
+          type: string
+        latestEonOrHighestEonothem:
+          type: string
+        lowestBiostratigraphicZone:
+          type: string
+        highestBiostratigraphicZone:
+          type: string
+        verbatimEpoch:
+          type: string
+        ageAbsolute:
+          type: string
+        range:
+          type: string
+        group:
+          type: string
+        formation:
+          type: string
+        member:
+          type: string
+        bed:
+          type: string
+        otherLithostratigraphicTerms:
+          type: string
+
+    PublicOther:
+      type: object
+      properties:
+        linkGerBank:
+          type: string
+        linkBold:
+          type: string
+        linkOther:
+          type: string
+        financialAid:
+          type: string
+        computerizationProgram:
+          type: string
+        remarks:
+          type: string
+
+    PublicCollectionEvent:
+      type: object
+      properties:
+        eventDate:
+          type: string
+        recordedBy:
+          type: string
+        fieldNumber:
+          type: string
+        interpretedDate:
+          type: boolean
+        fieldNotes:
+          type: string
+        eventRemarks:
+          type: string
+        verbatimLocality:
+          type: string
+        sensitiveLocation:
+          type: boolean
+        location:
+          $ref: '#/components/schemas/Location'
+        minimumElevationInMeters:
+          type: number
+        maximumElevationInMeters:
+          type: number
+        interpretedAltitude:
+          type: boolean
+        minimumDepthInMeters:
+          type: number
+        maximumDepthInMeters:
+          type: number
+        interpretedDepth:
+          type: boolean
+        decimalLatitude:
+          type: number
+        decimalLongitude:
+          type: number
+        geodeticDatum:
+          type: string
+        georeferenceSources:
+          type: string
+        habitat:
+          type: string
+        locationRemarks:
+          type: string
+
+    PublicLiterature:
+      type: object
+      properties:
+        id:
+          type: string
+          nullable: false
+        authors:
+          type: string
+        citation:
+          type: string
+        identifier:
+          type: string
+        date:
+          type: string
+        title:
+          type: string
+        review:
+          type: string
+        volume:
+          type: string
+        number:
+          type: string
+        pages:
+          type: string
+        publisher:
+          type: string
+        publicationPlace:
+          type: string
+        editors:
+          type: string
+        bookTitle:
+          type: string
+        pageNumber:
+          type: string
+        language:
+          type: string
+        keywords:
+          type: string
+        description:
+          type: string
+        url:
+          type: string
+        remarks:
+          type: string
+
+    PublicTaxon:
+      type: object
+      nullable: false
+      properties:
+        id:
+          type: string
+          format: uuid
+          nullable: false
+        scientificName:
+          type: string
+          nullable: false
+        scientificNameAuthorship:
+          type: string
+        kingdom:
+          type: string
+        phylum:
+          type: string
+        taxonClass:
+          type: string
+        taxonOrder:
+          type: string
+        subOrder:
+          type: string
+        family:
+          type: string
+        subFamily:
+          type: string
+        genus:
+          type: string
+        subGenus:
+          type: string
+        vernacularName:
+          type: string
+        taxonRemarks:
+          type: string
+        specificEpithet:
+          type: string
+        infraspecificEpithet:
+          type: string
+        levelType:
+          type: string
+          enum:
+            - MASTER
+            - SECONDARY
+        referentialTaxonId:
+          type: string
+        referentialName:
+          type: string
+          description: referentialName
+        referentialVersion:
+          type: string
+          description: referentialVersion
+
+    PublicIdentification:
+      type: object
+      nullable: false
+      properties:
+        id:
+          type: string
+          format: uuid
+          nullable: false
+        currentDetermination:
+          type: boolean
+          nullable: false
+        identifiedByID:
+          type: string
+        dateIdentified:
+          type: string
+        typeStatus:
+          type: string
+        identificationRemarks:
+          type: string
+        verbatimIdentification:
+          type: string
+        taxons:
+          type: array
+          nullable: false
+          items:
+            $ref: '#/components/schemas/PublicTaxon'
+
+    PublicMedia:
+      type: object
+      nullable: false
+      properties:
+        id:
+          type: string
+          format: uuid
+          nullable: false
+        creator:
+          type: string
+        contributor:
+          type: string
+        license:
+          type: string
+        source:
+          type: string
+        description:
+          type: string
+        fileName:
+          type: string
+          nullable: false
+        mediaUrl:
+          type: string
+          nullable: false
+        isCover:
+          type: boolean
+          description: if this media is a cover or not
+
+    AdminSpecimen:
+      description: Modèle représentant un spécimen sur la partie privée de l'application
+      type: object
+      nullable: false
+      properties:
+        id:
+          type: string
+          nullable: false
+          format: uuid
+          example: f4b71ce1-9f8a-4dca-af89-4b61d6ec6884
+        institutionId:
+          type: string
+          format: uuid
+          nullable: false
+        collectionId:
+          type: string
+          format: uuid
+          nullable: false
+        catalogNumber:
+          type: string
+          nullable: false
+        nominativeCollection:
+          type: string
+        recordNumber:
+          type: string
+        basisOfRecord:
+          type: string
+        preparations:
+          type: string
+        individualCount:
+          type: string
+        sex:
+          type: string
+        lifeStage:
+          type: string
+        occurrenceRemarks:
+          type: string
+        legalStatus:
+          type: string
+        donor:
+          type: string
+        identifications:
+          type: array
+          items:
+            $ref: '#/components/schemas/Identification'
+        geologicalContext:
+          $ref: '#/components/schemas/GeologicalContext'
+        collectionEvent:
+          $ref: '#/components/schemas/CollectionEvent'
+        literatures:
+          type: array
+          items:
+            $ref: '#/components/schemas/Literature'
+        medias:
+          type: array
+          items:
+            $ref: '#/components/schemas/Media'
+        other:
+          $ref: '#/components/schemas/Other'
+        management:
+          $ref: '#/components/schemas/Management'
+
+    SpecimensListResponse:
+      description: Specimen integration data response
+      type: object
+      nullable: false
+      properties:
+        id:
+          type: string
+          nullable: false
+          example: f4b71ce1-9f8a-4dca-af89-4b61d6ec6884
+        collectionId:
+          type: string
+          nullable: false
+          example: Mammals
+        scientificName:
+          type: string
+        scientificNameAuthorship:
+          type: string
+        collectionName:
+          type: string
+        catalogNumber:
+          type: string
+        state:
+          type: string
+        modifiedAt:
+          type: string
+          format: date-time
+
+    SpecimenIntegrationPageResponse:
+      description: specimen pagination response
+      type: object
+      properties:
+        totalPages:
+          type: string
+          format: integer
+        numberOfElements:
+          type: string
+          format: integer
+        specimenListResponse:
+          type: array
+          items:
+            $ref: '#/components/schemas/SpecimensListResponse'
+
+    UserDashboardPageResponse:
+      description: specimen pagination response
+      type: object
+      properties:
+        totalPages:
+          type: string
+          format: integer
+        numberOfElements:
+          type: string
+          format: long
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserDashboard'
+
+    UserDashboard:
+      description: User model for dashboard
+      type: object
+      nullable: false
+      properties:
+        id:
+          type: string
+          format: uuid
+          nullable: false
+          example: 86360ea7-b055-485b-8f46-8b75e4c3c1af
+        name:
+          type: string
+          nullable: false
+          example: Doe John
+        email:
+          type: string
+          example: john.doe@recolnat.fr
+        role:
+          type: string
+          example: ADMIN
+
+    CollectionDashboardPageResponse:
+      description: specimen pagination response
+      type: object
+      properties:
+        totalPages:
+          type: string
+          format: integer
+        numberOfElements:
+          type: string
+          format: integer
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/CollectionDashboard'
+
+    NominativeCollectionDashboardPageResponse:
+      description: nominative collection pagination response
+      type: object
+      properties:
+        totalPages:
+          type: string
+          format: integer
+        numberOfElements:
+          type: string
+          format: integer
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/NominativeCollectionDashboard'
+
+    CollectionDashboard:
+      description: Collection data response
+      type: object
+      nullable: false
+      properties:
+        id:
+          type: string
+          format: uuid
+          nullable: false
+          example: 86360ea7-b055-485b-8f46-8b75e4c3c1af
+        name:
+          type: string
+          nullable: false
+          example: botanique
+        type:
+          type: string
+          example: botanique
+        specimenCount:
+          type: string
+          format: int
+          description: nombre de spécimen dans la collection
+
+    NominativeCollectionDashboard:
+      description: Nominative collection data response
+      type: object
+      nullable: false
+      properties:
+        name:
+          type: string
+          nullable: false
+          example: botanique
+        specimenCount:
+          type: string
+          format: int
+          description: nombre de spécimen dans la collection
+
+    CollectionResponse:
+      description: Collection data response
+      type: object
+      nullable: false
+      properties:
+        id:
+          type: string
+          format: uuid
+          nullable: false
+        typeCollection:
+          type: string
+          nullable: false
+          example: h
+        institutionId:
+          type: string
+          nullable: false
+          example: 86360ea7-b055-485b-8f46-8b75e4c3c1af
+        collectionNameFr:
+          type: string
+          nullable: false
+          example: botanique
+        collectionNameEn:
+          type: string
+          nullable: false
+          example: botanic
+        collectionName:
+          type: string
+          nullable: false
+          example: botanique
+
+    CollectionPublic:
+      description: Collection data response public
+      type: object
+      nullable: false
+      properties:
+        id:
+          type: string
+          nullable: false
+        typeCollection:
+          type: string
+          nullable: false
+          example: h
+        institutionCode:
+          type: string
+          nullable: false
+          example: MNHN
+        collectionNameFr:
+          type: string
+          nullable: false
+          example: botanique
+        collectionNameEn:
+          type: string
+          nullable: false
+          example: botanique
+        collectionName:
+          type: string
+          nullable: false
+          example: botanique
+        institutionId:
+          type: string
+          format: int
+          description: institution id
+          example: 86360ea7-b055-485b-8f46-8b75e4c3c1af
+
+    DatationResponse:
+      description: Datation Response
+      type: object
+      nullable: false
+      properties:
+        eonothem:
+          type: array
+          items:
+            type: string
+            format: string
+          example: Phanérozoïque
+        eratheme:
+          type: array
+          items:
+            type: string
+            format: string
+          example: Cénozoïque
+        system:
+          type: array
+          items:
+            type: string
+            format: string
+          example: Quaternaire
+        epoch:
+          type: array
+          items:
+            type: string
+            format: string
+          example: Holocène
+        age:
+          type: array
+          items:
+            type: string
+            format: string
+          example: Meghalayen
+
+    OperationType:
+      type: string
+      enum:
+        - VALID
+        - REVIEW
+        - DRAFT
+        -
+    ArticleState:
+      type: string
+      enum:
+        - PUBLISHED
+        - DRAFT
+        -
+    MediaParam:
+      description: Media Param
+      type: object
+      nullable: false
+      properties:
+        owner:
+          type: string
+          nullable: true
+          example: INVENT_1177878790
+        publish:
+          type: number
+          nullable: true
+          example: 1
+
+    UserCollection:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: identifiant de la collection
+          example: 50f4978a-da62-4fde-8f38-5003bd43ff64
+        nameFr:
+          type: string
+          format: string
+          description: nom de la collection en français
+          example: Mamifères
+        nameEn:
+          type: string
+          format: string
+          description: nom de la collection en anglais
+          example: Mammals
+        type:
+          type: string
+          format: string
+          description: type de la collection
+          example: Botanique
+
+    Collection:
+      description: Collection type et code
+      type: object
+      properties:
+        typeCollection:
+          type: string
+        collectionCode:
+          type: string
+
+    Identification:
+      type: object
+      description: Identification description
+      properties:
+        id:
+          type: string
+          format: uuid
+          nullable: false
+        errorMessage:
+          type: string
+          description: Message
+        verbatimIdentification:
+          type: string
+          description: Verbatim Identification
+        identificationVerificationStatus:
+          type: boolean
+          description: Identification Verification Status
+        identifiedByID:
+          type: string
+          description: Persona who identify
+        dateIdentified:
+          type: string
+          description: date sous forme de localtime ou de periode
+        currentDetermination:
+          type: boolean
+          description: Current Determination
+        typeStatus:
+          type: string
+          description: typeStatus
+        identificationRemarks:
+          type: string
+          description: Identification Remarks
+        taxon:
+          type: array
+          items:
+            $ref: "#/components/schemas/Taxon"
+
+    GeologicalContext:
+      description: GeologicalContext data
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          nullable: false
+        verbatimEpoch:
+          type: string
+        ageAbsolute:
+          type: string
+        range:
+          type: string
+        earliestAgeOrLowestStage:
+          type: string
+        latestAgeOrHighestStage:
+          type: string
+        earliestEpochOrLowestSeries:
+          type: string
+        latestEpochOrHighestSeries:
+          type: string
+        earliestPeriodOrLowestSystem:
+          type: string
+        latestPeriodOrHighestSystem:
+          type: string
+        earliestEraOrLowestErathem:
+          type: string
+        latestEraOrHighestErathem:
+          type: string
+        earliestEonOrLowestEonothem:
+          type: string
+        latestEonOrHighestEonothem:
+          type: string
+        lowestBiostratigraphicZone:
+          type: string
+        highestBiostratigraphicZone:
+          type: string
+        group:
+          type: string
+        formation:
+          type: string
+        member:
+          type: string
+        bed:
+          type: string
+        otherLithostratigraphicTerms:
+          type: string
+
+    Location:
+      type: object
+      properties:
+        municipality:
+          type: string
+        stateProvince:
+          type: string
+        region:
+          type: string
+        county:
+          type: string
+        country:
+          type: string
+        continent:
+          type: string
+        countryCode:
+          type: string
+        waterBody:
+          type: string
+        islandGroup:
+          type: string
+        island:
+          type: string
+        locality:
+          type: string
+        locationRemarks:
+          type: string
+
+    Literature:
+      description: publication, bibliographic reference, global unique identifier, URI
+      properties:
+        id:
+          type: string
+          format: uuid
+          nullable: false
+        identifier:
+          type: string
+        authors:
+          type: string
+        date:
+          type: string
+        title:
+          type: string
+        review:
+          type: string
+        volume:
+          type: string
+        number:
+          type: string
+        pages:
+          type: string
+        publisher:
+          type: string
+        publicationPlace:
+          type: string
+        editors:
+          type: string
+        bookTitle:
+          type: string
+        pageNumber:
+          type: string
+        citation:
+          type: string
+        language:
+          type: string
+        keywords:
+          type: string
+        description:
+          type: string
+        url:
+          type: string
+        remarks:
+          type: string
+
+    Media:
+      description: images attached
+      properties:
+        id:
+          type: string
+          format: uuid
+          nullable: false
+        creator:
+          type: string
+        contributor:
+          type: string
+        license:
+          type: string
+        source:
+          type: string
+        description:
+          type: string
+        fileName:
+          type: string
+          nullable: false
+        mediaUrl:
+          type: string
+          description: media url, file URI without server name
+          nullable: false
+        isCover:
+          type: boolean
+          description: if this media is a cover or not
+
+    Other:
+      properties:
+        id:
+          type: string
+          format: uuid
+          nullable: false
+        linkGerBank:
+          type: string
+        linkBold:
+          type: string
+        linkOther:
+          type: string
+        financialAid:
+          type: string
+        computerizationProgram:
+          type: string
+        remarks:
+          type: string
+
+    Management:
+      properties:
+        id:
+          type: string
+          format: uuid
+          nullable: false
+        storageName:
+          type: string
+
+    Taxon:
+      properties:
+        id:
+          type: string
+          format: uuid
+          nullable: false
+        scientificName:
+          type: string
+          example: Pica pica
+          nullable: false
+        scientificNameAuthorship:
+          type: string
+        kingdom:
+          type: string
+          example: Animalia
+        phylum:
+          type: string
+          example: chordata
+        taxonClass:
+          type: string
+        taxonOrder:
+          type: string
+        subOrder:
+          type: string
+        family:
+          type: string
+        subFamily:
+          type: string
+        genus:
+          type: string
+          example: Pica
+        subGenus:
+          type: string
+        specificEpithet:
+          type: string
+        infraspecificEpithet:
+          type: string
+        vernacularName:
+          type: string
+          description: vernacular Name
+          example: le poisson rouge
+        taxonRemarks:
+          type: string
+          description: taxon Remarks
+          example: this name is a misspelling in common use
+        referentialTaxonId:
+          type: string
+        referentialName:
+          type: string
+          description: referentialName
+        referentialVersion:
+          type: string
+          description: referentialVersion
+        levelType:
+          type: string
+          enum:
+            - MASTER
+            - SECONDARY
+          description: level Type in hierarchy
+
+    CollectionEvent:
+      properties:
+        id:
+          type: string
+          format: uuid
+          nullable: false
+        noCollectionInformation:
+          type: boolean
+        eventDate:
+          type: string
+        interpretedDate:
+          type: boolean
+        recordedBy:
+          type: string
+        fieldNumber:
+          type: string
+        fieldNotes:
+          type: string
+        eventRemarks:
+          type: string
+        verbatimLocality:
+          type: string
+        sensitiveLocation:
+          type: boolean
+        minimumElevationInMeters:
+          type: number
+          format: double
+        maximumElevationInMeters:
+          type: number
+          format: double
+        interpretedAltitude:
+          type: boolean
+        minimumDepthInMeters:
+          type: number
+          format: double
+        maximumDepthInMeters:
+          type: number
+          format: double
+        interpretedDepth:
+          type: boolean
+        decimalLatitude:
+          type: number
+          format: double
+        decimalLongitude:
+          type: number
+          format: double
+        geodeticDatum:
+          type: string
+        georeferenceSources:
+          type: string
+        habitat:
+          type: string
+        location:
+          $ref: '#/components/schemas/Location'
+
+    CollectionSpecificationIdPairs:
+      required:
+        - specimenId
+        - collectionId
+      properties:
+        specimenId:
+          type: string
+          format: uuid
+          nullable: false
+          example: 024dc410-91d5-42c5-bac7-32395968e30a
+        collectionId:
+          type: string
+          format: uuid
+          nullable: false
+          example: 9a342a92-6fe8-48d3-984e-d1731c051666
+
+    InstitutionResponse:
+      description: Institution Response
+      type: object
+      nullable: false
+      properties:
+        totalPages:
+          type: string
+          format: int
+        numberOfElements:
+          type: string
+          format: int
+        institutions:
+          items:
+            $ref: "#/components/schemas/Institution"
+
+    ArticleDashboardResponse:
+      description: Article Response
+      type: object
+      nullable: false
+      properties:
+        totalPages:
+          type: string
+          format: int
+        numberOfElements:
+          type: string
+          format: long
+        data:
+          items:
+            $ref: "#/components/schemas/ArticleDashboard"
+
+    InstitutionDashboardResponse:
+      description: Institution Response
+      type: object
+      nullable: false
+      properties:
+        totalPages:
+          type: string
+          format: int
+        numberOfElements:
+          type: string
+          format: long
+        data:
+          items:
+            $ref: "#/components/schemas/InstitutionDashboard"
+
+    InstitutionListResponse:
+      description: list Institutions Response
+      type: array
+      nullable: false
+      items:
+        $ref: "#/components/schemas/Institution"
+
+    CollectionListResponse:
+      description: list collection Response
+      type: array
+      nullable: false
+      items:
+        $ref: "#/components/schemas/CollectionDetailPublic"
+
+    CollectionOption:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: id sous forme UUID de la collection
+          example: 50f4978a-da62-4fde-8f38-5003bd43ff64
+        name:
+          type: string
+          format: string
+          description: nom de la collection
+          example: Herbier
+
+    CollectionWithCode:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: id sous forme UUID de la collection
+          example: 50f4978a-da62-4fde-8f38-5003bd43ff64
+        name:
+          type: string
+          format: string
+          description: nom de la collection
+          example: Herbier
+        code:
+          type: string
+          format: string
+          description: code de la collection
+          example: HB
+
+    InstitutionsProgramResponse:
+      description: Institutions programs Response
+      type: object
+      nullable: false
+      properties:
+        id:
+          type: integer
+          format: int32
+          description: id sous forme int de l institution pour keycloak
+          example: 159
+        institutionId:
+          type: string
+          format: uuid
+          description: id sous forme UUID de l institution
+          example: 50f4978a-da62-4fde-8f38-5003bd43ff64
+        code:
+          type: string
+          nullable: false
+          description: code , libelle court de l institution
+          example: MNHN
+        name:
+          type: string
+          nullable: false
+          description: nom de l institution
+          example: Muséum National d''Histoire Naturelle
+        logoUrl:
+          type: string
+          example: https://mediaphoto.mnhn.fr/media/1652113411737lMgX2dOG5396jVeF
+
+    InstitutionDetailPublicResponse:
+      description: Institution public Response
+      type: object
+      nullable: false
+      properties:
+        id:
+          type: integer
+          format: int32
+          description: id sous forme int de l institution pour keycloak
+          example: 159
+        institutionId:
+          type: string
+          format: uuid
+          description: id sous forme UUID de l institution
+          example: 50f4978a-da62-4fde-8f38-5003bd43ff64
+        code:
+          type: string
+          nullable: false
+          description: code , libelle court de l institution
+          example: MNHN
+        name:
+          type: string
+          nullable: false
+          description: nom de l institution
+          example: Muséum National d''Histoire Naturelle
+        mandatoryDescription:
+          type: string
+          format: string
+          description: description obligatoire de l institution
+          example: institution parisienne
+        optionalDescription:
+          type: string
+          format: string
+          description: description optionnel de l institution
+          example: institution principale
+        logoUrl:
+          type: string
+          example: https://mediaphoto.mnhn.fr/media/1652113411737lMgX2dOG5396jVeF
+        partnerTypeEn:
+          type: string
+          example: membre
+        partnerTypeFr:
+          type: string
+          example: member
+        partnerType:
+          type: string
+          example: member ou membre
+        collections:
+          type: array
+          items:
+            $ref: '#/components/schemas/Collection'
+        url:
+          type: string
+        specimenCount:
+          type: integer
+          format: int32
+
+    InstitutionDetailResponse:
+      description: Institution Response
+      type: object
+      nullable: false
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: id sous forme UUID de l institution
+          example: 50f4978a-da62-4fde-8f38-5003bd43ff64
+        code:
+          type: string
+          nullable: false
+          description: code , libelle court de l institution
+          example: MNHN
+        name:
+          type: string
+          nullable: false
+          description: nom de l institution
+          example: Muséum National d''Histoire Naturelle
+        mandatoryDescription:
+          type: string
+          format: string
+          description: description obligatoire de l institution
+          example: institution parisienne
+        optionalDescription:
+          type: string
+          format: string
+          description: description optionnel de l institution
+          example: institution principale
+        logoUrl:
+          type: string
+          example: https://mediaphoto.mnhn.fr/media/1652113411737lMgX2dOG5396jVeF
+        partnerType:
+          type: string
+          example: DATA_PROVIDER, MEMBER, PARTNER
+        url:
+          type: string
+          format: string
+          description: url du site de l'institution
+          example: http://mnhn.fr
+        specimensCount:
+          type: integer
+          format: int32
+          description: nombre estimé de specimen
+      example:
+        id: 1
+        code: MNHN
+        name: Muséum National d'Histoire Naturelle
+
+    InstitutionRequest:
+      type: object
+      properties:
+        code:
+          type: string
+          format: string
+          description: code , libelle court de l institution
+          example: MNHN
+        name:
+          type: string
+          format: string
+          description: nom de l institution
+          example: Muséum National d''Histoire Naturelle
+        mandatoryDescription:
+          type: string
+          format: string
+          description: description obligatoire de l institution
+          example: institution parisienne
+        optionalDescription:
+          type: string
+          format: string
+          description: description optionnel de l institution
+          example: institution principale
+        partnerType:
+          type: string
+          format: string
+          description: type de partenariat DATA_PROVIDER,PARTNER,MEMBER
+          example: PARTNER
+        logoUrl:
+          type: string
+          format: string
+          description: url du logo d institution
+          example: http://mediaphoto.mnhn.fr/media/1441439763721S1JxP92vYMmLFcfK
+        url:
+          type: string
+          format: string
+          description: url du site de l'institution
+          example: http://mnhn.fr
+        specimensCount:
+          type: integer
+          format: int32
+          description: nombre estimé de specimen
+
+    InstitutionOption:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: id sous forme UUID de l institution
+          example: 50f4978a-da62-4fde-8f38-5003bd43ff64
+        name:
+          type: string
+          format: string
+          description: nom de l institution
+          example: Muséum National d''Histoire Naturelle
+
+    Institution:
+      type: object
+      properties:
+        id:
+          type: string
+          format: integer
+        institutionId:
+          type: string
+          format: uuid
+          description: id sous forme UUID de l institution
+          example: 50f4978a-da62-4fde-8f38-5003bd43ff64
+        code:
+          type: string
+          format: string
+          description: code , libelle court de l institution
+          example: MNHN
+        name:
+          type: string
+          format: string
+          description: nom de l institution
+          example: Muséum National d''Histoire Naturelle
+        assignable:
+          type: boolean
+          nullable: false
+          example: false
+        mandatoryDescription:
+          type: string
+          format: string
+          description: description obligatoire de l institution
+          example: institution parisienne
+        optionalDescription:
+          type: string
+          format: string
+          description: description optionnel de l institution
+          example: institution principale
+        partnerType:
+          type: string
+          format: string
+          description: type de partenariat DATA_PROVIDER,PARTNER,MEMBER
+          example: PARTNER
+        logoUrl:
+          type: string
+          format: string
+          description: url du logo d institution
+          example: http://mediaphoto.mnhn.fr/media/1441439763721S1JxP92vYMmLFcfK
+
+    ArticleDashboard:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Id de l'article
+          example: 50f4978a-da62-4fde-8f38-5003bd43ff64
+        title:
+          type: string
+          format: string
+          description: Titre de l'article
+          example: Un titre
+        author:
+          type: string
+          format: string
+          description: Auteur de l'article
+          example: John Doe
+        creationDate:
+          type: string
+          format: date
+          description: Date de création de l'article
+        state:
+          $ref: '#/components/schemas/ArticleState'
+
+    InstitutionDashboard:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: id sous forme UUID de l institution
+          example: 50f4978a-da62-4fde-8f38-5003bd43ff64
+        code:
+          type: string
+          format: string
+          description: code , libelle court de l institution
+          example: MNHN
+        name:
+          type: string
+          format: string
+          description: nom de l institution
+          example: Muséum National d''Histoire Naturelle
+        partnerType:
+          type: string
+          format: string
+          description: type de partenariat DATA_PROVIDER,PARTNER,MEMBER
+          example: PARTNER
+        specimenCount:
+          type: string
+          format: int
+          description: nombre de spécimen dans l'institution
+
+    PartnerResponse:
+      type: object
+      properties:
+        Partner:
+          type: array
+          items:
+            type: string
+            format: string
+
+    Article:
+      type: object
+      required:
+        - content
+        - author
+        - title
+        - creationDate
+      properties:
+        title:
+          type: string
+          description: titre de l article
+          example: Mon titre
+        content:
+          type: string
+          description: description contenu de l article
+          example: Mon contenu
+        author:
+          type: string
+          description: auteur de l article
+          example: Mon nom de plume
+        creationDate:
+          type: string
+          description: date creation article , format YYYY-MM-JJ
+          example: 2023-12-18
+        media:
+          type: string
+          format: binary
+          description: dle binaire de l article
+          example: fichier svg
+        state:
+          $ref: "#/components/schemas/ArticleState"
+
+    ArticleResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        content:
+          type: string
+        author:
+          type: string
+        createdBy:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        creationDate:
+          type: string
+          format: date
+        urlMedia:
+          type: string
+        media:
+          type: string
+          format: binary
+        incrementId:
+          type: integer
+
+    ArticleResultPageResponse:
+      type: object
+      properties:
+        totalPages:
+          type: integer
+          format: int32
+        numberOfElements:
+          type: integer
+          format: int32
+        articles:
+          type: array
+          items:
+            $ref: '#/components/schemas/ArticleResponse'
+
+    StatisticsResult:
+      type: object
+      properties:
+        countSpecimen:
+          type: integer
+          format: int32
+        countTaxon:
+          type: integer
+          format: int32
+        countInstitution:
+          type: integer
+          format: int32
+
+    CollectionDetail:
+      description: Collection detail
+      type: object
+      nullable: false
+      properties:
+        id:
+          type: string
+          format: uuid
+          nullable: false
+        domain:
+          type: string
+          nullable: false
+          example: Botanique
+        collectionNameFr:
+          type: string
+          nullable: false
+          description: nom de la collection en français
+          example: botanique
+        collectionNameEn:
+          type: string
+          description: nom de la collection en anglais
+          example: botanique
+        collectionCode:
+          type: string
+          description: code de la collection
+          example: BTN
+        descriptionEn:
+          type: string
+          nullable: false
+          description: description de la collection en anglais
+          example: specimens collection
+        descriptionFr:
+          type: string
+          description: description de la collection en français
+          example: collection de specimens
+
+    CollectionDetailPublic:
+      description: Collection detail public
+      type: object
+      nullable: false
+      properties:
+        id:
+          type: string
+          format: uuid
+          nullable: false
+        typeCollection:
+          type: string
+          nullable: false
+          example: h
+        collectionNameFr:
+          type: string
+          nullable: false
+          description: nom de la collection en français
+          example: botanique
+        collectionNameEn:
+          type: string
+          description: nom de la collection en anglais
+          example: botanique
+        collectionName:
+          type: string
+          description: nom de la collection dans la langue présente (ou français si le nom est present dans les deux langues)
+          example: botanique
+        descriptionEn:
+          type: string
+          description: description de la collection en anglais
+          example: specimens collection
+        descriptionFr:
+          type: string
+          description: description de la collection en français
+          example: collection de specimens
+        institutionId:
+          type: string
+          format: int
+          description: institution id
+          example: 86360ea7-b055-485b-8f46-8b75e4c3c1af
+    DomainSpecimenCount:
+      type: object
+      properties:
+        domainName:
+          type: string
+        specimenCount:
+          type: string
+          format: int
+    CollectionDescription:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        description:
+          type: string
+        collectionCode:
+          type: string
+    InstitutionStatistics:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        institutionId:
+          type: string
+          format: uuid
+        institutionName:
+          type: string
+        computerizedSpecimens:
+          type: integer
+          format: int64
+        specimensCount:
+          type: integer
+          format: int64
+        taxonsCount:
+          type: integer
+          format: int64
+        typesCount:
+          type: integer
+          format: int64
+        lastUpdate:
+          type: string
+          format: date-time
+
+    AutoCompleteResponse:
+      type: array
+      items:
+        type: string
+
+    BadRequest:
+      type: object
+      properties:
+        code:
+          type: integer
+          format: int32
+        message:
+          type: string
+          example:
+            code: 400
+            message: "Invalid query parameter"
+
+    NotFound:
+      type: object
+      properties:
+        code:
+          type: integer
+          format: int32
+        message:
+          type: string
+          example:
+            code: 404
+            message: "Resource not found"
+
+    NoContent:
+      $ref: '#/components/schemas/Error'
+    UnexpectedError:
+      $ref: '#/components/schemas/Error'
+    Forbidden:
+      $ref: '#/components/schemas/Error'
+    Unauthorized:
+      $ref: '#/components/schemas/Error'
+    Conflict:
+      $ref: '#/components/schemas/Error'
+    Error:
+      type: object
+      description: A common error response
+      properties:
+        errorCode:
+          type: integer
+          description: Error Code
+        errorMessage:
+          type: string
+          description: Message
+        errorLevel:
+          type: string
+          description: Level of error
+          default: info
+          enum:
+            - info
+            - warning
+            - error
+            - critical
+        errorType:
+          type: string
+          description: Type of error
+          enum:
+            - functional
+            - technical
+        documentationUrl:
+          type: string
+          description: Url of the documenation
+        tips:
+          type: string
+          description: Tips/help for adressing the error
+    ImportCheckDataResponse:
+      type: object
+      properties:
+        format:
+          type: boolean
+        size:
+          type: boolean
+        structureErrors:
+          type: array
+          items:
+            $ref: '#/components/schemas/ImportStructureError'
+
+    ImportCheckResponse:
+      type: object
+      properties:
+        specimen:
+          $ref: '#/components/schemas/ImportCheckSpecimenResponse'
+        identification:
+          $ref: '#/components/schemas/ImportCheckIdentificationResponse'
+        publication:
+          $ref: '#/components/schemas/ImportCheckPublicationResponse'
+
+    ImportCheckSpecimenResponse:
+      type: object
+      properties:
+        lines:
+          type: integer
+        specimensInRecolnat:
+          type: integer
+        blockingErrors:
+          type: array
+          items:
+            $ref: '#/components/schemas/ImportError'
+        nonBlockingErrors:
+          type: array
+          items:
+            $ref: '#/components/schemas/ImportError'
+
+    ImportCheckIdentificationResponse:
+      type: object
+      properties:
+        lines:
+          type: integer
+        blockingErrors:
+          type: array
+          items:
+            $ref: '#/components/schemas/ImportError'
+        nonBlockingErrors:
+          type: array
+          items:
+            $ref: '#/components/schemas/ImportError'
+
+    ImportCheckPublicationResponse:
+      type: object
+      properties:
+        lines:
+          type: integer
+        blockingErrors:
+          type: array
+          items:
+            $ref: '#/components/schemas/ImportError'
+        nonBlockingErrors:
+          type: array
+          items:
+            $ref: '#/components/schemas/ImportError'
+
+    ImportError:
+      type: object
+      properties:
+        code:
+          type: string
+        lines:
+          type: array
+          items:
+            type: integer
+    ImportStructureError:
+      type: object
+      properties:
+        code:
+          type: string
+        columns:
+          type: array
+          items:
+            type: string
+
+    ImportPageResponse:
+      description: import pagination response
+      type: object
+      properties:
+        totalPages:
+          type: string
+          format: integer
+        numberOfElements:
+          type: string
+          format: integer
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Import'
+    Import:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        fillingDate:
+          type: string
+          format: date-time
+        files:
+          type: array
+          items:
+            $ref: '#/components/schemas/ImportFile'
+        user:
+          type: string
+        status:
+          type: string
+        addedSpecimenCount:
+          type: integer
+        addedIdentificationCount:
+          type: integer
+        addedLiteratureCount:
+          type: integer
+        updatedSpecimenCount:
+          type: integer
+
+    ImportFile:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string

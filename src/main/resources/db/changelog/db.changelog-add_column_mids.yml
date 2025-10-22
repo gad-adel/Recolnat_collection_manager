@@ -1,0 +1,11 @@
+databaseChangeLog:
+  - changeSet:
+      id: add-column-mids
+      author: DTH
+      changes:
+        - addColumn:
+            tableName: specimen
+            columns:
+              - column:
+                  name: mids
+                  type: smallint

@@ -1,0 +1,41 @@
+#POUR LES ENVIRONNEMENTS DE TEST CONTAINER
+spring:
+  datasource:
+    url: jdbc:tc:postgresql:16.0-bullseye:///rcn
+    hikari:
+      driver-class-name: org.testcontainers.jdbc.ContainerDatabaseDriver
+      jdbc-url: jdbc:tc:postgresql:16.0-bullseye:///rcn
+  banner:
+    location: banner.txt
+  jpa:
+    open-in-view: false
+    generate-ddl: false
+    show-sql: ${JPA_SHOW_SQL:true}
+  liquibase:
+    enabled: true
+taxonRef:
+  api:
+    base_url: ${TAXON_REF_SERVER_API:"http://dock-pas1.arzt.mnhn.fr:8098/api/v3/taxon"}
+    mock: true
+
+keycloak:
+  auth-server-url-OpenApi: ${AUTH_SERVER:http://localhost:8089/auth/realms/recolnat-oauth2}
+
+elasticsearch:
+  uris: ${ES_URI:http://localhost:9200}
+  connection-timeout: 100000
+  socket-timeout: 10000
+  https-ignore_certif: ${ES_IGNORE_ALL_HTTPS_CERTIF:false}
+  https-certificate: ${ES_WITH_HTTPS_CERTIF:false}
+  https-truststore: ${ES_WITH_HTTPS_TRUSTSTORE:false}
+
+index:
+  specimen: ${INDEX_SPECIMEN:rcn_specimen_short}
+
+application:
+  title: ^project.name^
+  version: ^project.version^
+
+caching:
+  statistics:
+    statisticsTTL: ${STATS_TTL:3600000}

@@ -1,0 +1,157 @@
+{
+  "scientificName": "string",
+  "ownerInstitutionCode": "string",
+  "institutionCode": "string",
+  "collectionName": "string",
+  "collectionCode": "string",
+  "collectionId": "9a342a92-6fe8-48d3-984e-d1731c051666",
+  "legacyId": "string",
+  "catalogNumber": "string",
+  "recordNumber": "string",
+  "basisOfRecord": "string",
+  "preparations": "string",
+  "individualCount": "string",
+  "sex": "string",
+  "lifeStage": "string",
+  "occurrenceRemarks": "string",
+  "legalStatus": "string",
+  "donor": "string",
+  "state": "string",
+  "identifications": [
+    {
+      "errorMessage": "string",
+      "verbatimIdentification": "string",
+      "identificationVerificationStatus": "true",
+      "identifiedByID": "string",
+      "dateIdentified": "2022-07-13",
+      "currentDetermination": true,
+      "taxon": [
+        {
+          "scientificName": "string",
+          "scientificNameAuthorship": "string",
+          "kingdom": "string",
+          "phylum": "string",
+          "vernacularName": "string",
+          "taxonRemarks": "string"
+        }
+      ]
+    },
+    {
+      "errorMessage": "string",
+      "verbatimIdentification": "string",
+      "identificationVerificationStatus": "true",
+      "identifiedByID": "string",
+      "dateIdentified": "2022-07-13",
+      "currentDetermination": true,
+      "taxon": [
+        {
+          "scientificName": "string",
+          "scientificNameAuthorship": "string",
+          "kingdom": "string",
+          "phylum": "string",
+          "vernacularName": "string",
+          "taxonRemarks": "string"
+        }
+      ]
+    }
+  ],
+  "geologicalContext": {
+    "verbatimEpoch": "string",
+    "ageAbsolute": "string",
+    "range": "string",
+    "earliestAgeOrLowestStage": "string",
+    "latestAgeOrHighestStage": "string",
+    "earliestEpochOrLowestSeries": "string",
+    "latestEpochOrHighestSeries": "string",
+    "earliestPeriodOrLowestSystem": "string",
+    "latestPeriodOrHighestSystem": "string",
+    "earliestEraOrLowestErathem": "string",
+    "latestEraOrHighestErathem": "string",
+    "earliestEonOrLowestEonothem": "string",
+    "latestEonOrHighestEonothem": "string",
+    "lowestBiostratigraphicZone": "string",
+    "highestBiostratigraphicZone": "string",
+    "group": "string",
+    "formation": "string",
+    "member": "string",
+    "bed": "string",
+    "otherLithostratigraphicTerms": "string"
+  },
+  "collectionEvent": {
+    "noCollectionInformation": true,
+    "eventDate": "string",
+    "interpretedDate": true,
+    "recordedBy": "string",
+    "fieldNumber": "string",
+    "fieldNotes": "string",
+    "eventRemarks": "string",
+    "verbatimLocality": "string",
+    "sensitiveLocation": true,
+    "minimumElevationInMeters": 0,
+    "maximumElevationInMeters": 0,
+    "interpretedAltitude": true,
+    "minimumDepthInMeters": 0,
+    "maximumDepthInMeters": 0,
+    "interpretedDepth": true,
+    "decimalLatitude": 0,
+    "decimalLongitude": 0,
+    "geodeticDatum": "string",
+    "georeferenceSources": "string",
+    "habitat": "string",
+    "location": {
+      "municipality": "string",
+      "stateProvince": "string",
+      "region": "string",
+      "county": "string",
+      "country": "string",
+      "continent": "string",
+      "countryCode": "str",
+      "waterBody": "string",
+      "islandGroup": "string",
+      "island": "string",
+      "locationRemarks": "string"
+    }
+  },
+  "literatures": [
+    {
+      "identifier": "string",
+      "authors": "string",
+      "date": "2022",
+      "title": "string",
+      "review": "string",
+      "volume": "string",
+      "number": "string",
+      "pages": "string",
+      "publisher": "string",
+      "publicationPlace": "string",
+      "editors": "string",
+      "bookTitle": "string",
+      "pageNumber": "string",
+      "citation": "string",
+      "language": "str",
+      "keywords": "string",
+      "description": "string",
+      "url": "string",
+      "remarks": "string"
+    }
+  ],
+  "medias": [
+    {
+      "creator": "string",
+      "contributor": "string",
+      "license": "string",
+      "source": "string",
+      "description": "string",
+      "fileName": "string",
+      "mediaUrl": "string"
+    }
+  ],
+  "other": {
+    "linkGerBank": "string",
+    "linkBold": "string",
+    "linkOther": "string",
+    "financialAid": "string",
+    "computerizationProgram": "string",
+    "remarks": "string"
+  }
+}

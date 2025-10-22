@@ -1,0 +1,21 @@
+databaseChangeLog:
+- changeSet:
+   id:  modifyDataType of collection_event
+   author:  YEK
+   changes:
+    -  modifyDataType:
+         columnName:  maximum_elevation_in_meters
+         newDataType:  decimal
+         tableName:  collection_event
+    -  modifyDataType:
+         columnName:  minimum_elevation_in_meters
+         newDataType:  decimal
+         tableName:  collection_event
+    -  modifyDataType:
+         columnName:  maximum_depth_in_meters
+         newDataType:  decimal
+         tableName:  collection_event
+    -  modifyDataType:
+         columnName:  minimum_depth_in_meters
+         newDataType:  decimal
+         tableName:  collection_event

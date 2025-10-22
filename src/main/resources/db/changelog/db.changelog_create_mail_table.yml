@@ -1,0 +1,63 @@
+databaseChangeLog:
+  - changeSet:
+      id: init-mail-table
+      author: DTH
+      changes:
+        - createTable:
+            tableName: mail
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: from
+                  type: text
+                  constraints:
+                    nullable: false
+              - column:
+                  name: to
+                  type: text
+                  constraints:
+                    nullable: false
+              - column:
+                  name: cc
+                  type: text
+              - column:
+                  name: bcc
+                  type: text
+              - column:
+                  name: content
+                  type: text
+                  constraints:
+                    nullable: false
+              - column:
+                  name: subject
+                  type: text
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: timestamp
+                  constraints:
+                    nullable: false
+              - column:
+                  name: state
+                  type: text
+                  constraints:
+                    nullable: false
+
+
+
+
+
+
+
+
+
+
+
+
+

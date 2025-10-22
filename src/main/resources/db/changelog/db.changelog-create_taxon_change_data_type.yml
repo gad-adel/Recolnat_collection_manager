@@ -1,0 +1,9 @@
+databaseChangeLog:
+  - changeSet:
+      id: modifyDataType of taxon
+      author: DTH
+      changes:
+        - modifyDataType:
+            columnName: vernacular_name
+            newDataType: text
+            tableName: taxon

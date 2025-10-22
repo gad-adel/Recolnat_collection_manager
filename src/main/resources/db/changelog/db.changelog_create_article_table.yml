@@ -1,0 +1,94 @@
+databaseChangeLog:
+  - changeSet:
+      id: init-article-table
+      author: YEK
+      changes:
+        - createTable:
+            tableName: article
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: author
+                  type: varchar2 (255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: title
+                  type: varchar2 (255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: content
+                  type: clob
+                  constraints:
+                    nullable: true
+              - column:
+                  name: url_media
+                  type: varchar2 (255)
+                  constraints:
+                    nullable: true
+              - column:
+                  name: created_at
+                  type: timestamp
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_by
+                  type: varchar2 (255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: modified_by
+                  type: varchar(255)
+                  constraints:
+                    nullable: true
+              - column:
+                  name: modified_at
+                  type: timestamp
+                  constraints:
+                    nullable: true
+              - column:
+                  name: creation_date
+                  type: timestamp
+                  constraints:
+                    nullable: true
+              - column:
+                  name: increment_id
+                  type: int
+                  constraints:
+                    nullable: false
+              - column:
+                  name: data_change_ts
+                  type: timestamp
+              - column:
+                  name: state
+                  type: varchar
+                  constraints:
+                    nullable: false
+  - changeSet:
+      id: addAutoIncrementId
+      author: YEK
+      changes:
+        - addAutoIncrement:
+            columnName: increment_id
+            columnDataType: int
+            generationType: BY DEFAULT
+            incrementBy: 1
+            tableName: article
+
+
+
+
+
+
+
+
+
+
+
+

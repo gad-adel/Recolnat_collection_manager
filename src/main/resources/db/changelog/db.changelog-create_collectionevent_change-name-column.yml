@@ -1,0 +1,10 @@
+databaseChangeLog:
+  - changeSet:
+      id: modify name column
+      author: ZBO
+      changes:
+        - renameColumn:
+            oldColumnName: recordedby
+            newColumnName: recorded_by
+            columnDataType: varchar2 (300)
+            tableName: collection_event

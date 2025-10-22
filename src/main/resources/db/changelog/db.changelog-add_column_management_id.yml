@@ -1,0 +1,32 @@
+databaseChangeLog:
+  - changeSet:
+      id: add-column-management-id
+      author: DTH
+      changes:
+        - createTable:
+            tableName: management
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: storage_name
+                  type: text
+        - addColumn:
+            tableName: specimen
+            columns:
+              - column:
+                  name: fk_management_id
+                  type: uuid
+        - addForeignKeyConstraint:
+            baseColumnNames: fk_management_id
+            baseTableName: specimen
+            constraintName: fk_management_id
+            onDelete: CASCADE
+            onUpdate: CASCADE
+            referencedColumnNames: id
+            referencedTableName: management
+            validate: true

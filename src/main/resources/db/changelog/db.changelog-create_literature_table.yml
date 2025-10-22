@@ -1,0 +1,128 @@
+databaseChangeLog:
+  - changeSet:
+      id: change-literature-table
+      author: YEK
+      changes:
+        - createTable:
+            tableName: literature
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: identifier
+                  type: varchar(255)
+                  constraints:
+                    nullable: true
+              - column:
+                  name: authors
+                  type: varchar(255)
+                  constraints:
+                    nullable: true
+              - column:
+                  name: book_title
+                  type: varchar(255)
+                  constraints:
+                    nullable: true
+              - column:
+                  name: citation
+                  type: varchar(1500)
+                  constraints:
+                    nullable: true
+              - column:
+                  name: date
+                  type: date
+                  constraints:
+                    nullable: true
+              - column:
+                  name: description
+                  type: clob
+                  constraints:
+                    nullable: true
+              - column:
+                  name: editors
+                  type: clob
+                  constraints:
+                    nullable: true
+              - column:
+                  name: keywords
+                  type: clob
+                  constraints:
+                    nullable: true
+              - column:
+                  name: language
+                  type: varchar(3)
+                  constraints:
+                    nullable: true
+              - column:
+                  name: number
+                  type: clob
+                  constraints:
+                    nullable: true
+              - column:
+                  name: page_number
+                  type: clob
+                  constraints:
+                    nullable: true
+              - column:
+                  name: pages
+                  type: clob
+                  constraints:
+                    nullable: true
+              - column:
+                  name: publication_place
+                  type: clob
+                  constraints:
+                    nullable: true
+              - column:
+                  name: publisher
+                  type: clob
+                  constraints:
+                    nullable: true
+              - column:
+                  name: remarks
+                  type: clob
+                  constraints:
+                    nullable: true
+              - column:
+                  name: review
+                  type: clob
+                  constraints:
+                    nullable: true
+              - column:
+                  name: title
+                  type: varchar(255)
+                  constraints:
+                    nullable: true
+              - column:
+                  name: url
+                  type: clob
+                  constraints:
+                    nullable: true
+              - column:
+                  name: volume
+                  type: clob
+                  constraints:
+                    nullable: true
+              - column:
+                  name: data_change_ts
+                  type: timestamp
+              - column:
+                  name: fk_id_specimen
+                  type: uuid
+                  constraints:
+                    nullable: true
+
+        - addForeignKeyConstraint:
+            baseColumnNames: fk_id_specimen
+            baseTableName: literature
+            constraintName: fk_id_specimen
+            onDelete: CASCADE
+            onUpdate: CASCADE
+            referencedColumnNames: id
+            referencedTableName: specimen
+            validate: true
+

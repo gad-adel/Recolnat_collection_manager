@@ -1,0 +1,146 @@
+databaseChangeLog:
+  - changeSet:
+      id: init-specimen-table
+      author: YEK
+      changes:
+        - createTable:
+            tableName: specimen
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: inventory_id
+                  type: varchar(255)
+              - column:
+                  name: created_at
+                  type: timestamp
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_by
+                  type: clob
+                  constraints:
+                    nullable: true
+              - column:
+                  name: modified_by
+                  type: clob
+                  constraints:
+                    nullable: true
+              - column:
+                  name: modified_at
+                  type: timestamp
+                  constraints:
+                    nullable: true
+              - column:
+                  name: catalog_number
+                  type: varchar(50)
+              - column:
+                  name: record_number
+                  type: varchar(20)
+              - column:
+                  name: basis_of_record
+                  type: varchar(45)
+              - column:
+                  name: preparations
+                  type: clob
+              - column:
+                  name: individual_count
+                  type: varchar(20)
+              - column:
+                  name: sex
+                  type: varchar(20)
+              - column:
+                  name: occurrence_status
+                  type: varchar(50)
+              - column:
+                  name: occurrence_remarks
+                  type: clob
+              - column:
+                  name: legal_status
+                  type: clob
+              - column:
+                  name: donor
+                  type: clob
+              - column:
+                  name: fk_id_collection
+                  type: uuid
+                  constraints:
+                    nullable: false
+              - column:
+                  name: state
+                  type: clob
+                  constraints:
+                    nullable: false
+              - column:
+                  name: FK_GEO_ID
+                  type: uuid
+                  constraints:
+                    nullable: true
+              - column:
+                  name: fk_colevent_id
+                  type: uuid
+                  constraints:
+                    nullable: true
+              - column:
+                  name: FK_OTHER_ID
+                  type: uuid
+                  constraints:
+                    nullable: true
+              - column:
+                  name: collection_code
+                  type: varchar(60)
+                  constraints:
+                    nullable: true
+              - column:
+                  name: data_change_ts
+                  type: timestamp
+              - column:
+                  name: nominative_collection
+                  type: clob
+
+        - addForeignKeyConstraint:
+            baseColumnNames: fk_id_collection
+            baseTableName: specimen
+            constraintName: fk_id_collection
+            onDelete: CASCADE
+            onUpdate: CASCADE
+            referencedColumnNames: id
+            referencedTableName: COLLECTION
+            validate: true
+        - addForeignKeyConstraint:
+            baseColumnNames: FK_GEO_ID
+            baseTableName: specimen
+            constraintName: FK_GEO_ID
+            onDelete: CASCADE
+            onUpdate: CASCADE
+            referencedColumnNames: id
+            referencedTableName: geological_context
+            validate: true
+        - addForeignKeyConstraint:
+            baseColumnNames: fk_colevent_id
+            baseTableName: specimen
+            constraintName: fk_colevent_id
+            onDelete: CASCADE
+            onUpdate: CASCADE
+            referencedColumnNames: id
+            referencedTableName: collection_event
+            validate: true
+        - addForeignKeyConstraint:
+            baseColumnNames: FK_OTHER_ID
+            baseTableName: specimen
+            constraintName: FK_OTHER_ID
+            onDelete: CASCADE
+            onUpdate: CASCADE
+            referencedColumnNames: id
+            referencedTableName: other
+            validate: true
+
+
+
+
+
+
