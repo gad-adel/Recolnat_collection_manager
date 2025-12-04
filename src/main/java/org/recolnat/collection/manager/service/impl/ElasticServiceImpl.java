@@ -266,8 +266,8 @@ public class ElasticServiceImpl implements ElasticService {
             Location location = collectionEvent.getLocation();
             if (location != null) {
                 specimenIndexBuilder
-                        .continent(location.getContinent())
-                        .region(location.getRegion())
+                        .continent(StringUtils.isNotBlank(location.getContinent()) ? location.getContinent().split(";") : new String[]{})
+                        .region(location.getStateProvince())
                         .locality(location.getLocality())
                         .island(location.getIsland())
                         .islandGroup(location.getIslandGroup())

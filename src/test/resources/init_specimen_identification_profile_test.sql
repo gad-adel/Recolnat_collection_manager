@@ -6,10 +6,10 @@ VALUES ('8342cf1d-f202-4c10-9037-2e2406ce7331', 'h', 1, 'botanique', 'botanique'
 INSERT INTO public.specimen
 (id, created_at, created_by, modified_by, modified_at, catalog_number, record_number, basis_of_record,
  preparations, individual_count, sex, life_stage, occurrence_remarks, legal_status, donor, fk_id_collection, state,
- fk_geo_id, fk_colevent_id, fk_other_id, collection_code)
+ fk_geo_id, fk_colevent_id, fk_other_id, collection_code, approximate_individual_count)
 VALUES ('bf25ed41-f55c-41ec-bcb8-064268420e78'::uuid, '2022-08-17 15:26:11.527', 'zied', NULL, NULL,
         NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '8342cf1d-f202-4c10-9037-2e2406ce7331'::uuid,
-        'VALID', NULL, NULL, NULL, NULL);
+        'VALID', NULL, NULL, NULL, NULL, false);
 
 INSERT INTO public.identification
 (id, current_determination, date_identified, error_message, identification_remarks, identification_verification_status,

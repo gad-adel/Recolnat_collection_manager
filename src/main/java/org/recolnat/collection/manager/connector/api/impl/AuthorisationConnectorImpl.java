@@ -38,7 +38,7 @@ public class AuthorisationConnectorImpl implements AuthorisationConnector {
     private String authorisationUrl;
 
     @Override
-    public UserDashboardPageResponseDTO getUsers(UUID institutionId, Integer page, Integer size, String searchTerm) {
+    public UserDashboardPageResponseDTO getUsers(UUID institutionId, Integer page, Integer size, String searchTerm, String columnSort, String typeSort) {
         var userefOut = UserOut.builder().users(List.of()).build();
 
         var authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -50,6 +50,8 @@ public class AuthorisationConnectorImpl implements AuthorisationConnector {
                             .queryParam("size", size)
                             .queryParam("q", searchTerm)
                             .queryParam("institution_id", institutionId)
+                            .queryParam("columnSort", columnSort)
+                            .queryParam("typeSort", typeSort)
                             .build())
                     .header("Authorization", "Bearer " + credentials.getTokenValue())
                     .retrieve()

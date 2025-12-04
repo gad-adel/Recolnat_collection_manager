@@ -395,6 +395,9 @@
                 <apiFirst>false</apiFirst>
                 <useJakartaEe>true</useJakartaEe>
                 <useSpringBoot3>true</useSpringBoot3>
+                <generatedConstructorWithRequiredArgs>false</generatedConstructorWithRequiredArgs>
+                <additionalModelTypeAnnotations>@lombok.Builder @lombok.NoArgsConstructor @lombok.AllArgsConstructor
+                </additionalModelTypeAnnotations>
               </configOptions>
             </configuration>
           </execution>
@@ -441,25 +444,6 @@
             </configuration>
             <goals>
               <goal>enhance</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
-        <groupId>org.jacoco</groupId>
-        <artifactId>jacoco-maven-plugin</artifactId>
-        <version>${jacoco.version}</version>
-        <executions>
-          <execution>
-            <goals>
-              <goal>prepare-agent</goal>
-            </goals>
-          </execution>
-          <execution>
-            <id>report</id>
-            <phase>test</phase>
-            <goals>
-              <goal>report</goal>
             </goals>
           </execution>
         </executions>

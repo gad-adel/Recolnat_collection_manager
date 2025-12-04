@@ -15,12 +15,14 @@ import org.junit.jupiter.api.Test;
 import org.recolnat.collection.manager.api.domain.ConnectedUser;
 import org.recolnat.collection.manager.api.domain.UserAttributes;
 import org.recolnat.collection.manager.api.domain.enums.RoleEnum;
+import org.recolnat.collection.manager.api.domain.enums.SpecimenStatusEnum;
 import org.recolnat.collection.manager.api.domain.enums.imports.ImportFileType;
 import org.recolnat.collection.manager.api.domain.enums.imports.ImportModeEnum;
 import org.recolnat.collection.manager.api.domain.enums.imports.ImportStatusEnum;
 import org.recolnat.collection.manager.collection.api.web.AbstractResourceDBTest;
 import org.recolnat.collection.manager.repository.entity.ImportJPA;
 import org.recolnat.collection.manager.repository.jpa.ImportJPARepository;
+import org.recolnat.collection.manager.repository.jpa.SpecimenJPARepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.PageRequest;
@@ -67,6 +69,8 @@ import static org.recolnat.collection.manager.api.domain.enums.imports.ImportFil
 import static org.recolnat.collection.manager.api.domain.enums.imports.ImportFileType.LITERATURE;
 import static org.recolnat.collection.manager.api.domain.enums.imports.ImportFileType.SPECIMEN;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
@@ -89,7 +93,7 @@ public class ImportResourceITest extends AbstractResourceDBTest {
             .collections(List.of(UUID.fromString("8342cf1d-f202-4c10-9037-2e2406ce7331")))
             .institution(1)
             .build();
-    public static final String SPECIMEN_HEADER = "NOM_COLLECTION;NUMERO_INVENTAIRE;NUMERO_SPECIMEN;NATURE_SPECIMEN;REMARQUES_SPECIMEN;COLLECTE_DEBUT_JOUR;COLLECTE_DEBUT_MOIS;COLLECTE_DEBUT_ANNEE;COLLECTE_FIN_JOUR;COLLECTE_FIN_MOIS;COLLECTE_FIN_ANNEE;NOM_COLLECTEUR;NUMERO_COLLECTE;NOTES_TERRAIN;REMARQUES_COLLECTE;LOCALISATION_VERBATIM;LOCALISATION_SENSIBLE;LATITUDE;LONGITUDE;SYSTEME_GEODESIQUE;ALTITUDE_MIN;ALTITUDE_MAX;PROFONDEUR_MIN;PROFONDEUR_MAX;LOCALITE;COMMUNE;DEPARTEMENT;REGION;ETAT_PROVINCE;PAYS;CODE_ISO;CONTINENT;TYPE;AUTEUR_DETERMINATION;DETERMINATION_ANNEE;DETERMINATION_MOIS;DETERMINATION_JOUR;NOM_SCIENTIFIQUE;AUTEURS_TAXON;NOM_VERNACULAIRE;FAMILLE;SOUS_FAMILLE;GENRE;SOUS_GENRE;EPITHETE_SPECIFIQUE;EPITHETE_INFRA_SPECIFIQUE;REGNE;EMBRANCHEMENT;ORDRE";
+    public static final String SPECIMEN_HEADER = "NOM_COLLECTION;NUMERO_INVENTAIRE;AUTRE_NUMERO;NATURE_SPECIMEN;REMARQUES_SPECIMEN;COLLECTE_DEBUT_JOUR;COLLECTE_DEBUT_MOIS;COLLECTE_DEBUT_ANNEE;COLLECTE_FIN_JOUR;COLLECTE_FIN_MOIS;COLLECTE_FIN_ANNEE;NOM_COLLECTEUR;NUMERO_COLLECTE;NOTES_TERRAIN;REMARQUES_COLLECTE;LOCALISATION_VERBATIM;LOCALISATION_SENSIBLE;LATITUDE;LONGITUDE;SYSTEME_GEODESIQUE;ALTITUDE_MIN;ALTITUDE_MAX;PROFONDEUR_MIN;PROFONDEUR_MAX;LOCALITE;COMMUNE;DEPARTEMENT;REGION_ETAT_PROVINCE;PAYS;CODE_ISO;CONTINENT;TYPE;AUTEUR_DETERMINATION;DETERMINATION_ANNEE;DETERMINATION_MOIS;DETERMINATION_JOUR;NOM_SCIENTIFIQUE;AUTEURS_TAXON;NOM_VERNACULAIRE;FAMILLE;SOUS_FAMILLE;GENRE;SOUS_GENRE;EPITHETE_SPECIFIQUE;EPITHETE_INFRA_SPECIFIQUE;REGNE;EMBRANCHEMENT;ORDRE";
     public static final String SPECIMEN_TEST_LINE = "\nUCB Lyon 1;%s;;PreservedSpecimen;;;;;;;;;;;;;false;45.808408;5.790681;WGS84;;;;;;Chanaz;Savoie;;Auvergne-Rhône-Alpes;france;FR;Europe;Figuré;;;;;Hecticoceras zieteni;Tsytovitch, 1911;;Oppeliidae;;Hecticoceras;;zieteni;;Animalia;Mollusca;Ammonitida";
 
     public static final String IDENTIFICATION_HEADER = "NOM_COLLECTION;NUMERO_INVENTAIRE;VERBATIM_DETERMINATION;DOUTE_DETERMINATION;TYPE;AUTEUR_DETERMINATION;DETERMINATION_ANNEE;DETERMINATION_MOIS;DETERMINATION_JOUR;NOM_SCIENTIFIQUE;AUTEURS_TAXON;NOM_VERNACULAIRE;FAMILLE;SOUS_FAMILLE;GENRE;SOUS_GENRE;EPITHETE_SPECIFIQUE;EPITHETE_INFRA_SPECIFIQUE;REGNE;EMBRANCHEMENT;ORDRE";
@@ -101,6 +105,9 @@ public class ImportResourceITest extends AbstractResourceDBTest {
 
     @Autowired
     private ImportJPARepository importJPARepository;
+
+    @Autowired
+    private SpecimenJPARepository specimenJPARepository;
 
     public static ConnectedUser getConnectedUser() {
         return ConnectedUser.builder()
@@ -728,6 +735,19 @@ public class ImportResourceITest extends AbstractResourceDBTest {
             ImportCheckResponseDTO dto = testCheck(ADMIN, new CheckPayload(
                     null, null, "import/publication/data/TP30.csv"));
             assertThat(dto.getPublication().getBlockingErrors()).isEmpty();
+        }
+
+        @Sql(scripts = "classpath:import/unpublish.sql")
+        @SqlMergeMode(SqlMergeMode.MergeMode.MERGE)
+        @Test
+        @DisplayName("Dépublication des spécimens d'un import")
+        void unpublish() throws Exception {
+            mvc.perform(put("/v1/import/{importId}/unpublish", "00000000-0000-0000-0000-000000000001")
+                            .accept(MediaType.APPLICATION_JSON))
+                    .andDo(print()).andExpect(status().is2xxSuccessful());
+
+            var specimens = specimenJPARepository.findSpecimenByImportId(new UUID(0, 1));
+            assertThat(specimens).isNotEmpty().allMatch(specimenJPA -> specimenJPA.getState().equals(SpecimenStatusEnum.DRAFT));
         }
     }
 }

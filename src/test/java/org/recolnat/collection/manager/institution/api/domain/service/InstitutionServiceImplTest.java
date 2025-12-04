@@ -23,7 +23,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class InstitutionServiceImplTest {
+class InstitutionServiceImplTest {
 
     @Mock
     private InstitutionRepositoryJPA institutionRepository;
@@ -53,8 +53,7 @@ public class InstitutionServiceImplTest {
         List<Long> result = institutionService.getInstitutionMids(institutionId);
 
         // Then
-        assertThat(result).hasSize(4);
-        assertThat(result).containsExactly(10L, 20L, 30L, 40L);
+        assertThat(result).hasSize(4).containsExactly(10L, 20L, 30L, 40L);
         verify(institutionRepository).getInstitutionMids(institutionId);
     }
 
@@ -71,8 +70,7 @@ public class InstitutionServiceImplTest {
         List<Long> result = institutionService.getInstitutionMids(institutionId);
 
         // Then
-        assertThat(result).hasSize(4);
-        assertThat(result).containsExactly(15L, 0L, 25L, 0L);
+        assertThat(result).hasSize(4).containsExactly(15L, 0L, 25L, 0L);
         verify(institutionRepository).getInstitutionMids(institutionId);
     }
 
@@ -86,8 +84,7 @@ public class InstitutionServiceImplTest {
         List<Long> result = institutionService.getInstitutionMids(institutionId);
 
         // Then
-        assertThat(result).hasSize(4);
-        assertThat(result).containsExactly(0L, 0L, 0L, 0L);
+        assertThat(result).hasSize(4).containsExactly(0L, 0L, 0L, 0L);
         verify(institutionRepository).getInstitutionMids(institutionId);
     }
 
@@ -104,8 +101,7 @@ public class InstitutionServiceImplTest {
         List<Long> result = institutionService.getInstitutionMids(institutionId);
 
         // Then
-        assertThat(result).hasSize(4);
-        assertThat(result).containsExactly(0L, 100L, 0L, 200L);
+        assertThat(result).hasSize(4).containsExactly(0L, 100L, 0L, 200L);
         verify(institutionRepository).getInstitutionMids(institutionId);
     }
 
@@ -124,8 +120,7 @@ public class InstitutionServiceImplTest {
         List<Long> result = institutionService.getInstitutionMids(institutionId);
 
         // Then
-        assertThat(result).hasSize(4);
-        assertThat(result).containsExactly(10L, 20L, 0L, 0L);
+        assertThat(result).hasSize(4).containsExactly(10L, 20L, 0L, 0L);
         verify(institutionRepository).getInstitutionMids(institutionId);
     }
 
@@ -138,8 +133,7 @@ public class InstitutionServiceImplTest {
         List<Long> result = institutionService.getInstitutionMids(null);
 
         // Then
-        assertThat(result).hasSize(4);
-        assertThat(result).containsExactly(0L, 0L, 0L, 0L);
+        assertThat(result).hasSize(4).containsExactly(0L, 0L, 0L, 0L);
         verify(institutionRepository).getInstitutionMids(null);
     }
 

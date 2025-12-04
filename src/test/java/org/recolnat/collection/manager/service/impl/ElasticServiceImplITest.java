@@ -47,12 +47,12 @@ public class ElasticServiceImplITest extends AbstractResourceDBTest {
                         CollectionEvent.builder()
                                 .location(
                                         Location.builder()
-                                                .continent("Continent")
+                                                .continent("Continent1;Continent2")
                                                 .country("Pays")
                                                 .county("Conté")
                                                 .municipality("Municipalité")
                                                 .locality("Localité")
-                                                .region("Région")
+                                                .stateProvince("Region/Etat/Province")
                                                 .island("Ile")
                                                 .islandGroup("Groupe d'iles")
                                                 .waterBody("Masse d'eau")
@@ -142,14 +142,14 @@ public class ElasticServiceImplITest extends AbstractResourceDBTest {
         assertThat(index.getVernacularName()).isEqualTo(new String[]{"Nom vernaculaire 3", "Nom vernaculaire 2", "Nom vernaculaire 1"});
         assertThat(index.getIdentificationByIds()).isEqualTo(new String[]{"Identifié par 2", "Identifié par 1"});
         assertThat(index.getTypesStatus()).isEqualTo(new String[]{"Type statut 2", "Type statut 1"});
-        assertThat(index.getContinent()).isEqualTo("Continent");
+        assertThat(index.getContinent()).isEqualTo(new String[]{"Continent1", "Continent2"});
         assertThat(index.getCountry()).isEqualTo("Pays");
         assertThat(index.getMunicipality()).isEqualTo("Municipalité");
         assertThat(index.getCounty()).isEqualTo("Conté");
         assertThat(index.getWaterBody()).isEqualTo("Masse d'eau");
         assertThat(index.getIsland()).isEqualTo("Ile");
         assertThat(index.getIslandGroup()).isEqualTo("Groupe d'iles");
-        assertThat(index.getRegion()).isEqualTo("Région");
+        assertThat(index.getRegion()).isEqualTo("Region/Etat/Province");
         assertThat(index.getLocality()).isEqualTo("Localité");
         assertThat(index.getMediaUrl()).isEqualTo("http://mediaphoto.mnhn.fr/media/1441360143985SJ9QKugPxDp1GNIB");
         assertThat(index.getDecimalLatitude()).isEqualTo(-33.91667f);

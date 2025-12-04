@@ -85,7 +85,7 @@ public class MidsServiceTest {
         @ParameterizedTest
         @MethodSource("provideSpecimenTestData")
         @DisplayName("Test isMids0Validated with different specimen configurations")
-        public void testIsMids0Validated(String catalogNumber, String institutionId, UUID collectionId, boolean expectedResult, String testDescription) {
+        void testIsMids0Validated(String catalogNumber, String institutionId, UUID collectionId, boolean expectedResult, String testDescription) {
             // Given
             Specimen specimen = Specimen.builder()
                     .catalogNumber(catalogNumber)
@@ -101,7 +101,7 @@ public class MidsServiceTest {
         }
 
         @Test
-        public void testIsMids1Validated_AllFieldsPresent() {
+        void testIsMids1Validated_AllFieldsPresent() {
             Taxon taxon = Taxon.builder()
                     .id(new UUID(0, 1))
                     .scientificName("Scientific Name")
@@ -120,7 +120,7 @@ public class MidsServiceTest {
         }
 
         @Test
-        public void testIsMids1Validated_NameMissing() {
+        void testIsMids1Validated_NameMissing() {
             Taxon taxon = Taxon.builder()
                     .id(new UUID(0, 1))
                     .build();
@@ -140,7 +140,7 @@ public class MidsServiceTest {
         @ParameterizedTest
         @MethodSource("provideMids2TestData")
         @DisplayName("Test isMids2Validated with different specimen configurations")
-        public void testIsMids2Validated(
+        void testIsMids2Validated(
                 boolean hasCollectionEvent,
                 boolean hasQualitativeLocation,
                 boolean hasQuantitativeLocation,

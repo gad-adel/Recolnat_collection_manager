@@ -92,6 +92,270 @@ paths:
               schema:
                 $ref: '#/components/schemas/UnexpectedError'
 
+  /v1/import/{importId}/unpublish:
+    put:
+      operationId: unpublish
+      tags:
+        - Import
+      summary: Dépublie les spécimens d'un import
+      parameters:
+        - name: importId
+          required: true
+          in: path
+          schema:
+            type: string
+            format: uuid
+            description: Identificant de l'import
+          example: 386ff0b0-a6cc-11ec-b909-0242ac120002
+      responses:
+        '201':
+          description: Successful operation
+        '401':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Unauthorized'
+        '403':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Forbidden'
+        '409':
+          description: Applicative Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Conflict'
+        '500':
+          description: error server
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnexpectedError'
+
+  /v1/import/specimen/template:
+    get:
+      operationId: getSpecimenTemplateStructure
+      tags:
+        - ImportSpecimen
+      summary: Récupère le modèle de fichier d'import de specimens
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TemplateStructure'
+        '401':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Unauthorized'
+        '403':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Forbidden'
+        '500':
+          description: error server
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnexpectedError'
+
+  /v1/import/specimen/template/generate:
+    post:
+      operationId: generateSpecimenTemplate
+      tags:
+        - ImportSpecimen
+      summary: Génère le modèle de fichier d'import de specimens
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: string
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: string
+        '401':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Unauthorized'
+        '403':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Forbidden'
+        '500':
+          description: error server
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnexpectedError'
+  /v1/import/identification/template/generate:
+    post:
+      operationId: generateIdentificationTemplate
+      tags:
+        - ImportIdentification
+      summary: Génère le modèle de fichier d'import de déterminations
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: string
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: string
+        '401':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Unauthorized'
+        '403':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Forbidden'
+        '500':
+          description: error server
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnexpectedError'
+
+  /v1/import/publication/template/generate:
+    post:
+      operationId: generatePublicationTemplate
+      tags:
+        - ImportPublication
+      summary: Génère le modèle de fichier d'import de publications
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: string
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: string
+        '401':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Unauthorized'
+        '403':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Forbidden'
+        '500':
+          description: error server
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnexpectedError'
+
+  /v1/import/publication/template:
+    get:
+      operationId: getPublicationTemplateStructure
+      tags:
+        - ImportPublication
+      summary: Récupère le modèle de fichier d'import de publications
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TemplateStructure'
+        '401':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Unauthorized'
+        '403':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Forbidden'
+        '500':
+          description: error server
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnexpectedError'
+
+  /v1/import/identification/template:
+    get:
+      operationId: getIdentificationTemplateStructure
+      tags:
+        - ImportIdentification
+      summary: Récupère le modèle de fichier d'import de déterminations
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TemplateStructure'
+        '401':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Unauthorized'
+        '403':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Forbidden'
+        '500':
+          description: error server
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnexpectedError'
+
   /v1/import/file/{fileId}/download:
     get:
       operationId: getImportFile
@@ -595,7 +859,9 @@ paths:
           in: query
           description: Query specimen where continent field contains this value (case insensitive)
           schema:
-            type: string
+            type: array
+            items:
+              type: string
         - name: country
           required: false
           in: query
@@ -608,6 +874,13 @@ paths:
           description: Query specimen where nominative collection field contains this value (case insensitive)
           schema:
             type: string
+        - name: import_id
+          required: false
+          in: query
+          description: Query specimen for a specific import
+          schema:
+            type: string
+            format: uuid
         - name: storage_name
           required: false
           in: query
@@ -2002,6 +2275,20 @@ paths:
           schema:
             type: string
             default: ""
+        - name: columnSort
+          required: false
+          in: query
+          description: Champ de tri
+          schema:
+            type: string
+        - name: typeSort
+          in: query
+          description: Ordre de tri
+          schema:
+            type: string
+            enum:
+              - ASC
+              - DESC
       responses:
         '200':
           description: Successful operation
@@ -2884,6 +3171,20 @@ paths:
               - DATA_PROVIDER
               - MEMBER
           description: partnerType filter (PARTNER, DATA_PROVIDER, MEMBER)
+        - name: columnSort
+          required: false
+          in: query
+          description: Champ de tri
+          schema:
+            type: string
+        - name: typeSort
+          in: query
+          description: Ordre de tri
+          schema:
+            type: string
+            enum:
+              - ASC
+              - DESC
 
       tags:
         - Institution
@@ -3185,6 +3486,20 @@ paths:
           description: State of the article
           schema:
             $ref: '#/components/schemas/ArticleState'
+        - name: columnSort
+          required: false
+          in: query
+          description: Champ de tri
+          schema:
+            type: string
+        - name: typeSort
+          in: query
+          description: Ordre de tri
+          schema:
+            type: string
+            enum:
+              - ASC
+              - DESC
       tags:
         - Article
       summary: Retrieve articles
@@ -4053,8 +4368,13 @@ components:
           type: string
         preparations:
           type: string
+        preparationDetail:
+          type: string
         individualCount:
           type: string
+        approximateIndividualCount:
+          type: boolean
+          nullable: false
         sex:
           type: string
         lifeStage:
@@ -4128,8 +4448,13 @@ components:
           type: string
         preparations:
           type: string
+        preparationDetail:
+          type: string
         individualCount:
           type: string
+        approximateIndividualCount:
+          type: boolean
+          nullable: false
         sex:
           type: string
         lifeStage:
@@ -4325,8 +4650,6 @@ components:
         financialAid:
           type: string
         computerizationProgram:
-          type: string
-        remarks:
           type: string
 
     PublicCollectionEvent:
@@ -4557,8 +4880,13 @@ components:
           type: string
         preparations:
           type: string
+        preparationDetail:
+          type: string
         individualCount:
           type: string
+        approximateIndividualCount:
+          type: boolean
+          nullable: false
         sex:
           type: string
         lifeStage:
@@ -4987,8 +5315,6 @@ components:
           type: string
         stateProvince:
           type: string
-        region:
-          type: string
         county:
           type: string
         country:
@@ -5097,8 +5423,6 @@ components:
         financialAid:
           type: string
         computerizationProgram:
-          type: string
-        remarks:
           type: string
 
     Management:
@@ -6046,3 +6370,21 @@ components:
           format: uuid
         name:
           type: string
+
+    TemplateStructure:
+      type: object
+      properties:
+        name:
+          type: string
+        children:
+          type: array
+          items:
+            $ref: '#/components/schemas/TemplateField'
+
+    TemplateField:
+      type: object
+      properties:
+        key:
+          type: string
+        required:
+          type: boolean

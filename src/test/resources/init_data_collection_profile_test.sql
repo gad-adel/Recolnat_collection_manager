@@ -17,9 +17,10 @@ VALUES ('e82e315f-c4a0-4a3d-942c-19c26151a1b1', 'CCJBN', 2, 'NCJBN french', 'NCJ
         'TNCJBN collection (CJBN) of the Conservatoire et jardins botaniques de Nancy',
         'afea161b-70bb-4cad-aa04-d20698f5721c');
 
-INSERT INTO specimen(id, created_at, created_by, modified_by, modified_at, fk_id_collection, state)
+INSERT INTO specimen(id, created_at, created_by, modified_by, modified_at, fk_id_collection, state,
+                     approximate_individual_count)
 values ('9c6ab9ea-d049-47b5-972c-18e7831bdd4e', '2022-03-25 12:22:30.965616', 'created_by', null, null,
-        '8342cf1d-f202-4c10-9037-2e2406ce7331', 'VALID');
+        '8342cf1d-f202-4c10-9037-2e2406ce7331', 'VALID', false);
 
 SELECT collection.id::text, collection.type_collection, specimen.state
 FROM COLLECTION collection
@@ -36,10 +37,10 @@ where specimen.state = 'VALID';
 INSERT INTO public.specimen
 (id, created_at, created_by, modified_by, modified_at, catalog_number, record_number, basis_of_record,
  preparations, individual_count, sex, life_stage, occurrence_remarks, legal_status, donor, fk_id_collection, state,
- fk_geo_id, fk_colevent_id, fk_other_id, collection_code)
+ fk_geo_id, fk_colevent_id, fk_other_id, collection_code, approximate_individual_count)
 VALUES ('359eefe3-901a-4faf-bc3e-6f3fa266a465'::uuid, '2022-08-10 17:27:53.309', 'zied', NULL, NULL,
         NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '8342cf1d-f202-4c10-9037-2e2406ce7331'::uuid,
-        'VALID', NULL, NULL, NULL, NULL);
+        'VALID', NULL, NULL, NULL, NULL, false);
 
 INSERT INTO public.media
 (id, contributor, creator, description, license, source, media_url, fk_id_specimen, media_name)

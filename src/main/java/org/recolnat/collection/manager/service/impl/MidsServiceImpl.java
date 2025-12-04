@@ -38,13 +38,12 @@ public class MidsServiceImpl implements MidsService {
             return new MidsDTO(1, missingInformationsMids2);
         }
 
-        List<List<String>> missingInformationsMids3 = isMids3Validated(specimen);
-        if (!missingInformationsMids3.isEmpty()) {
-            return new MidsDTO(2, missingInformationsMids3);
-        }
+        // TODO à décommenter quand mids 3 sera implémenté
+//        List<List<String>> missingInformationsMids3 = isMids3Validated(specimen);
+//        if (!missingInformationsMids3.isEmpty()) {
+//            return new MidsDTO(2, missingInformationsMids3);
+//        }
 
-        // TODO à compléter une fois la règle établie
-        //return new MidsDTO(3, Collections.emptyList());
         return new MidsDTO(2, Collections.emptyList());
     }
 
@@ -135,7 +134,6 @@ public class MidsServiceImpl implements MidsService {
                 location != null ? location.getIsland() : null,
                 location != null ? location.getContinent() : null,
                 location != null ? location.getCountry() : null,
-                location != null ? location.getRegion() : null,
                 location != null ? location.getCountryCode() : null,
                 location != null ? location.getIslandGroup() : null,
                 location != null ? location.getStateProvince() : null,
@@ -145,15 +143,15 @@ public class MidsServiceImpl implements MidsService {
         boolean hasCollectingAgent = StringUtils.isNotBlank(event.getRecordedBy());
         boolean hasDateCollected = StringUtils.isNotBlank(event.getEventDate());
         boolean hasCollectingNumber = StringUtils.isNotBlank(event.getFieldNumber());
-        boolean hasMedia = specimen.getMedias() != null && specimen.getMedias().stream()
-                .anyMatch(m -> m != null && StringUtils.isNotBlank(m.getMediaUrl()));
+        boolean hasMedia = specimen.getMedias() != null && !specimen.getMedias().isEmpty();
 
         if (!hasQualitativeLocation) {
-            missingInformations.add(List.of("locality", "county", "municipality", "island", "continent", "country", "region", "countryCode", "islandGroup", "stateProvince", "waterBody"));
+            missingInformations.add(List.of("verbatimLocality", "locality", "county", "municipality", "island", "continent", "country", "region", "countryCode", "islandGroup", "stateProvince", "waterBody"));
         }
 
         if (!hasQuantitativeLocation) {
-            missingInformations.add(List.of("latitude", "longitude"));
+            // La longitude est traitée en même temps dans l'affichage côté front
+            missingInformations.add(Collections.singletonList("latitude"));
         }
 
         if (!hasCollectingAgent) {

@@ -58,6 +58,10 @@ public interface SpecimenJPARepository extends JpaRepository<SpecimenJPA, UUID>,
     @Query("delete from specimen s where s.id = ?1")
     void deleteSpecimen(UUID specimenId);
 
+    @Modifying
+    @Query(value = "update specimen s set state = 'DRAFT' from specimen_update su where s.id = su.fk_specimen_id and su.fk_import_id = :importId", nativeQuery = true)
+    void unpublishSpecimenByImportId(@Param("importId") UUID importId);
+
     /**
      * @param fromDate
      * @param toDate

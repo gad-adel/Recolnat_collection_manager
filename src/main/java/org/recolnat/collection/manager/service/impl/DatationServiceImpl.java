@@ -10,6 +10,8 @@ import org.recolnat.collection.manager.service.DatationService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.text.Normalizer;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -30,6 +32,11 @@ public class DatationServiceImpl implements DatationService {
     private final DatationJPARepository datationJPARepository;
 
     public static DatationResponseDTO buildDatationDto(List<DatationJPA> findAll) {
+        Comparator<String> comparator = (o1, o2) -> {
+            o1 = Normalizer.normalize(o1, Normalizer.Form.NFD);
+            o2 = Normalizer.normalize(o2, Normalizer.Form.NFD);
+            return o1.compareTo(o2);
+        };
         Set<String> eonothemSet = new HashSet<>();
         Set<String> erathemeSet = new HashSet<>();
         Set<String> systemSet = new HashSet<>();
@@ -44,11 +51,11 @@ public class DatationServiceImpl implements DatationService {
                 }
         );
 
-        List<String> eonothemList = eonothemSet.stream().filter(StringUtils::isNotBlank).sorted().toList();
-        List<String> erathemeList = erathemeSet.stream().filter(StringUtils::isNotBlank).sorted().toList();
-        List<String> systemList = systemSet.stream().filter(StringUtils::isNotBlank).sorted().toList();
-        List<String> epochList = epochSet.stream().filter(StringUtils::isNotBlank).sorted().toList();
-        List<String> ageList = ageSet.stream().filter(StringUtils::isNotBlank).sorted().toList();
+        List<String> eonothemList = eonothemSet.stream().filter(StringUtils::isNotBlank).sorted(comparator).toList();
+        List<String> erathemeList = erathemeSet.stream().filter(StringUtils::isNotBlank).sorted(comparator).toList();
+        List<String> systemList = systemSet.stream().filter(StringUtils::isNotBlank).sorted(comparator).toList();
+        List<String> epochList = epochSet.stream().filter(StringUtils::isNotBlank).sorted(comparator).toList();
+        List<String> ageList = ageSet.stream().filter(StringUtils::isNotBlank).sorted(comparator).toList();
 
         return new DatationResponseDTO()
                 .eonothem(eonothemList)

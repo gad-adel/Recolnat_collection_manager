@@ -18,7 +18,7 @@ import org.testcontainers.containers.PostgreSQLContainer;
 @ActiveProfiles("int")
 @AutoConfigureMockMvc(addFilters = false)
 @EnableAutoConfiguration
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, properties = "spring.main.banner-mode=off")
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 public abstract class AbstractResourceDBTest {
 

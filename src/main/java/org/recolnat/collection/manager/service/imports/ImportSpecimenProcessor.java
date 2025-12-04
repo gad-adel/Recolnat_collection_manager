@@ -51,11 +51,11 @@ public class ImportSpecimenProcessor {
     private final ImportHelper importHelper;
     private final List<ImportColumn> specimenColumns = List.of(
             new ImportColumn("catalog_number", CATALOG_NUMBER.getColumnName()),
-            new ImportColumn("collection_code", COLLECTION_CODE.getColumnName()),
             new ImportColumn("nominative_collection", NOMINATIVE_COLLECTION.getColumnName()),
             new ImportColumn("record_number", RECORD_NUMBER.getColumnName()),
             new ImportColumn("basis_of_record", BASIS_OF_RECORD.getColumnName()),
             new ImportColumn("preparations", PREPARATIONS.getColumnName()),
+            new ImportColumn("preparation_detail", PREPARATION_DETAIL.getColumnName()),
             new ImportColumn("sex", SEX.getColumnName()),
             new ImportColumn("life_stage", LIFE_STAGE.getColumnName()),
             new ImportColumn("individual_count", INDIVIDUAL_COUNT.getColumnName()),
@@ -85,8 +85,7 @@ public class ImportSpecimenProcessor {
             new ImportColumn("locality", LOCALITY.getColumnName()),
             new ImportColumn("municipality", MUNICIPALITY.getColumnName()),
             new ImportColumn("county", COUNTY.getColumnName()),
-            new ImportColumn("region", REGION.getColumnName()),
-            new ImportColumn("state_province", STATE_PROVINCE.getColumnName()),
+            new ImportColumn("state_province", REGION_STATE_PROVINCE.getColumnName()),
             new ImportColumn("country", COUNTRY.getColumnName()),
             new ImportColumn("country_code", COUNTRY_CODE.getColumnName()),
             new ImportColumn("continent", CONTINENT.getColumnName()),
@@ -353,7 +352,7 @@ public class ImportSpecimenProcessor {
         String country = importHelper.getValueFromCell(line, columnNamesMap, COUNTRY.getColumnName());
         String countryCode = importHelper.getValueFromCell(line, columnNamesMap, COUNTRY_CODE.getColumnName());
         String islandGroup = importHelper.getValueFromCell(line, columnNamesMap, ISLAND_GROUP.getColumnName());
-        String stateProvince = importHelper.getValueFromCell(line, columnNamesMap, STATE_PROVINCE.getColumnName());
+        String stateProvince = importHelper.getValueFromCell(line, columnNamesMap, REGION_STATE_PROVINCE.getColumnName());
         String waterBody = importHelper.getValueFromCell(line, columnNamesMap, WATER_BODY.getColumnName());
         String latitude = importHelper.getValueFromCell(line, columnNamesMap, DECIMAL_LATITUDE.getColumnName());
         String longitude = importHelper.getValueFromCell(line, columnNamesMap, DECIMAL_LONGITUDE.getColumnName());

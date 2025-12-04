@@ -3,6 +3,7 @@ package org.recolnat.collection.manager.service.impl;
 import io.recolnat.model.ArticleDashboardDTO;
 import io.recolnat.model.ArticleStateDTO;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Tuple;
 import jakarta.persistence.TypedQuery;
@@ -13,27 +14,32 @@ import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.recolnat.collection.manager.api.domain.Article;
 import org.recolnat.collection.manager.api.domain.ArticleSearchResult;
 import org.recolnat.collection.manager.api.domain.ConnectedUser;
+import org.recolnat.collection.manager.api.domain.FileInfo;
 import org.recolnat.collection.manager.api.domain.Result;
 import org.recolnat.collection.manager.api.domain.enums.ArticleStatusEnum;
 import org.recolnat.collection.manager.common.exception.CollectionManagerBusinessException;
-import org.recolnat.collection.manager.common.exception.ErrorCode;
 import org.recolnat.collection.manager.common.mapper.ArticleMapper;
+import org.recolnat.collection.manager.common.util.FileUtil;
 import org.recolnat.collection.manager.connector.api.MediathequeService;
 import org.recolnat.collection.manager.repository.entity.ArticleJPA;
 import org.recolnat.collection.manager.repository.jpa.ArticleJPARepository;
 import org.recolnat.collection.manager.service.ArticleService;
 import org.recolnat.collection.manager.service.AuthenticationService;
+import org.recolnat.collection.manager.service.UploadFileService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
@@ -41,6 +47,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import java.io.IOException;
+import java.nio.file.Path;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -62,14 +69,24 @@ public class ArticleServiceImpl implements ArticleService {
     public static final String RESOURCE_NOT_FOUND_WITH_ID = "Resource not found with id :";
 
     private final ArticleJPARepository articleJPARepository;
+
     private final MediathequeService mediathequeApiClient;
+
     private final Validator validator;
+
     private final AuthenticationService authenticationService;
+    private final UploadFileService uploadFileService;
+
     private final ArticleMapper articleMapper;
+
+    @Value("${filesystem.base-directory}")
+    private String baseDirectory;
+
+    @Value("${upload.articles}")
+    private String articleDirectory;
 
     @PersistenceContext
     private EntityManager em;
-
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED, isolation = Isolation.REPEATABLE_READ)
@@ -80,10 +97,19 @@ public class ArticleServiceImpl implements ArticleService {
             getArticleJPA(article.getId());
         }
         validate(article);
-        var url = Objects.nonNull(article.getMedia()) ? getMediaUrl(article) : null;
+        String url = null;
+        if (article.getMedia() != null) {
+            url = article.getMedia().getOriginalFilename();
+        }
         var toSave = buildArticleJPA(article, user, url);
-        return articleJPARepository.save(toSave).getId();
+        ArticleJPA savedArticle = articleJPARepository.save(toSave);
 
+        if (article.getMedia() != null) {
+            Path directoryPath = Path.of(baseDirectory, articleDirectory, savedArticle.getId().toString());
+            String fileName = article.getMedia().getOriginalFilename();
+            uploadFileService.uploadFile(fileName, directoryPath, article.getMedia());
+        }
+        return savedArticle.getId();
     }
 
     /**
@@ -96,30 +122,18 @@ public class ArticleServiceImpl implements ArticleService {
         validate(article);
         ArticleJPA databaseArticle = getArticleJPA(article.getId());
 
-        String url = Objects.nonNull(article.getMedia()) ? getMediaUrl(article) : databaseArticle.getUrlMedia();
+        String url = databaseArticle.getUrlMedia();
+        if (article.getMedia() != null) {
+            Path directoryPath = Path.of(baseDirectory, articleDirectory, article.getId().toString());
+            if (databaseArticle.getUrlMedia() != null) {
+                FileUtil.deleteIfExists(directoryPath.resolve(Path.of(databaseArticle.getUrlMedia())));
+            }
+            String fileName = article.getMedia().getOriginalFilename();
+            url = uploadFileService.uploadFile(fileName, directoryPath, article.getMedia());
+        }
 
         var toSave = buildArticleJPA(article, user, url);
         return articleJPARepository.save(toSave).getId();
-    }
-
-    private String getMediaUrl(Article article) {
-
-        try {
-            if (Objects.nonNull(article.getMedia())) {
-                var saveLogo = mediathequeApiClient.savePicture(article.getMedia());
-                if (Objects.isNull(saveLogo) ||
-                    Objects.isNull(saveLogo.getBody())) {
-                    throw new CollectionManagerBusinessException(ErrorCode.ERR_NFE_CODE, "Media don't found");
-                }
-                return Objects.nonNull(saveLogo.getBody().getMedia()) ? saveLogo.getBody().getMedia().getUrl() : null;
-            }
-
-        } catch (IOException e) {
-            log.error(e.getMessage(), e);
-            throw new CollectionManagerBusinessException(HttpStatus.INTERNAL_SERVER_ERROR,
-                    "MEDIATHEQUE_ERR_CODE", e.getMessage());
-        }
-        return null;
     }
 
     private void validate(Article article) {
@@ -210,7 +224,8 @@ public class ArticleServiceImpl implements ArticleService {
 
 
     @Override
-    public Result<ArticleDashboardDTO> findAllForDashboard(Integer page, Integer size, String searchTerm, ArticleStateDTO state) {
+    public Result<ArticleDashboardDTO> findAllForDashboard(Integer page, Integer size, String searchTerm, ArticleStateDTO state, String columnSort,
+                                                           String typeSort) {
         CriteriaBuilder cb = em.getCriteriaBuilder();
         CriteriaQuery<Tuple> query = cb.createTupleQuery();
         Root<ArticleJPA> root = query.from(ArticleJPA.class);
@@ -223,7 +238,13 @@ public class ArticleServiceImpl implements ArticleService {
                 root.get("state")
         );
 
-        List<Order> sorting = List.of(cb.desc(root.get("createdAt")), cb.asc(root.get("title")));
+        List<Order> sorting = new ArrayList<>();
+
+        if (StringUtils.isNotBlank(typeSort) && StringUtils.isNotBlank(columnSort)) {
+            sorting.add("ASC".equalsIgnoreCase(typeSort) ? cb.asc(root.get(columnSort)) : cb.desc(root.get(columnSort)));
+        } else {
+            sorting.addAll(List.of(cb.desc(root.get("createdAt")), cb.asc(root.get("title"))));
+        }
 
         ArrayList<Predicate> filters = new ArrayList<>(getFilters(cb, root, searchTerm, state));
 
@@ -286,5 +307,25 @@ public class ArticleServiceImpl implements ArticleService {
     public void deleteArticle(UUID id) {
         final var article = getArticleJPA(id);
         articleJPARepository.delete(article);
+    }
+
+    @Override
+    public FileInfo getArticleImage(UUID id) {
+        var article = articleJPARepository.findById(id).orElseThrow(EntityNotFoundException::new);
+        if (article.getUrlMedia() == null) {
+            return null;
+        }
+        var filePath = getDirectoryPath().resolve(Path.of(id.toString(), article.getUrlMedia()));
+        try {
+            byte[] data = uploadFileService.getFileBytes(filePath);
+            MediaType mediaType = uploadFileService.getImageMediaType(article.getUrlMedia());
+            return FileInfo.builder().data(data).mediaType(mediaType).build();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private @NotNull Path getDirectoryPath() {
+        return Path.of(baseDirectory, articleDirectory);
     }
 }

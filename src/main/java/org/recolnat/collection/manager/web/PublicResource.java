@@ -11,9 +11,13 @@ import io.recolnat.model.InstitutionDTO;
 import io.recolnat.model.InstitutionsProgramResponseDTO;
 import io.recolnat.model.PublicSpecimenDTO;
 import io.recolnat.model.StatisticsResultDTO;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import lombok.RequiredArgsConstructor;
 import org.recolnat.collection.manager.api.domain.ArticleSearchResult;
 import org.recolnat.collection.manager.api.domain.Collection;
+import org.recolnat.collection.manager.api.domain.FileInfo;
 import org.recolnat.collection.manager.common.exception.CollectionManagerBusinessException;
 import org.recolnat.collection.manager.common.exception.ErrorCode;
 import org.recolnat.collection.manager.common.exception.MediathequeException;
@@ -27,8 +31,11 @@ import org.recolnat.collection.manager.service.InstitutionService;
 import org.recolnat.collection.manager.service.SpecimenIntegrationService;
 import org.recolnat.collection.manager.service.SpecimenStatisticsService;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -189,6 +196,35 @@ public class PublicResource implements VisibilitePublicApi {
             throw e;
         } catch (Exception e) {
             throw new CollectionManagerBusinessException(HttpStatus.CONFLICT, ErrorCode.ERROR_APPLICATIVE, e.getMessage());
+        }
+    }
+
+    @Operation(summary = "Récupère la photo d'un article")
+    @GetMapping(value = "/v1/public/articles/{id}/image")
+    public ResponseEntity<byte[]> getArticleImage(
+            @Parameter(name = "id", description = "Identifiant de l'article", required = true, in = ParameterIn.PATH) @PathVariable("id") UUID id) {
+        try {
+            FileInfo fileInfo = articleService.getArticleImage(id);
+            byte[] imageBytes = fileInfo.getData();
+
+            if (imageBytes == null || imageBytes.length == 0) {
+                return ResponseEntity.notFound().build();
+            }
+
+            // Construire la réponse avec les en-têtes appropriés
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(fileInfo.getMediaType());
+            headers.setContentLength(imageBytes.length);
+
+            // Désactiver la mise en cache
+            headers.setCacheControl("no-cache, no-store, must-revalidate");
+            headers.setPragma("no-cache");
+            headers.setExpires(0);
+
+            return new ResponseEntity<>(imageBytes, headers, HttpStatus.OK);
+
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 }

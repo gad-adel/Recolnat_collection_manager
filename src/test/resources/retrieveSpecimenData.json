@@ -10,6 +10,7 @@
   "basisOfRecord": "string",
   "preparations": "string",
   "individualCount": "string",
+  "approximateIndividualCount": false,
   "sex": "string",
   "lifeStage": "string",
   "occurrenceRemarks": "string",

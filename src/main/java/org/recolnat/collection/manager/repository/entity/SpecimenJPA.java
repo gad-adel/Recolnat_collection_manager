@@ -84,7 +84,9 @@ public class SpecimenJPA extends AbstractEntity {
     private String recordNumber;
     private String basisOfRecord;
     private String preparations;
+    private String preparationDetail;
     private String individualCount;
+    private boolean approximateIndividualCount;
     private String sex;
     private String lifeStage;
     private String occurrenceRemarks;

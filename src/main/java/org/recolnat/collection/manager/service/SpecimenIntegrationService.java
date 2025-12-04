@@ -1,8 +1,8 @@
 package org.recolnat.collection.manager.service;
 
 
-import io.recolnat.model.OperationTypeDTO;
 import io.recolnat.model.PublicSpecimenDTO;
+import org.recolnat.collection.manager.api.domain.AdminSpecimenListFilter;
 import org.recolnat.collection.manager.api.domain.Specimen;
 import org.recolnat.collection.manager.api.domain.SpecimenMerge;
 import org.recolnat.collection.manager.api.domain.SpecimenPage;
@@ -26,11 +26,7 @@ public interface SpecimenIntegrationService {
 
     CollectionIdentifier updateAsReviewed(UUID specimenId, Specimen specimen);
 
-    SpecimenPage getAllSpecimen(Integer pages, Integer size, String searchTerm, OperationTypeDTO state, Boolean currentDetermination, Boolean levelType,
-                                String columnSort,
-                                String typeSort, UUID institutionId, UUID collectionId, String collectionCode, String family, String genus,
-                                String specificEpithet, String startDate, String endDate, String collector, String continent, String country,
-                                String nominativeCollection, String storageName);
+    SpecimenPage getAllSpecimen(Integer pages, Integer size, String columnSort, String typeSort, AdminSpecimenListFilter filters);
 
     List<UUID> updateMultipleSpecimen(List<UUID> specimenIds, SpecimenMerge specimen);
 

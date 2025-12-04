@@ -118,7 +118,6 @@ public class SpecimenIntegrationServiceImplITest {
         assertThat(updated.getSpecimenId()).isNotNull();
         assertThat(identifications).hasSize(2);
         assertThat(identification.getTaxon()).hasSize(1);
-
     }
 
     @Test

@@ -42,7 +42,7 @@ Integer tincidunt ante vel ipsum. Praesent blandit lacinia erat. Vestibulum sed 
 
 </body>
 </html>
-', 'http://dummyimage.com/135x100.png/ff4444/ffffff', '2023-05-23 12:06:18.792921', 'created_by', null, null, null, 1,
+', 'image.png', '2023-05-23 12:06:18.792921', 'created_by', null, null, null, 1,
         now(), 'PUBLISHED');
 
 INSERT INTO public.article (id, author, title, content, url_media, created_at, created_by, modified_by, modified_at,

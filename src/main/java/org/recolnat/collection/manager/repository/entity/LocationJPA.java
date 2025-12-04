@@ -16,7 +16,6 @@ import lombok.NoArgsConstructor;
 public class LocationJPA {
     private String municipality;
     private String stateProvince;
-    private String region;
     private String county;
     private String country;
     private String continent;

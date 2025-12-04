@@ -50,4 +50,10 @@ public class ImportResource implements ImportApi {
     }
 
     // TODO DTH API annulation d'un import
+
+    @Override
+    public ResponseEntity<Void> unpublish(UUID importId) {
+        importService.unpublish(importId);
+        return ResponseEntity.ok().build();
+    }
 }

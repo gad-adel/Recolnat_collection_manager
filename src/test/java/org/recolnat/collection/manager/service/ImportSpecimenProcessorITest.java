@@ -57,7 +57,6 @@ public class ImportSpecimenProcessorITest extends AbstractResourceDBTest {
 
     private static void checkInsertedSpecimen(SpecimenJPA specimen) {
         // specimen
-        assertThat(specimen.getCollectionCode()).isEqualTo("UCBL-FSL");
         assertThat(specimen.getCatalogNumber()).isEqualTo("UCBL-FSL 15234");
         assertThat(specimen.getNominativeCollection()).isEqualTo("Collection nominale");
         assertThat(specimen.getRecordNumber()).isEqualTo("302");
@@ -100,7 +99,6 @@ public class ImportSpecimenProcessorITest extends AbstractResourceDBTest {
         assertThat(location.getLocality()).isEqualTo("Sans localité précise");
         assertThat(location.getMunicipality()).isEqualTo("Chanaz");
         assertThat(location.getCounty()).isEqualTo("Savoie");
-        assertThat(location.getRegion()).isEqualTo("Ile-de-France");
         assertThat(location.getStateProvince()).isEqualTo("Auvergne-Rhône-Alpes");
         assertThat(location.getCountry()).isEqualTo("france");
         assertThat(location.getCountryCode()).isEqualTo("FR");
@@ -214,7 +212,6 @@ public class ImportSpecimenProcessorITest extends AbstractResourceDBTest {
         assertThat(specimens).hasSize(1);
         var specimen = specimens.get(0);
 
-        assertThat(specimen.getCollectionCode()).isEqualTo("UCBL-FSL");
         assertThat(specimen.getCatalogNumber()).isEqualTo("UCBL-FSL 15234");
 
         // identification
@@ -254,7 +251,6 @@ public class ImportSpecimenProcessorITest extends AbstractResourceDBTest {
         assertThat(specimens).hasSize(1);
         var specimen = specimens.get(0);
 
-        assertThat(specimen.getCollectionCode()).isEqualTo("UCBL-FSL");
         assertThat(specimen.getCatalogNumber()).isEqualTo("UCBL-FSL 15234");
 
         // identification

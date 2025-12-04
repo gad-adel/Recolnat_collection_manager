@@ -19,6 +19,7 @@ import jakarta.validation.Validator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.recolnat.collection.manager.api.domain.AdminSpecimenListFilter;
 import org.recolnat.collection.manager.api.domain.CollectionEvent;
 import org.recolnat.collection.manager.api.domain.GeologicalContext;
 import org.recolnat.collection.manager.api.domain.Identification;
@@ -198,7 +199,6 @@ public class SpecimenIntegrationServiceImpl implements SpecimenIntegrationServic
                         .island(location.getIsland())
                         .islandGroup(location.getIslandGroup())
                         .municipality(location.getMunicipality())
-                        .region(location.getRegion())
                         .stateProvince(location.getStateProvince())
                         .waterBody(location.getWaterBody())
                         .locality(location.getLocality())
@@ -214,41 +214,38 @@ public class SpecimenIntegrationServiceImpl implements SpecimenIntegrationServic
                newMedias.stream().anyMatch(media -> StringUtils.isBlank(media.getMediaUrl()));
     }
 
-    private static void addParametersToQuery(Query query, String searchTerm, OperationTypeDTO state, Integer institutionId, UUID collectionId,
-                                             String collectionCode,
-                                             String family, String genus, String specificEpithet,
-                                             String startDate, String endDate, String collector, String continent, String country, String nominativeCollection,
-                                             String storageName, List<UUID> collectionUuids) {
-        if (StringUtils.isNotBlank(searchTerm)) {
-            query.setParameter("searchTerm", "%" + searchTerm + "%");
+    private static void addParametersToQuery(Query query, AdminSpecimenListFilter filters, List<UUID> collectionUuids, Integer institutionId) {
+        if (StringUtils.isNotBlank(filters.getSearchTerm())) {
+            query.setParameter("searchTerm", "%" + filters.getSearchTerm() + "%");
         }
 
-        if (StringUtils.isNotBlank(family)) {
-            query.setParameter("family", "%" + family + "%");
+        if (StringUtils.isNotBlank(filters.getFamily())) {
+            query.setParameter("family", "%" + filters.getFamily() + "%");
         }
 
-        if (StringUtils.isNotBlank(genus)) {
-            query.setParameter("genus", "%" + genus + "%");
+        if (StringUtils.isNotBlank(filters.getGenus())) {
+            query.setParameter("genus", "%" + filters.getGenus() + "%");
         }
 
-        if (StringUtils.isNotBlank(specificEpithet)) {
-            query.setParameter("specificEpithet", "%" + specificEpithet + "%");
+        if (StringUtils.isNotBlank(filters.getSpecificEpithet())) {
+            query.setParameter("specificEpithet", "%" + filters.getSpecificEpithet() + "%");
         }
 
-        if (nonNull(state)) {
-            query.setParameter(ROOT_STATE, state.getValue());
+        if (nonNull(filters.getState())) {
+            query.setParameter(ROOT_STATE, filters.getState().getValue());
         }
 
-        if (StringUtils.isNotBlank(collectionCode)) {
-            query.setParameter(COLLECTION_CODE, collectionCode);
+        if (StringUtils.isNotBlank(filters.getCollectionCode())) {
+            query.setParameter(COLLECTION_CODE, filters.getCollectionCode());
         }
 
-        if (StringUtils.isNotBlank(country)) {
-            query.setParameter("country", "%" + country + "%");
+        if (StringUtils.isNotBlank(filters.getCountry())) {
+            query.setParameter("country", "%" + filters.getCountry() + "%");
         }
 
-        if (StringUtils.isNotBlank(continent)) {
-            query.setParameter("continent", "%" + continent + "%");
+        if (filters.getContinent() != null && !filters.getContinent().isEmpty()) {
+            query.setParameter("continent", filters.getContinent().toArray(new String[0]));
+            query.setParameter("separator", ";");
         }
 
         // TODO retiré pour le moment
@@ -260,15 +257,15 @@ public class SpecimenIntegrationServiceImpl implements SpecimenIntegrationServic
         //     query.setParameter("endDate", endDate);
         // }
 
-        if (StringUtils.isNotBlank(collector)) {
-            query.setParameter("collector", "%" + collector + "%");
+        if (StringUtils.isNotBlank(filters.getCollector())) {
+            query.setParameter("collector", "%" + filters.getCollector() + "%");
         }
 
-        if (nonNull(collectionId)) {
-            query.setParameter("collectionId", collectionId);
+        if (nonNull(filters.getCollectionId())) {
+            query.setParameter("collectionId", filters.getCollectionId());
         }
 
-        if (nonNull(institutionId) && isNull(collectionId)) {
+        if (nonNull(institutionId) && isNull(filters.getCollectionId())) {
             query.setParameter("institutionId", institutionId);
         }
 
@@ -276,12 +273,16 @@ public class SpecimenIntegrationServiceImpl implements SpecimenIntegrationServic
             query.setParameter("collectionUuids", collectionUuids);
         }
 
-        if (StringUtils.isNotBlank(nominativeCollection)) {
-            query.setParameter("nominativeCollection", "%" + nominativeCollection + "%");
+        if (StringUtils.isNotBlank(filters.getNominativeCollection())) {
+            query.setParameter("nominativeCollection", "%" + filters.getNominativeCollection() + "%");
         }
 
-        if (StringUtils.isNotBlank(storageName)) {
-            query.setParameter("storageName", storageName);
+        if (filters.getImportId() != null) {
+            query.setParameter("importId", filters.getImportId());
+        }
+
+        if (StringUtils.isNotBlank(filters.getStorageName())) {
+            query.setParameter("storageName", filters.getStorageName());
         }
     }
 
@@ -309,17 +310,14 @@ public class SpecimenIntegrationServiceImpl implements SpecimenIntegrationServic
 
     @Override
     @Transactional(readOnly = true)
-    public SpecimenPage getAllSpecimen(Integer pages, Integer size, String searchTerm, OperationTypeDTO state, Boolean currentDetermination, Boolean levelType,
-                                       String columnSort, String typeSort, UUID institutionUuid, UUID collectionId, String collectionCode, String family,
-                                       String genus, String specificEpithet, String startDate, String endDate, String collector, String continent,
-                                       String country, String nominativeCollection, String storageName) {
+    public SpecimenPage getAllSpecimen(Integer pages, Integer size, String columnSort, String typeSort, AdminSpecimenListFilter filters) {
         var currentUser = authenticationService.findUserAttributes();
-        Integer institutionId = getInstitutionIdToFilter(institutionUuid, currentUser);
+        Integer institutionId = getInstitutionIdToFilter(filters.getInstitutionId(), currentUser);
 
         List<UUID> userCollectionUuids = getUserCollectionUuids(currentUser);
 
-        Page<Specimen> findAll = this.findByListCollectionQueryBuilder(pages, size, searchTerm, state, currentDetermination, levelType, columnSort, typeSort,
-                institutionId, collectionId, collectionCode, family, genus, specificEpithet, startDate, endDate, collector, continent, country, nominativeCollection, storageName, userCollectionUuids);
+        Page<Specimen> findAll = this.findByListCollectionQueryBuilder(pages, size, columnSort, typeSort,
+                institutionId, userCollectionUuids, filters);
 
         if (findAll.getTotalElements() == 0) {
             return SpecimenPage.builder().specimen(Collections.emptyList()).numberOfElements(0).totalPages(0).build();
@@ -334,11 +332,9 @@ public class SpecimenIntegrationServiceImpl implements SpecimenIntegrationServic
         return SpecimenPage.builder().specimen(specimens).numberOfElements((int) findAll.getTotalElements()).totalPages(totalPages).build();
     }
 
-    public Page<Specimen> findByListCollectionQueryBuilder(Integer page, Integer size, String searchTerm, OperationTypeDTO state, Boolean currentDetermination,
-                                                           Boolean levelType, String columnSort, String typeSort, Integer institutionId, UUID collectionId,
-                                                           String collectionCode, String family, String genus, String specificEpithet, String startDate,
-                                                           String endDate, String collector, String continent, String country, String nominativeCollection,
-                                                           String storageName, List<UUID> collectionUuids) {
+    public Page<Specimen> findByListCollectionQueryBuilder(Integer page, Integer size, String columnSort, String typeSort, Integer institutionId,
+                                                           List<UUID> collectionUuids,
+                                                           AdminSpecimenListFilter filters) {
         var queryStopWatch = new StopWatch();
         queryStopWatch.start();
 
@@ -358,16 +354,13 @@ public class SpecimenIntegrationServiceImpl implements SpecimenIntegrationServic
                         s1_0.collection_code,
                         t1_0.scientific_name_authorship
                 """;
-        queryString += "\n" + getFromClause("id, state, fk_id_collection, catalog_number, modified_at, collection_code, fk_colevent_id, fk_management_id",
-                state, searchTerm, collectionCode, nominativeCollection);
-        queryString += "\n" + getJoinClause(searchTerm, institutionId, collectionId, family, genus, specificEpithet, startDate, endDate, collector,
-                continent, country, storageName, collectionUuids);
+        queryString += "\n" + getFromClause("id, state, fk_id_collection, catalog_number, modified_at, collection_code, fk_colevent_id, fk_management_id", filters);
+        queryString += "\n" + getJoinClause(filters, collectionUuids, institutionId);
         queryString += "\n" + getOrderByClause(columnSort, typeSort);
 
         var query = em.createNativeQuery(queryString, Tuple.class);
 
-        addParametersToQuery(query, searchTerm, state, institutionId, collectionId, collectionCode, family, genus, specificEpithet, startDate, endDate, collector,
-                continent, country, nominativeCollection, storageName, collectionUuids);
+        addParametersToQuery(query, filters, collectionUuids, institutionId);
 
         query.setFirstResult(page * size).setMaxResults(size);
 
@@ -384,67 +377,68 @@ public class SpecimenIntegrationServiceImpl implements SpecimenIntegrationServic
 
 //        var countStopWatch = new StopWatch();
 //        countStopWatch.start();
-        Long total = countSpecimen(searchTerm, state, institutionId, collectionId, collectionCode, family, genus, specificEpithet, startDate, endDate, collector,
-                continent, country, nominativeCollection, storageName, collectionUuids);
+        Long total = countSpecimen(filters, collectionUuids, institutionId);
 //        countStopWatch.stop();
 //        System.out.println("Count Time Elapsed: " + countStopWatch.getTotalTimeMillis());
 
         return new PageImpl<>(specimens, PageRequest.of(page, size), total);
     }
 
-    private String getFromClause(String selectFields, OperationTypeDTO state, String searchTerm, String collectionCode, String nominativeCollection) {
+    private String getFromClause(String selectFields, AdminSpecimenListFilter filters) {
         var andString = "";
-        if (nonNull(state)) {
+        if (nonNull(filters.getState())) {
             andString += " and state = :state";
         }
-        if (StringUtils.isNotBlank(searchTerm)) {
+        if (StringUtils.isNotBlank(filters.getSearchTerm())) {
             andString += " and upper(catalog_number) like upper(:searchTerm)";
         }
 
-        if (StringUtils.isNotBlank(collectionCode)) {
+        if (StringUtils.isNotBlank(filters.getCollectionCode())) {
             andString += " and upper(collection_code) like upper(:collectionCode)";
         }
 
-        if (StringUtils.isNotBlank(nominativeCollection)) {
+        if (StringUtils.isNotBlank(filters.getNominativeCollection())) {
             andString += " and upper(nominative_collection) like upper(:nominativeCollection)";
         }
 
         return " from (select " + selectFields + " from specimen where 1 = 1 " + andString + ") as s1_0\n";
     }
 
-    private String getJoinClause(String searchTerm, Integer institutionId, UUID collectionId,
-                                 String family, String genus, String specificEpithet,
-                                 String startDate, String endDate, String collector, String continent, String country,
-                                 String storageName, List<UUID> collectionUuids) {
+    private String getJoinClause(AdminSpecimenListFilter filters, List<UUID> collectionUuids, Integer institutionId) {
         var joinClause = "";
-        joinClause += "\n" + buildCollectionJoin(institutionId, collectionId, collectionUuids);
+        joinClause += "\n" + buildCollectionJoin(filters, collectionUuids, institutionId);
         joinClause += "\n" + buildIdentificationJoin("i.id, i.fk_id_specimen, current_determination");
-        joinClause += "\n" + buildTaxonJoin("id, level_type, scientific_name, scientific_name_authorship, fk_id_identification", searchTerm, family, genus, specificEpithet);
+        joinClause += "\n" + buildTaxonJoin("id, level_type, scientific_name, scientific_name_authorship, fk_id_identification", filters);
 
-        if (StringUtils.isNotBlank(country) || StringUtils.isNotBlank(continent) || StringUtils.isNotBlank(startDate) || StringUtils.isNotBlank(endDate) ||
-            StringUtils.isNotBlank(collector)) {
-            joinClause += "\n" + buildCollectionEventJoin(country, continent, collector, startDate, endDate);
+        if (StringUtils.isNotBlank(filters.getCountry()) || (filters.getContinent() != null && !filters.getContinent()
+                .isEmpty()) || StringUtils.isNotBlank(filters.getStartDate())
+            || StringUtils.isNotBlank(filters.getEndDate()) || StringUtils.isNotBlank(filters.getCollector())) {
+            joinClause += "\n" + buildCollectionEventJoin(filters);
         }
 
-        if (StringUtils.isNotBlank(storageName)) {
+        if (StringUtils.isNotBlank(filters.getStorageName())) {
             joinClause += "\n" + buildManagementJoin();
+        }
+
+        if (filters.getImportId() != null) {
+            joinClause += "\n" + buildSpecimenUpdateJoin();
         }
 
         return joinClause;
     }
 
-    private String buildCollectionJoin(Integer institutionId, UUID collectionId, List<UUID> collectionUuids) {
+    private String buildCollectionJoin(AdminSpecimenListFilter filters, List<UUID> collectionUuids, Integer institutionId) {
         var andString = "";
 
-        if (nonNull(institutionId) && isNull(collectionId)) {
+        if (nonNull(institutionId) && isNull(filters.getCollectionId())) {
             andString += " and c.institution_id = :institutionId";
         }
 
-        if (nonNull(collectionId)) {
+        if (nonNull(filters.getCollectionId())) {
             andString += " and c.id = :collectionId";
         }
 
-        if (isNull(collectionId) && !collectionUuids.isEmpty()) {
+        if (isNull(filters.getCollectionId()) && !collectionUuids.isEmpty()) {
             andString += " and c.id in (:collectionUuids)";
         }
 
@@ -461,26 +455,26 @@ public class SpecimenIntegrationServiceImpl implements SpecimenIntegrationServic
                 """, selectFields);
     }
 
-    private String buildTaxonJoin(String selectFields, String searchTerm, String family, String genus, String specificEpithet) {
+    private String buildTaxonJoin(String selectFields, AdminSpecimenListFilter filters) {
         var andString = "";
         // TODO désactivé pour le moment
         // if (StringUtils.isNotBlank(searchTerm)) {
         //     andString += " and upper(scientific_name) like upper(:searchTerm)";
         // }
 
-        if (StringUtils.isNotBlank(family)) {
+        if (StringUtils.isNotBlank(filters.getFamily())) {
             andString += " and upper(family) like upper(:family)";
         }
 
-        if (StringUtils.isNotBlank(genus)) {
+        if (StringUtils.isNotBlank(filters.getGenus())) {
             andString += " and upper(genus) like upper(:genus)";
         }
 
-        if (StringUtils.isNotBlank(specificEpithet)) {
+        if (StringUtils.isNotBlank(filters.getSpecificEpithet())) {
             andString += " and upper(specific_epithet) like upper(:specificEpithet)";
         }
 
-        var hasParameter = StringUtils.isNotBlank(family) || StringUtils.isNotBlank(genus) || StringUtils.isNotBlank(specificEpithet);
+        var hasParameter = StringUtils.isNotBlank(filters.getFamily()) || StringUtils.isNotBlank(filters.getGenus()) || StringUtils.isNotBlank(filters.getSpecificEpithet());
 
         var joinType = hasParameter ? "join" : "left join";
 
@@ -535,52 +529,54 @@ public class SpecimenIntegrationServiceImpl implements SpecimenIntegrationServic
         return sorting;
     }
 
-    private Long countSpecimen(String searchTerm, OperationTypeDTO state, Integer institutionId, UUID collectionId, String collectionCode, String family,
-                               String genus, String specificEpithet, String startDate, String endDate, String collector, String continent, String country,
-                               String nominativeCollection, String storageName, List<UUID> collectionUuids) {
-        String queryString = "select count(s1_0.id) " + getFromClause("id, fk_id_collection, fk_colevent_id, fk_management_id", state, searchTerm, collectionCode, nominativeCollection);
+    private Long countSpecimen(AdminSpecimenListFilter filters, List<UUID> collectionUuids, Integer institutionId) {
+        String queryString = "select count(s1_0.id) " + getFromClause("id, fk_id_collection, fk_colevent_id, fk_management_id", filters);
 
-        if (nonNull(institutionId) || nonNull(collectionId)) {
-            queryString += "\n" + buildCollectionJoin(institutionId, collectionId, collectionUuids);
+        if (nonNull(institutionId) || nonNull(filters.getCollectionId())) {
+            queryString += "\n" + buildCollectionJoin(filters, collectionUuids, institutionId);
         }
 
         // TODO count a revoir car le select fait toujours les jointures et donc le compte n'est pas cohérent si on ne précise pas de paramètre
-        if (/*StringUtils.isNotBlank(searchTerm) || */StringUtils.isNotBlank(family) || StringUtils.isNotBlank(genus) || StringUtils.isNotBlank(specificEpithet)) {
+        if (/*StringUtils.isNotBlank(searchTerm) || */StringUtils.isNotBlank(filters.getFamily()) || StringUtils.isNotBlank(filters.getGenus()) || StringUtils.isNotBlank(filters.getSpecificEpithet())) {
             queryString += "\n" + buildIdentificationJoin("i.id, i.fk_id_specimen");
 
-            queryString += "\n" + buildTaxonJoin("fk_id_identification", searchTerm, family, genus, specificEpithet);
+            queryString += "\n" + buildTaxonJoin("fk_id_identification", filters);
         }
 
-        if (StringUtils.isNotBlank(country) || StringUtils.isNotBlank(continent) || StringUtils.isNotBlank(startDate) || StringUtils.isNotBlank(endDate) ||
-            StringUtils.isNotBlank(collector)) {
-            queryString += "\n" + buildCollectionEventJoin(country, continent, collector, startDate, endDate);
+        if (StringUtils.isNotBlank(filters.getCountry()) || (filters.getContinent() != null && !filters.getContinent()
+                .isEmpty()) || StringUtils.isNotBlank(filters.getStartDate()) || StringUtils.isNotBlank(filters.getEndDate()) ||
+            StringUtils.isNotBlank(filters.getCollector())) {
+            queryString += "\n" + buildCollectionEventJoin(filters);
         }
 
-        if (StringUtils.isNotBlank(storageName)) {
+        if (StringUtils.isNotBlank(filters.getStorageName())) {
             queryString += "\n" + buildManagementJoin();
+        }
+
+        if (filters.getImportId() != null) {
+            queryString += "\n" + buildSpecimenUpdateJoin();
         }
 
         Query query = em.createNativeQuery(queryString);
 
-        addParametersToQuery(query, searchTerm, state, institutionId, collectionId, collectionCode, family, genus, specificEpithet, startDate, endDate, collector,
-                continent, country, nominativeCollection, storageName, collectionUuids);
+        addParametersToQuery(query, filters, collectionUuids, institutionId);
 
         var result = query.getSingleResult();
 
         return (Long) result;
     }
 
-    private String buildCollectionEventJoin(String country, String continent, String collector, String startDate, String endDate) {
+    private String buildCollectionEventJoin(AdminSpecimenListFilter filters) {
         var whereClause = " where 1 = 1 ";
-        if (StringUtils.isNotBlank(country)) {
+        if (StringUtils.isNotBlank(filters.getCountry())) {
             whereClause += " and upper(country) like upper(:country)";
         }
 
-        if (StringUtils.isNotBlank(continent)) {
-            whereClause += " and upper(continent) like upper(:continent)";
+        if (filters.getContinent() != null && !filters.getContinent().isEmpty()) {
+            whereClause += " and cast(:continent as text[]) && string_to_array(continent, :separator)";
         }
 
-        if (StringUtils.isNotBlank(collector)) {
+        if (StringUtils.isNotBlank(filters.getCollector())) {
             whereClause += " and upper(recorded_by) like upper(:collector)";
         }
         // TODO retiré pour le moment
@@ -597,6 +593,10 @@ public class SpecimenIntegrationServiceImpl implements SpecimenIntegrationServic
 
     private String buildManagementJoin() {
         return " join (select id from management m where upper(storage_name) like upper(:storageName)) as m_0 on m_0.id = s1_0.fk_management_id";
+    }
+
+    private String buildSpecimenUpdateJoin() {
+        return " join specimen_update su on s1_0.id = su.fk_specimen_id and su.fk_import_id = :importId";
     }
 
     @Override
@@ -910,12 +910,10 @@ public class SpecimenIntegrationServiceImpl implements SpecimenIntegrationServic
         return CollectionIdentifier.builder().specimenId(savedSpec.getId()).collectionId(colJPA.getId()).build();
     }
 
-
     public SpecimenJPA saveSpecimenJPAAndUpdateMids(SpecimenJPA specimenJPA) {
         specimenJPA.setMids(midsService.processMids(specimenMapper.mapJpaToSpecimen(specimenJPA)).level());
         return specimenJPARepository.save(specimenJPA);
     }
-
 
     private Set<LiteratureJPA> buildLiterature(Set<Literature> literatures) {
         log.info("buildLiterature");
@@ -1004,7 +1002,7 @@ public class SpecimenIntegrationServiceImpl implements SpecimenIntegrationServic
         if (nonNull(other1)) {
             return OtherJPA.builder().id(other1.getId()).linkOther(other1.getLinkOther()).linkBold(other1.getLinkBold())
                     .linkGerBank(other1.getLinkGerBank()).computerizationProgram(other1.getComputerizationProgram())
-                    .financialAid(other1.getFinancialAid()).remarks(other1.getRemarks()).build();
+                    .financialAid(other1.getFinancialAid()).build();
         }
         return null;
     }
@@ -1056,7 +1054,9 @@ public class SpecimenIntegrationServiceImpl implements SpecimenIntegrationServic
                 .recordNumber(specimenToSave.getRecordNumber())
                 .basisOfRecord(specimenToSave.getBasisOfRecord())
                 .preparations(specimenToSave.getPreparations())
+                .preparationDetail(specimenToSave.getPreparationDetail())
                 .individualCount(specimenToSave.getIndividualCount())
+                .approximateIndividualCount(specimenToSave.getApproximateIndividualCount())
                 .lifeStage(specimenToSave.getLifeStage())
                 .occurrenceRemarks(specimenToSave.getOccurrenceRemarks())
                 .donor(specimenToSave.getDonor())
@@ -1291,8 +1291,10 @@ public class SpecimenIntegrationServiceImpl implements SpecimenIntegrationServic
         Integer institutionId = getInstitutionIdToFilter(institutionUuid, currentUser);
 
         List<UUID> userCollectionUuids = getUserCollectionUuids(currentUser);
-
-        return countSpecimen(null, OperationTypeDTO.REVIEW, institutionId, null, null, null, null, null, null, null, null, null, null, null, null, userCollectionUuids) > 0;
+        AdminSpecimenListFilter filters = AdminSpecimenListFilter.builder()
+                .state(OperationTypeDTO.REVIEW)
+                .build();
+        return countSpecimen(filters, userCollectionUuids, institutionId) > 0;
     }
 
     /**

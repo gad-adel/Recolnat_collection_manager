@@ -33,9 +33,10 @@ public class InstitutionResource implements InstitutionApi {
     private final InstitutionMapper institutionMapper;
 
     @Override
-    public ResponseEntity<InstitutionDashboardResponseDTO> getInstitutions(Integer page, Integer size, String searchTerm, String partnerType) {
+    public ResponseEntity<InstitutionDashboardResponseDTO> getInstitutions(Integer page, Integer size, String searchTerm, String partnerType, String columnSort,
+                                                                           String typeSort) {
         try {
-            final var result = institutionMapper.toInstitutionDashboardResponseDTO(institutionService.findAll(page, size, searchTerm, partnerType));
+            final var result = institutionMapper.toInstitutionDashboardResponseDTO(institutionService.findAll(page, size, searchTerm, partnerType, columnSort, typeSort));
             return new ResponseEntity<>(result, HttpStatus.OK);
         } catch (CollectionManagerBusinessException | MediathequeException e) {
             throw e;
@@ -84,7 +85,6 @@ public class InstitutionResource implements InstitutionApi {
 
     @Override
     public ResponseEntity<Void> updateInstitution(UUID institutionId, InstitutionRequestDTO institutionRequestDTO) {
-
         try {
             var institution = institutionMapper.dtoToInstitution(institutionRequestDTO);
             var id = institutionService.updateInstitution(institutionId, institution);
@@ -99,7 +99,7 @@ public class InstitutionResource implements InstitutionApi {
     @Override
     public ResponseEntity<Void> addLogoInstitution(UUID institutionId, MultipartFile logo) {
         try {
-            UUID id = institutionService.addLogoIntitution(institutionId, logo);
+            UUID id = institutionService.addOrReplaceInstitutionLogo(institutionId, logo);
             return new ResponseEntity<>(buildHeader(id), HttpStatus.OK);
         } catch (CollectionManagerBusinessException | MediathequeException e) {
             throw e;

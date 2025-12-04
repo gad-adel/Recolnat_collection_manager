@@ -40,7 +40,9 @@ public class Specimen extends DomainId {
     private String recordNumber;
     private String basisOfRecord;
     private String preparations;
+    private String preparationDetail;
     private String individualCount;
+    private Boolean approximateIndividualCount;
     private String sex;
     private String lifeStage;
     private String occurrenceRemarks;

@@ -70,11 +70,6 @@ public class ArticleResourceITest extends AbstractResourceDBTest {
         );
 
         // When - action or the behaviour
-        final MediathequeOutput mediaDetailsOutput = MediathequeOutput.builder()
-                .media(MediaDetailsOutput.builder()
-                        .url("https://mediaphoto.mnhn.fr/media/1671041236335AUUo9kb5wF0rbw9T").build()).build();
-
-        when(mediathequeApiClient.savePicture(file)).thenReturn(new ResponseEntity<>(mediaDetailsOutput, HttpStatusCode.valueOf(HttpStatus.SC_SUCCESS)));
 
         UUID uidAdmin = UUID.fromString("b9a746ef-3dd6-4954-8e14-a317e380524e");
         when(authenticationService.findUserAttributes()).thenReturn(buildAdminUser(uidAdmin));
@@ -139,12 +134,7 @@ public class ArticleResourceITest extends AbstractResourceDBTest {
                 "Media work as mock!".getBytes()
         );
         UUID uidAdmin = UUID.fromString("b9a746ef-3dd6-4954-8e14-a317e380524e");
-        // When - action or the behaviour
-        final MediathequeOutput mediaDetailsOutput = MediathequeOutput.builder()
-                .media(MediaDetailsOutput.builder()
-                        .url("https://mediaphoto.mnhn.fr/media/1671041236335AUUo9kb5wF0rbw9T").build()).build();
 
-        when(mediathequeApiClient.savePicture(file)).thenReturn(new ResponseEntity<>(mediaDetailsOutput, HttpStatusCode.valueOf(HttpStatus.SC_SUCCESS)));
         when(authenticationService.findUserAttributes()).thenReturn(buildAdminUser(uidAdmin));
         when(authenticationService.getConnected()).thenReturn(getConnectedUser());
         Article.builder().author("author").media(file).build();
