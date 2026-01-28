@@ -15,9 +15,10 @@ jobs:
     uses: gad-adel/Recolnat-Template/.github/workflows/github-ci-template.yml@main
     with:
       project_ci: collection-manager
+      short_sha: ${{ github.sha }}
+      app_version: ${{ github.ref_name == 'develop' && 'dev' || github.ref_name == 'staging' && 'rc' || github.ref_name == 'main' && 'prod' || github.ref_name }}
     secrets:
       HARBOR_REGISTRY_PASSWORD: ${{ secrets.HARBOR_REGISTRY_PASSWORD }}
       SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-
     permissions:
       contents: read
