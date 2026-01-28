@@ -52,10 +52,9 @@ public class ArticleResource implements ArticleApi {
     }
 
     @Override
-    public ResponseEntity<ArticleDashboardResponseDTO> getArticles(Integer page, Integer size, String searchTerm, ArticleStateDTO state, String columnSort,
-                                                                   String typeSort) {
+    public ResponseEntity<ArticleDashboardResponseDTO> getArticles(Integer page, Integer size, String searchTerm, ArticleStateDTO state) {
         try {
-            final var result = articleMapper.toDashboardResponseDTO(articleService.findAllForDashboard(page, size, searchTerm, state, columnSort, typeSort));
+            final var result = articleMapper.toDashboardResponseDTO(articleService.findAllForDashboard(page, size, searchTerm, state));
             return new ResponseEntity<>(result, HttpStatus.OK);
         } catch (Exception e) {
             throw new CollectionManagerBusinessException(HttpStatus.CONFLICT, ErrorCode.ERROR_APPLICATIVE, e.getMessage());

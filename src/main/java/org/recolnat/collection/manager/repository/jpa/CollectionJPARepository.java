@@ -1,9 +1,7 @@
 package org.recolnat.collection.manager.repository.jpa;
 
 import org.recolnat.collection.manager.api.domain.CollectionDashboardProjection;
-import org.recolnat.collection.manager.api.domain.CollectionDescriptionProjection;
 import org.recolnat.collection.manager.api.domain.CollectionProjection;
-import org.recolnat.collection.manager.api.domain.DomainSpecimenCountProjection;
 import org.recolnat.collection.manager.repository.entity.CollectionJPA;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -62,29 +60,5 @@ public interface CollectionJPARepository extends JpaRepository<CollectionJPA, UU
             order by c.collectionNameFr""")
     List<CollectionProjection> findAllOptionsByInstitutionId(@Param("institutionId") UUID institutionId);
 
-    @Query(value = """
-            select c.type_collection as domainName, count(s.id) as specimenCount
-            from specimen s
-            join collection c on c.id = s.fk_id_collection
-            where c.fk_institution_id = :institutionId
-            and c.type_collection is not null
-            and s.state = 'VALID'
-            group by c.type_collection
-            order by c.type_collection
-            """, nativeQuery = true)
-    List<DomainSpecimenCountProjection> findDomainSpecimenCounts(@Param("institutionId") UUID institutionId);
 
-    @Query(value = """
-            select
-            c.id AS uuid,
-            c.collection_code as collectionCode,
-            c.collection_name_fr AS nameFr,
-            c.collection_name_en AS nameEn,
-            c.description_fr AS descriptionFr,
-            c.description_en AS descriptionEn
-            from collection c
-            where c.fk_institution_id = :institutionId
-            order by c.collection_name_fr
-            """, nativeQuery = true)
-    List<CollectionDescriptionProjection> getCollectionsDescriptions(@Param("institutionId") UUID institutionId);
 }

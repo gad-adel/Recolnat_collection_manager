@@ -16,7 +16,7 @@ VALUES ('8342cf1d-f202-4c10-9037-2e2406ce7331', 'h', 1, 'botanique', 'botanique'
 INSERT INTO collection (id, type_collection, institution_id, collection_name_fr, collection_name_en, description_fr,
                         description_en, fk_institution_id)
 VALUES ('9a342a92-6fe8-48d3-984e-d1731c051666', 'IT', 1, 'Tunicier', 'Tunicates',
-        'Collection de Tuniciers (IT) du Muséum national d''Histoire naturelle (MNHN - Paris)',
+        'Tunicates collection (IT) of the Muséum national d''Histoire naturelle (MNHN - Paris)',
         'Tunicates collection (IT) of the Muséum national d''Histoire naturelle (MNHN - Paris)',
         '50f4978a-da62-4fde-8f38-5003bd43ff64');
 

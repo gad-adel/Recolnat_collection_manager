@@ -12,11 +12,12 @@ import java.time.format.DateTimeFormatter;
 @Slf4j
 class DateUtilTest {
     @Test
-    void testParse() {
-        var now = LocalDateTime.ofInstant(Instant.now(), ZoneId.of("UTC")).toString();
+    void testParse(){
+        var now = LocalDateTime.ofInstant(Instant.now(),ZoneId.of("UTC")).toString();
+        String date="2023-04-28T16:15:49.290273";
 
         LocalDateTime ldt = LocalDateTime.parse(now, DateTimeFormatter.ISO_LOCAL_DATE_TIME);
 
-        log.info("result of parse now :{}, result :{}", now, ldt);
+        log.info("result of parse now :{}, result :{}",now, ldt);
     }
 }

@@ -1,17 +1,13 @@
 package org.recolnat.collection.manager.service.impl;
 
 
-import io.recolnat.model.CollectionDescriptionDTO;
 import io.recolnat.model.CollectionDetailDTO;
-import io.recolnat.model.DomainSpecimenCountDTO;
 import io.recolnat.model.UserCollectionDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.recolnat.collection.manager.api.domain.Collection;
 import org.recolnat.collection.manager.api.domain.CollectionDashboardProjection;
-import org.recolnat.collection.manager.api.domain.CollectionDescriptionProjection;
 import org.recolnat.collection.manager.api.domain.CollectionProjection;
-import org.recolnat.collection.manager.api.domain.DomainSpecimenCountProjection;
 import org.recolnat.collection.manager.api.domain.NominativeCollectionDashboardProjection;
 import org.recolnat.collection.manager.api.domain.Result;
 import org.recolnat.collection.manager.api.domain.enums.LanguageEnum;
@@ -156,20 +152,5 @@ public class CollectionRetrieveServiceImpl implements CollectionRetrieveService 
                     .filter(c -> currentUser.getCollections().contains(c.getId())).toList());
         }
         return Collections.emptyList();
-    }
-
-    @Override
-    public List<DomainSpecimenCountDTO> getDomainSpecimenCounts(UUID institutionId) {
-        List<DomainSpecimenCountProjection> projections =
-                collectionJPARepository.findDomainSpecimenCounts(institutionId);
-        return collectionMapper.projectionsToDtos(projections);
-    }
-
-    @Override
-    public List<CollectionDescriptionDTO> getCollectionsDescriptions(UUID institutionId, String lng) {
-        List<CollectionDescriptionProjection> projections =
-                collectionJPARepository.getCollectionsDescriptions(institutionId);
-        boolean isFr = LanguageEnum.FR.name().equalsIgnoreCase(lng);
-        return collectionMapper.toLocalizedCollectionDescriptions(projections, isFr);
     }
 }

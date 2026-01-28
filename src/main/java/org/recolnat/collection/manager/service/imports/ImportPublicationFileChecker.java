@@ -26,10 +26,8 @@ import java.util.UUID;
 import static org.recolnat.collection.manager.api.domain.enums.imports.ImportErrorEnum.BLANK_LINE;
 import static org.recolnat.collection.manager.api.domain.enums.imports.ImportErrorEnum.COLLECTION_NOT_EXISTS;
 import static org.recolnat.collection.manager.api.domain.enums.imports.ImportErrorEnum.REQUIRED_CATALOG_NUMBER;
-import static org.recolnat.collection.manager.api.domain.enums.imports.ImportErrorEnum.REQUIRED_CITATION;
 import static org.recolnat.collection.manager.api.domain.enums.imports.ImportErrorEnum.REQUIRED_COLLECTION_NAME;
 import static org.recolnat.collection.manager.api.domain.enums.imports.ImportErrorEnum.SPECIMEN_NOT_EXISTS;
-import static org.recolnat.collection.manager.api.domain.enums.imports.ImportPublicationColumnEnum.CITATION;
 import static org.recolnat.collection.manager.api.domain.enums.imports.ImportPublicationColumnEnum.DATE;
 import static org.recolnat.collection.manager.api.domain.enums.imports.ImportSpecimenColumnEnum.CATALOG_NUMBER;
 import static org.recolnat.collection.manager.api.domain.enums.imports.ImportSpecimenColumnEnum.COLLECTION_NAME;
@@ -205,11 +203,6 @@ public class ImportPublicationFileChecker {
         value = values[columnNames.get(CATALOG_NUMBER.getColumnName())];
         if (StringUtils.isBlank(value)) {
             importHelper.addErrorInMap(REQUIRED_CATALOG_NUMBER, lineIndex, blockingErrors);
-        }
-
-        value = values[columnNames.get(CITATION.getColumnName())];
-        if (StringUtils.isBlank(value)) {
-            importHelper.addErrorInMap(REQUIRED_CITATION, lineIndex, blockingErrors);
         }
 
         long finish = System.nanoTime();

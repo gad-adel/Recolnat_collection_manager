@@ -10,8 +10,7 @@ VALUES ('8f57a134-01d4-47f3-9037-27b8ead3a651', 'Arthur Martin', 'Plantae banana
 
 </body>
 </html>
-', 'http://dummyimage.com/116x100.png/cc0000/ffffff', '2022-12-16 12:06:18.792921', 'created_by', null, null, null, 1,
-        now(), 'PUBLISHED');
+', 'urlmedial', '2022-12-16 12:06:18.792921', 'created_by', null, null, null, 1, now(), 'PUBLISHED');
 
 INSERT INTO article (id, author, title, content, url_media, created_at, created_by, modified_by, modified_at,
                      creation_date, increment_id, data_change_ts, state)
@@ -24,8 +23,7 @@ VALUES ('f49bd44f-6a2f-4e65-bf88-3576227f5825', 'Arthur Martin', 'Plantae banana
 
 </body>
 </html>
-', 'http://dummyimage.com/116x100.png/cc0000/ffffff', '2022-12-16 12:06:18.792921', 'created_by', null, null, null, 2,
-        now(), 'PUBLISHED');
+', 'urlmedial', '2022-12-16 12:06:18.792921', 'created_by', null, null, null, 2, now(), 'PUBLISHED');
 
 INSERT INTO public.article (id, author, title, content, url_media, created_at, created_by, modified_by, modified_at,
                             creation_date, increment_id, data_change_ts, state)
@@ -42,7 +40,7 @@ Integer tincidunt ante vel ipsum. Praesent blandit lacinia erat. Vestibulum sed 
 
 </body>
 </html>
-', 'image.png', '2023-05-23 12:06:18.792921', 'created_by', null, null, null, 1,
+', 'http://dummyimage.com/135x100.png/ff4444/ffffff', '2023-05-23 12:06:18.792921', 'created_by', null, null, null, 1,
         now(), 'PUBLISHED');
 
 INSERT INTO public.article (id, author, title, content, url_media, created_at, created_by, modified_by, modified_at,
@@ -56,8 +54,7 @@ VALUES ('46a3f3ba-0a63-439c-a92c-cb9ebdba487b', 'Arthur Martin', 'Plantae banana
 
 </body>
 </html>
-', 'http://dummyimage.com/116x100.png/cc0000/ffffff', '2023-10-16 12:06:18.792921', 'created_by', null, null, null, 1,
-        now(), 'PUBLISHED');
+', 'urlmedial', '2023-10-16 12:06:18.792921', 'created_by', null, null, null, 1, now(), 'PUBLISHED');
 
 INSERT INTO public.article (id, author, title, content, url_media, created_at, created_by, modified_by, modified_at,
                             creation_date, increment_id, data_change_ts, state)

@@ -11,10 +11,10 @@ import java.util.UUID;
 @Mapper(componentModel = "spring", imports = {UUID.class})
 public interface UserMapper {
 
-    @Mapping(target = "id", source = "id")
-    @Mapping(target = "name", source = "name")
+    @Mapping(target = "id", source = "uid")
+    @Mapping(target = "name", expression = "java(user.getLastName() + \" \" + user.getFirstName())")
     @Mapping(target = "email", source = "email")
-    @Mapping(target = "role", source = "role")
+    @Mapping(target = "role", source = "role.name")
     UserDashboardDTO toUserDashboardDTO(User user);
 
     List<UserDashboardDTO> toUsersDashboardDTO(List<User> users);

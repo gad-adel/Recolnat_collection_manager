@@ -5,24 +5,14 @@ import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-import org.recolnat.collection.manager.api.domain.CollectionEvent;
-import org.recolnat.collection.manager.api.domain.Identification;
 import org.recolnat.collection.manager.api.domain.ImportColumn;
-import org.recolnat.collection.manager.api.domain.Location;
-import org.recolnat.collection.manager.api.domain.Specimen;
-import org.recolnat.collection.manager.api.domain.Taxon;
 import org.recolnat.collection.manager.api.domain.enums.SpecimenStatusEnum;
 import org.recolnat.collection.manager.api.domain.enums.imports.ImportModeEnum;
 import org.recolnat.collection.manager.api.domain.enums.imports.SpecimenUpdateModeEnum;
 import org.recolnat.collection.manager.api.domain.imports.ImportSpecimenProcessorResult;
-import org.recolnat.collection.manager.common.mapper.SpecimenMapper;
 import org.recolnat.collection.manager.repository.entity.SpecimenJPA;
 import org.recolnat.collection.manager.repository.jpa.CollectionJPARepository;
 import org.recolnat.collection.manager.repository.jpa.SpecimenJPARepository;
-import org.recolnat.collection.manager.service.MidsService;
-import org.recolnat.collection.manager.service.SpecimenIntegrationService;
-import org.recolnat.collection.manager.web.dto.MidsDTO;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,7 +23,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 
 import static java.lang.String.format;
@@ -51,11 +40,11 @@ public class ImportSpecimenProcessor {
     private final ImportHelper importHelper;
     private final List<ImportColumn> specimenColumns = List.of(
             new ImportColumn("catalog_number", CATALOG_NUMBER.getColumnName()),
+            new ImportColumn("collection_code", COLLECTION_CODE.getColumnName()),
             new ImportColumn("nominative_collection", NOMINATIVE_COLLECTION.getColumnName()),
             new ImportColumn("record_number", RECORD_NUMBER.getColumnName()),
             new ImportColumn("basis_of_record", BASIS_OF_RECORD.getColumnName()),
             new ImportColumn("preparations", PREPARATIONS.getColumnName()),
-            new ImportColumn("preparation_detail", PREPARATION_DETAIL.getColumnName()),
             new ImportColumn("sex", SEX.getColumnName()),
             new ImportColumn("life_stage", LIFE_STAGE.getColumnName()),
             new ImportColumn("individual_count", INDIVIDUAL_COUNT.getColumnName()),
@@ -85,7 +74,8 @@ public class ImportSpecimenProcessor {
             new ImportColumn("locality", LOCALITY.getColumnName()),
             new ImportColumn("municipality", MUNICIPALITY.getColumnName()),
             new ImportColumn("county", COUNTY.getColumnName()),
-            new ImportColumn("state_province", REGION_STATE_PROVINCE.getColumnName()),
+            new ImportColumn("region", REGION.getColumnName()),
+            new ImportColumn("state_province", STATE_PROVINCE.getColumnName()),
             new ImportColumn("country", COUNTRY.getColumnName()),
             new ImportColumn("country_code", COUNTRY_CODE.getColumnName()),
             new ImportColumn("continent", CONTINENT.getColumnName()),
@@ -146,9 +136,6 @@ public class ImportSpecimenProcessor {
 
     private final CollectionJPARepository collectionJPARepository;
     private final SpecimenJPARepository specimenJPARepository;
-    private final MidsService midsService;
-    private final SpecimenIntegrationService specimenIntegrationService;
-    private final SpecimenMapper specimenMapper;
 
     @PersistenceContext
     private EntityManager em;
@@ -236,10 +223,7 @@ public class ImportSpecimenProcessor {
                 }
                 var query = em.createNativeQuery(format("insert into specimen(%s) values (%s) returning id", String.join(", ", specimenFieldsForInsert), String.join(", ", specimenParametersForInsert)));
 
-                Specimen specimen = buildSpecimenFromLine(line, columnNamesMap);
-                MidsDTO mids = midsService.processMids(specimen);
-
-                setParametersForInsert(query, line, userName, columnNamesMap, collectionEventId, geologicalContextId, collectionId, mids.level());
+                setParametersForInsert(query, line, userName, columnNamesMap, collectionEventId, geologicalContextId, collectionId);
                 UUID specimenId = (UUID) query.getSingleResult();
                 addedSpecimenCount++;
 
@@ -264,7 +248,6 @@ public class ImportSpecimenProcessor {
                     continue;
                 } else if (mode.equals(ImportModeEnum.REPLACE)) {
                     var specimen = specimens.get(0);
-
                     if (log.isInfoEnabled()) {
                         log.info("Mise à jour d'un spécimen avec les données : {}", (Object) line);
                     }
@@ -273,17 +256,9 @@ public class ImportSpecimenProcessor {
 
                     var queryString = format("update specimen set %s where id = '%s'", String.join(", ", valuesToUpdate), specimen.getId());
                     var query = em.createNativeQuery(queryString);
-
-                    MidsDTO mids = midsService.processMids(specimenMapper.mapJpaToSpecimen(specimen));
-
-                    setParametersForUpdate(query, line, columnNamesMap, specimenFieldsForUpdate, mids.level());
-
+                    setParametersForUpdate(query, line, columnNamesMap, specimenFieldsForUpdate);
                     var updated = query.executeUpdate();
                     updatedSpecimenCount += updated;
-
-                    SpecimenJPA updatedSpecimen = em.find(SpecimenJPA.class, specimen.getId());
-                    em.refresh(updatedSpecimen);
-                    specimenIntegrationService.saveSpecimenJPAAndUpdateMids(updatedSpecimen);
 
                     var insertUpdateQuery = em.createNativeQuery("insert into specimen_update(fk_specimen_id, fk_import_id, mode) values (:fk_specimen_id, :fk_import_id, :mode)");
                     insertUpdateQuery.setParameter("fk_specimen_id", specimen.getId());
@@ -337,69 +312,6 @@ public class ImportSpecimenProcessor {
         }
 
         return new ImportSpecimenProcessorResult(addedSpecimenCount, updatedSpecimenCount);
-    }
-
-    private Specimen buildSpecimenFromLine(String[] line, Map<String, Integer> columnNamesMap) {
-        String catalogNumber = importHelper.getValueFromCell(line, columnNamesMap, CATALOG_NUMBER.getColumnName());
-        String collectionName = importHelper.getValueFromCell(line, columnNamesMap, COLLECTION_NAME.getColumnName());
-        String scientificName = importHelper.getValueFromCell(line, columnNamesMap, SCIENTIFIC_NAME.getColumnName());
-        String verbatimLocality = importHelper.getValueFromCell(line, columnNamesMap, VERBATIM_LOCALITY.getColumnName());
-        String locality = importHelper.getValueFromCell(line, columnNamesMap, LOCALITY.getColumnName());
-        String county = importHelper.getValueFromCell(line, columnNamesMap, COUNTY.getColumnName());
-        String municipality = importHelper.getValueFromCell(line, columnNamesMap, MUNICIPALITY.getColumnName());
-        String island = importHelper.getValueFromCell(line, columnNamesMap, ISLAND.getColumnName());
-        String continent = importHelper.getValueFromCell(line, columnNamesMap, CONTINENT.getColumnName());
-        String country = importHelper.getValueFromCell(line, columnNamesMap, COUNTRY.getColumnName());
-        String countryCode = importHelper.getValueFromCell(line, columnNamesMap, COUNTRY_CODE.getColumnName());
-        String islandGroup = importHelper.getValueFromCell(line, columnNamesMap, ISLAND_GROUP.getColumnName());
-        String stateProvince = importHelper.getValueFromCell(line, columnNamesMap, REGION_STATE_PROVINCE.getColumnName());
-        String waterBody = importHelper.getValueFromCell(line, columnNamesMap, WATER_BODY.getColumnName());
-        String latitude = importHelper.getValueFromCell(line, columnNamesMap, DECIMAL_LATITUDE.getColumnName());
-        String longitude = importHelper.getValueFromCell(line, columnNamesMap, DECIMAL_LONGITUDE.getColumnName());
-        String recordedBy = importHelper.getValueFromCell(line, columnNamesMap, RECORDED_BY.getColumnName());
-        String eventDate = importHelper.extractIntervalValue(line, columnNamesMap, "COLLECTE");
-        String fieldNumber = importHelper.getValueFromCell(line, columnNamesMap, FIELD_NUMBER.getColumnName());
-
-        return Specimen.builder()
-                .catalogNumber(catalogNumber)
-                .collectionId(collectionName == null ? null : new UUID(0, 1)) // Pas forcément pertinent de mettre une vraie valeur sachant qu'on teste juste si la valeur est non vide
-                .institutionId("never empty") // Pas forcément pertinent de mettre une vraie valeur sachant qu'on teste juste si la valeur est non vide
-                .identifications(
-                        Set.of(
-                                Identification.builder()
-                                        .taxon(
-                                                List.of(
-                                                        Taxon.builder().scientificName(scientificName).build()
-                                                )
-                                        )
-                                        .build()
-                        )
-                )
-                .collectionEvent(
-                        CollectionEvent.builder()
-                                .verbatimLocality(verbatimLocality)
-                                .location(
-                                        Location.builder()
-                                                .locality(locality)
-                                                .county(county)
-                                                .municipality(municipality)
-                                                .island(island)
-                                                .continent(continent)
-                                                .country(country)
-                                                .countryCode(countryCode)
-                                                .islandGroup(islandGroup)
-                                                .stateProvince(stateProvince)
-                                                .waterBody(waterBody)
-                                                .build()
-                                )
-                                .decimalLatitude(StringUtils.isNotBlank(latitude) ? Double.valueOf(latitude) : null)
-                                .decimalLongitude(StringUtils.isNotBlank(longitude) ? Double.valueOf(longitude) : null)
-                                .recordedBy(recordedBy)
-                                .eventDate(eventDate)
-                                .fieldNumber(fieldNumber)
-                                .build()
-                )
-                .build();
     }
 
     private void updateGeologicalContext(UUID id, String[] line, Map<String, Integer> columnNamesMap, List<String> geologicalContextFields,
@@ -458,8 +370,7 @@ public class ImportSpecimenProcessor {
     }
 
     private void setParametersForUpdate(Query query, String[] line, Map<String, Integer> columnNamesMap,
-                                        List<String> specimenFieldsForUpdate, Integer mids) {
-        query.setParameter("mids", mids);
+                                        List<String> specimenFieldsForUpdate) {
         specimenColumns.forEach(field -> {
             var exists = specimenFieldsForUpdate.contains(field.dbFieldName());
             if (exists) {
@@ -697,7 +608,6 @@ public class ImportSpecimenProcessor {
             fields.add("created_at");
             fields.add("created_by");
         }
-        fields.add("mids");
 
         specimenColumns.forEach(field -> {
             var exists = columnNamesMap.containsKey(field.columnName());
@@ -720,8 +630,6 @@ public class ImportSpecimenProcessor {
             parameters.add(":createdBy");
         }
 
-        parameters.add(":mids");
-
         specimenColumns.forEach(field -> {
             var exists = columnNamesMap.containsKey(field.columnName());
             if (exists) {
@@ -733,13 +641,12 @@ public class ImportSpecimenProcessor {
     }
 
     private void setParametersForInsert(Query query, String[] line, String userName, Map<String, Integer> columnNamesMap, UUID collectionEventId,
-                                        UUID geologicalContextId, UUID collectionId, Integer mids) {
+                                        UUID geologicalContextId, UUID collectionId) {
         query.setParameter("id", UUID.randomUUID());
         query.setParameter("state", SpecimenStatusEnum.VALID.name());
         query.setParameter("collectionId", collectionId);
         query.setParameter("createdAt", LocalDateTime.now());
         query.setParameter("createdBy", userName);
-        query.setParameter("mids", mids);
 
         query.setParameter("fk_colevent_id", collectionEventId);
         query.setParameter("fk_geo_id", geologicalContextId);

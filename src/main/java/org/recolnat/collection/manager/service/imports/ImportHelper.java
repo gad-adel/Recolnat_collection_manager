@@ -114,14 +114,14 @@ public class ImportHelper {
         var endValue = extractDateValue(line, columnNames, endFieldKey);
 
         if (startValue == null || endValue == null) {
-            return null;
+            throw new RuntimeException("Le champ %s n'est pas un champ de type INTERVAL".formatted(columnName));
         }
 
         return Stream.of(startValue, endValue).filter(StringUtils::isNotBlank).collect(Collectors.joining("/"));
     }
 
     public boolean extractBooleanValue(String[] line, Map<String, Integer> columnNamesMap, String columnName) {
-        var value = getValueFromCell(line, columnNamesMap, columnName);
+        var value = line[columnNamesMap.get(columnName)];
         return TRUE_VALUES.contains(value.toUpperCase(Locale.ROOT));
     }
 
@@ -134,14 +134,6 @@ public class ImportHelper {
         } else {
             return columnNamesMap.containsKey(field.columnName());
         }
-    }
-
-
-    public String getValueFromCell(String[] line, Map<String, Integer> columnNamesMap, String columnName) {
-        if (columnNamesMap.get(columnName) == null) {
-            return null;
-        }
-        return line[columnNamesMap.get(columnName)];
     }
 
     public void setParameter(String[] line, Map<String, Integer> columnNamesMap, Query query, ImportColumn field) {

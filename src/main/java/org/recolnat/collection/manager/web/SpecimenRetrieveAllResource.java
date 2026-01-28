@@ -6,7 +6,6 @@ import io.recolnat.model.OperationTypeDTO;
 import io.recolnat.model.SpecimenIntegrationMergeRequestDTO;
 import io.recolnat.model.SpecimenIntegrationPageResponseDTO;
 import lombok.RequiredArgsConstructor;
-import org.recolnat.collection.manager.api.domain.AdminSpecimenListFilter;
 import org.recolnat.collection.manager.api.domain.SpecimenPage;
 import org.recolnat.collection.manager.common.exception.CollectionManagerBusinessException;
 import org.recolnat.collection.manager.common.exception.ErrorCode;
@@ -35,32 +34,11 @@ public class SpecimenRetrieveAllResource implements SpecimenApi {
                                                                                   Boolean currentDetermination, Boolean levelType, String columnSort,
                                                                                   String typeSort, UUID institutionId, UUID collectionId, String collectionCode,
                                                                                   String family, String genus, String specificEpithet, String startDate,
-                                                                                  String endDate, String collector, List<String> continent, String country,
-                                                                                  String nominativeCollection, UUID importId, String storageName) {
+                                                                                  String endDate, String collector, String continent, String country,
+                                                                                  String nominativeCollection, String storageName) {
         try {
-
-            AdminSpecimenListFilter filters = AdminSpecimenListFilter.builder()
-                    .searchTerm(q)
-                    .state(state)
-                    .currentDetermination(currentDetermination)
-                    .levelType(levelType)
-                    .institutionId(institutionId)
-                    .collectionId(collectionId)
-                    .collectionCode(collectionCode)
-                    .family(family)
-                    .genus(genus)
-                    .specificEpithet(specificEpithet)
-                    .startDate(startDate)
-                    .endDate(endDate)
-                    .collector(collector)
-                    .continent(continent)
-                    .country(country)
-                    .nominativeCollection(nominativeCollection)
-                    .importId(importId)
-                    .storageName(storageName)
-                    .build();
-
-            SpecimenPage allSpecimen = specimenIntegrationService.getAllSpecimen(page, size, columnSort, typeSort, filters);
+            SpecimenPage allSpecimen = specimenIntegrationService.getAllSpecimen(page, size, q, state, currentDetermination, levelType, columnSort, typeSort,
+                    institutionId, collectionId, collectionCode, family, genus, specificEpithet, startDate, endDate, collector, continent, country, nominativeCollection, storageName);
             var collectSpecDto = allSpecimen.getSpecimen().stream().map(specimenDtoMapper::specimensListToSpecimenListDto).toList();
             SpecimenIntegrationPageResponseDTO specPageDto = new SpecimenIntegrationPageResponseDTO().specimenListResponse(collectSpecDto)
                     .numberOfElements(allSpecimen.getNumberOfElements())

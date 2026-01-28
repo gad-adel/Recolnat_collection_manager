@@ -2,6 +2,7 @@ package org.recolnat.collection.manager.web;
 
 
 import io.recolnat.api.SpecimenIntegrationApi;
+import io.recolnat.model.OperationTypeDTO;
 import io.recolnat.model.SpecimenIntegrationRequestDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,6 +19,7 @@ import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.springframework.http.HttpStatus.CREATED;
 
@@ -56,6 +58,20 @@ public class SpecimenIntegrationResource implements SpecimenIntegrationApi, WebC
             throw new CollectionManagerBusinessException(HttpStatus.CONFLICT, ErrorCode.ERROR_APPLICATIVE, e.getMessage());
         }
 
+    }
+
+    @Override
+    public ResponseEntity<Void> duplicateSpecimen(UUID specimenId, UUID collectionIdTarget, OperationTypeDTO operation,
+                                                  SpecimenIntegrationRequestDTO specimenIntegrationRequestDTO) {
+        try {
+            final var specimen = specimenMapper.mapDtoToSpecimen(specimenIntegrationRequestDTO);
+            final var collectionIdentifier = specimenIntegrationService.duplicate(specimenId, collectionIdTarget, operation.name(), specimen);
+            return new ResponseEntity<>(buildHeader(collectionIdentifier), CREATED);
+        } catch (CollectionManagerBusinessException | MediathequeException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new CollectionManagerBusinessException(HttpStatus.CONFLICT, ErrorCode.ERROR_APPLICATIVE, e.getMessage());
+        }
     }
 
     @Override

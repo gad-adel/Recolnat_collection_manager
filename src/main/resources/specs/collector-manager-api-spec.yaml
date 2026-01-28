@@ -92,270 +92,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/UnexpectedError'
 
-  /v1/import/{importId}/unpublish:
-    put:
-      operationId: unpublish
-      tags:
-        - Import
-      summary: Dépublie les spécimens d'un import
-      parameters:
-        - name: importId
-          required: true
-          in: path
-          schema:
-            type: string
-            format: uuid
-            description: Identificant de l'import
-          example: 386ff0b0-a6cc-11ec-b909-0242ac120002
-      responses:
-        '201':
-          description: Successful operation
-        '401':
-          description: Bad request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Unauthorized'
-        '403':
-          description: Not found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Forbidden'
-        '409':
-          description: Applicative Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Conflict'
-        '500':
-          description: error server
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/UnexpectedError'
-
-  /v1/import/specimen/template:
-    get:
-      operationId: getSpecimenTemplateStructure
-      tags:
-        - ImportSpecimen
-      summary: Récupère le modèle de fichier d'import de specimens
-      responses:
-        '200':
-          description: Successful operation
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/TemplateStructure'
-        '401':
-          description: Bad request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Unauthorized'
-        '403':
-          description: Not found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Forbidden'
-        '500':
-          description: error server
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/UnexpectedError'
-
-  /v1/import/specimen/template/generate:
-    post:
-      operationId: generateSpecimenTemplate
-      tags:
-        - ImportSpecimen
-      summary: Génère le modèle de fichier d'import de specimens
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: array
-              items:
-                type: string
-      responses:
-        '200':
-          description: Successful operation
-          content:
-            application/json:
-              schema:
-                type: string
-        '401':
-          description: Bad request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Unauthorized'
-        '403':
-          description: Not found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Forbidden'
-        '500':
-          description: error server
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/UnexpectedError'
-  /v1/import/identification/template/generate:
-    post:
-      operationId: generateIdentificationTemplate
-      tags:
-        - ImportIdentification
-      summary: Génère le modèle de fichier d'import de déterminations
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: array
-              items:
-                type: string
-      responses:
-        '200':
-          description: Successful operation
-          content:
-            application/json:
-              schema:
-                type: string
-        '401':
-          description: Bad request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Unauthorized'
-        '403':
-          description: Not found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Forbidden'
-        '500':
-          description: error server
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/UnexpectedError'
-
-  /v1/import/publication/template/generate:
-    post:
-      operationId: generatePublicationTemplate
-      tags:
-        - ImportPublication
-      summary: Génère le modèle de fichier d'import de publications
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: array
-              items:
-                type: string
-      responses:
-        '200':
-          description: Successful operation
-          content:
-            application/json:
-              schema:
-                type: string
-        '401':
-          description: Bad request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Unauthorized'
-        '403':
-          description: Not found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Forbidden'
-        '500':
-          description: error server
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/UnexpectedError'
-
-  /v1/import/publication/template:
-    get:
-      operationId: getPublicationTemplateStructure
-      tags:
-        - ImportPublication
-      summary: Récupère le modèle de fichier d'import de publications
-      responses:
-        '200':
-          description: Successful operation
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/TemplateStructure'
-        '401':
-          description: Bad request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Unauthorized'
-        '403':
-          description: Not found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Forbidden'
-        '500':
-          description: error server
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/UnexpectedError'
-
-  /v1/import/identification/template:
-    get:
-      operationId: getIdentificationTemplateStructure
-      tags:
-        - ImportIdentification
-      summary: Récupère le modèle de fichier d'import de déterminations
-      responses:
-        '200':
-          description: Successful operation
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/TemplateStructure'
-        '401':
-          description: Bad request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Unauthorized'
-        '403':
-          description: Not found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Forbidden'
-        '500':
-          description: error server
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/UnexpectedError'
-
   /v1/import/file/{fileId}/download:
     get:
       operationId: getImportFile
@@ -859,9 +595,7 @@ paths:
           in: query
           description: Query specimen where continent field contains this value (case insensitive)
           schema:
-            type: array
-            items:
-              type: string
+            type: string
         - name: country
           required: false
           in: query
@@ -874,13 +608,6 @@ paths:
           description: Query specimen where nominative collection field contains this value (case insensitive)
           schema:
             type: string
-        - name: import_id
-          required: false
-          in: query
-          description: Query specimen for a specific import
-          schema:
-            type: string
-            format: uuid
         - name: storage_name
           required: false
           in: query
@@ -1510,6 +1237,73 @@ paths:
             application/json:
               schema:
                 type: boolean
+        '401':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Unauthorized'
+        '403':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Forbidden'
+        '409':
+          description: Applicative Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Conflict'
+        '500':
+          description: error server
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnexpectedError'
+
+  /v1/specimens/{specimenId}/duplicate/{collectionIdTarget}:
+    post:
+      operationId: duplicateSpecimen
+      tags:
+        - Specimen integration
+      summary: Specimen integration
+      parameters:
+        - name: specimenId
+          required: true
+          in: path
+          schema:
+            type: string
+            format: uuid
+            description: specimen identifier
+          example: 44386ff0b0-a6cc-11ec-b909-0242ac120075
+        - name: collectionIdTarget
+          required: true
+          in: path
+          schema:
+            type: string
+            format: uuid
+            description: collection target identifier
+          example: 44386ff0b0-a6cc-11ec-b909-0242ac120075
+        - name: operation
+          required: true
+          in: query
+          schema:
+            $ref: '#/components/schemas/OperationType'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SpecimenIntegrationRequest'
+      responses:
+        '201':
+          description: Successful operation
+          headers:
+            specimenId:
+              description: Specimen Identifier created
+              required: true
+              schema:
+                type: string
         '401':
           description: Bad request
           content:
@@ -2275,20 +2069,6 @@ paths:
           schema:
             type: string
             default: ""
-        - name: columnSort
-          required: false
-          in: query
-          description: Champ de tri
-          schema:
-            type: string
-        - name: typeSort
-          in: query
-          description: Ordre de tri
-          schema:
-            type: string
-            enum:
-              - ASC
-              - DESC
       responses:
         '200':
           description: Successful operation
@@ -2296,152 +2076,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/UserDashboardPageResponse'
-        '401':
-          description: Bad request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Unauthorized'
-        '403':
-          description: Not found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Forbidden'
-        '409':
-          description: Applicative Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Conflict'
-        '500':
-          description: error server
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/UnexpectedError'
-  /v1/public/institutions/{institutionId}/statistics:
-    get:
-      operationId: getInstitutionStatistics
-      tags:
-        - Public institution
-      summary: Retrieve institution statistics by institutionId
-      parameters:
-        - name: institutionId
-          in: path
-          required: true
-          description: The UUID of the institution.
-          schema:
-            type: string
-            format: uuid
-          example: "50f4978a-da62-4fde-8f38-5003bd43ff64"
-      responses:
-        '200':
-          description: Successful operation
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/InstitutionStatistics'
-        '401':
-          description: Bad request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Unauthorized'
-        '403':
-          description: Not found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Forbidden'
-        '409':
-          description: Applicative Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Conflict'
-        '500':
-          description: error server
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/UnexpectedError'
-
-  /v1/public/institutions/{institutionId}/nominative-collections:
-    get:
-      operationId: getNominativeCollectionsByInstitutionId
-      tags:
-        - Public institution
-      summary: Retrieve institution nominative-collections by institutionId
-      parameters:
-        - name: institutionId
-          in: path
-          required: true
-          description: The UUID of the institution.
-          schema:
-            type: string
-            format: uuid
-          example: "50f4978a-da62-4fde-8f38-5003bd43ff64"
-      responses:
-        '200':
-          description: Successful operation
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  type: string
-                  format: string
-        '401':
-          description: Bad request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Unauthorized'
-        '403':
-          description: Not found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Forbidden'
-        '409':
-          description: Applicative Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Conflict'
-        '500':
-          description: error server
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/UnexpectedError'
-
-  /v1/public/institutions/{institutionId}/mids:
-    get:
-      operationId: getInstitutionMids
-      tags:
-        - Public institution
-      summary: Retrieve institution mids by institutionId
-      parameters:
-        - name: institutionId
-          in: path
-          required: true
-          description: The UUID of the institution.
-          schema:
-            type: string
-            format: uuid
-          example: "50f4978a-da62-4fde-8f38-5003bd43ff64"
-      responses:
-        '200':
-          description: Successful operation
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  type: integer
-                  format: int64
         '401':
           description: Bad request
           content:
@@ -2508,109 +2142,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/UnexpectedError'
-  /v1/public/institutions/{institutionId}/domain-statistics:
-    get:
-      operationId: getDomainSpecimenCounts
-      tags:
-        - Public institution
-      summary: Retrieve institution domain-statistics by institutionId
-      parameters:
-        - name: institutionId
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-      responses:
-        '200':
-          description: Successful operation
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/DomainSpecimenCount'
-        '401':
-          description: Bad request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Unauthorized'
-        '403':
-          description: Not found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Forbidden'
-        '409':
-          description: Applicative Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Conflict'
-        '500':
-          description: error server
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/UnexpectedError'
-
-  /v1/public/institutions/{institutionId}/collection-descriptions:
-    get:
-      operationId: getCollectionsDescriptions
-      tags:
-        - Public institution
-      summary: Retrieve by collection all descriptions in the institution
-      parameters:
-        - name: institutionId
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-        - name: lng
-          required: false
-          in: header
-          schema:
-            type: string
-            format: string
-            description: user language
-          example:
-            lng: fr
-      responses:
-        '200':
-          description: Successful operation
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/CollectionDescription'
-        '401':
-          description: Bad request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Unauthorized'
-        '403':
-          description: Not found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Forbidden'
-        '409':
-          description: Applicative Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Conflict'
-        '500':
-          description: error server
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/UnexpectedError'
-
   /v1/placeholderDatations:
     get:
       operationId: getAllPlaceholderDatation
@@ -3171,20 +2702,6 @@ paths:
               - DATA_PROVIDER
               - MEMBER
           description: partnerType filter (PARTNER, DATA_PROVIDER, MEMBER)
-        - name: columnSort
-          required: false
-          in: query
-          description: Champ de tri
-          schema:
-            type: string
-        - name: typeSort
-          in: query
-          description: Ordre de tri
-          schema:
-            type: string
-            enum:
-              - ASC
-              - DESC
 
       tags:
         - Institution
@@ -3486,20 +3003,6 @@ paths:
           description: State of the article
           schema:
             $ref: '#/components/schemas/ArticleState'
-        - name: columnSort
-          required: false
-          in: query
-          description: Champ de tri
-          schema:
-            type: string
-        - name: typeSort
-          in: query
-          description: Ordre de tri
-          schema:
-            type: string
-            enum:
-              - ASC
-              - DESC
       tags:
         - Article
       summary: Retrieve articles
@@ -3916,7 +3419,7 @@ paths:
     get:
       operationId: getPublicInstitutions
       tags:
-        - Public institution
+        - visibilite public
       summary: Retrieve institutions (for public acces)
       parameters:
         - name: page
@@ -3980,9 +3483,9 @@ paths:
                 $ref: '#/components/schemas/UnexpectedError'
   /v1/public/institutions/{institutionUUID}:
     get:
-      operationId: getPublicInstitution
+      operationId: getPublicInstitutionDetailsUUID
       tags:
-        - Public institution
+        - visibilite public
       summary: Retrieve collections of intitution (for public acces)
       parameters:
         - name: institutionUUID
@@ -4368,13 +3871,8 @@ components:
           type: string
         preparations:
           type: string
-        preparationDetail:
-          type: string
         individualCount:
           type: string
-        approximateIndividualCount:
-          type: boolean
-          nullable: false
         sex:
           type: string
         lifeStage:
@@ -4448,13 +3946,8 @@ components:
           type: string
         preparations:
           type: string
-        preparationDetail:
-          type: string
         individualCount:
           type: string
-        approximateIndividualCount:
-          type: boolean
-          nullable: false
         sex:
           type: string
         lifeStage:
@@ -4650,6 +4143,8 @@ components:
         financialAid:
           type: string
         computerizationProgram:
+          type: string
+        remarks:
           type: string
 
     PublicCollectionEvent:
@@ -4880,13 +4375,8 @@ components:
           type: string
         preparations:
           type: string
-        preparationDetail:
-          type: string
         individualCount:
           type: string
-        approximateIndividualCount:
-          type: boolean
-          nullable: false
         sex:
           type: string
         lifeStage:
@@ -5315,6 +4805,8 @@ components:
           type: string
         stateProvince:
           type: string
+        region:
+          type: string
         county:
           type: string
         country:
@@ -5423,6 +4915,8 @@ components:
         financialAid:
           type: string
         computerizationProgram:
+          type: string
+        remarks:
           type: string
 
     Management:
@@ -5737,11 +5231,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Collection'
-        url:
-          type: string
-        specimenCount:
-          type: integer
-          format: int32
 
     InstitutionDetailResponse:
       description: Institution Response
@@ -5779,15 +5268,6 @@ components:
         partnerType:
           type: string
           example: DATA_PROVIDER, MEMBER, PARTNER
-        url:
-          type: string
-          format: string
-          description: url du site de l'institution
-          example: http://mnhn.fr
-        specimensCount:
-          type: integer
-          format: int32
-          description: nombre estimé de specimen
       example:
         id: 1
         code: MNHN
@@ -5826,15 +5306,6 @@ components:
           format: string
           description: url du logo d institution
           example: http://mediaphoto.mnhn.fr/media/1441439763721S1JxP92vYMmLFcfK
-        url:
-          type: string
-          format: string
-          description: url du site de l'institution
-          example: http://mnhn.fr
-        specimensCount:
-          type: integer
-          format: int32
-          description: nombre estimé de specimen
 
     InstitutionOption:
       type: object
@@ -6120,52 +5591,6 @@ components:
           format: int
           description: institution id
           example: 86360ea7-b055-485b-8f46-8b75e4c3c1af
-    DomainSpecimenCount:
-      type: object
-      properties:
-        domainName:
-          type: string
-        specimenCount:
-          type: string
-          format: int
-    CollectionDescription:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-        name:
-          type: string
-        description:
-          type: string
-        collectionCode:
-          type: string
-    InstitutionStatistics:
-      type: object
-      properties:
-        id:
-          type: integer
-          format: int64
-        institutionId:
-          type: string
-          format: uuid
-        institutionName:
-          type: string
-        computerizedSpecimens:
-          type: integer
-          format: int64
-        specimensCount:
-          type: integer
-          format: int64
-        taxonsCount:
-          type: integer
-          format: int64
-        typesCount:
-          type: integer
-          format: int64
-        lastUpdate:
-          type: string
-          format: date-time
 
     AutoCompleteResponse:
       type: array
@@ -6370,21 +5795,3 @@ components:
           format: uuid
         name:
           type: string
-
-    TemplateStructure:
-      type: object
-      properties:
-        name:
-          type: string
-        children:
-          type: array
-          items:
-            $ref: '#/components/schemas/TemplateField'
-
-    TemplateField:
-      type: object
-      properties:
-        key:
-          type: string
-        required:
-          type: boolean

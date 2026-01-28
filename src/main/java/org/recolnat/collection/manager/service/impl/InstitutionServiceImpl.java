@@ -3,14 +3,12 @@
  */
 package org.recolnat.collection.manager.service.impl;
 
-import io.recolnat.model.InstitutionStatisticsDTO;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Tuple;
 import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
-import jakarta.persistence.criteria.Expression;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Order;
@@ -22,14 +20,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.recolnat.collection.manager.api.domain.CollectionsInstitution;
-import org.recolnat.collection.manager.api.domain.FileInfo;
 import org.recolnat.collection.manager.api.domain.Institution;
 import org.recolnat.collection.manager.api.domain.InstitutionDashboard;
 import org.recolnat.collection.manager.api.domain.InstitutionDetail;
 import org.recolnat.collection.manager.api.domain.InstitutionProjection;
 import org.recolnat.collection.manager.api.domain.InstitutionPublicResult;
-import org.recolnat.collection.manager.api.domain.InstitutionStatisticProjection;
-import org.recolnat.collection.manager.api.domain.MidsGroup;
 import org.recolnat.collection.manager.api.domain.Result;
 import org.recolnat.collection.manager.api.domain.enums.LanguageEnum;
 import org.recolnat.collection.manager.api.domain.enums.PartnerType;
@@ -37,7 +32,7 @@ import org.recolnat.collection.manager.api.domain.enums.RoleEnum;
 import org.recolnat.collection.manager.common.exception.CollectionManagerBusinessException;
 import org.recolnat.collection.manager.common.exception.ErrorCode;
 import org.recolnat.collection.manager.common.mapper.InstitutionMapper;
-import org.recolnat.collection.manager.common.util.FileUtil;
+import org.recolnat.collection.manager.connector.api.MediathequeService;
 import org.recolnat.collection.manager.repository.entity.CollectionJPA;
 import org.recolnat.collection.manager.repository.entity.InstitutionJPA;
 import org.recolnat.collection.manager.repository.entity.SpecimenJPA;
@@ -46,13 +41,10 @@ import org.recolnat.collection.manager.service.AsyncService;
 import org.recolnat.collection.manager.service.AuthenticationService;
 import org.recolnat.collection.manager.service.CollectionRetrieveService;
 import org.recolnat.collection.manager.service.InstitutionService;
-import org.recolnat.collection.manager.service.UploadFileService;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
@@ -61,19 +53,16 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static java.util.Objects.isNull;
@@ -91,15 +80,9 @@ public class InstitutionServiceImpl implements InstitutionService {
     private final InstitutionRepositoryJPA institutionRepository;
     private final InstitutionMapper institutionMapper;
     private final Validator validator;
+    private final MediathequeService mediathequeApiClient;
     private final AuthenticationService authenticationService;
     private final AsyncService asyncService;
-    private final UploadFileService uploadFileService;
-
-    @Value("${filesystem.base-directory}")
-    private String baseDirectory;
-
-    @Value("${upload.institutions}")
-    private String institutionDirectory;
 
     @PersistenceContext
     private EntityManager em;
@@ -123,10 +106,7 @@ public class InstitutionServiceImpl implements InstitutionService {
                 .partnerTypeEn(isNull(inst.getPartnerType()) ? null : inst.getPartnerType().getPartnerEn())
                 .partnerTypeFr(isNull(inst.getPartnerType()) ? null : inst.getPartnerType().getPartnerFr())
                 .logoUrl(inst.getLogoUrl())
-                .collections(collectionsByInstitution)
-                .url(inst.getUrl())
-                .specimensCount(inst.getSpecimensCount())
-                .build();
+                .collections(collectionsByInstitution).build();
     }
 
 
@@ -152,10 +132,7 @@ public class InstitutionServiceImpl implements InstitutionService {
                 .partnerTypeEn(isNull(inst.getPartnerType()) ? null : inst.getPartnerType().getPartnerEn())
                 .partnerTypeFr(isNull(inst.getPartnerType()) ? null : inst.getPartnerType().getPartnerFr())
                 .logoUrl(inst.getLogoUrl())
-                .collections(collectionsByInstitution)
-                .url(inst.getUrl())
-                .specimensCount(inst.getSpecimensCount())
-                .build();
+                .collections(collectionsByInstitution).build();
 
     }
 
@@ -178,8 +155,6 @@ public class InstitutionServiceImpl implements InstitutionService {
                 .optionalDescription(inst.getOptionalDescription())
                 .partnerType(inst.getPartnerType().toString())
                 .logoUrl(inst.getLogoUrl())
-                .url(inst.getUrl())
-                .specimensCount(inst.getSpecimensCount())
                 .build();
     }
 
@@ -210,7 +185,7 @@ public class InstitutionServiceImpl implements InstitutionService {
     }
 
     @Override
-    public Result<InstitutionDashboard> findAll(int page, int size, String searchTerm, String partnerType, String columnSort, String typeSort) {
+    public Result<InstitutionDashboard> findAll(int page, int size, String searchTerm, String partnerType) {
         var currentUser = authenticationService.findUserAttributes();
         var isAdmin = RoleEnum.ADMIN.equals(RoleEnum.fromValue(currentUser.getRole()));
 
@@ -225,23 +200,15 @@ public class InstitutionServiceImpl implements InstitutionService {
         collectionJoin.on(cb.equal(root.get("id"), collectionJoin.get("institutionId")));
         Join<CollectionJPA, SpecimenJPA> specimenJoin = collectionJoin.join("specimens", JoinType.LEFT);
 
-        Expression<Long> countExpression = cb.count(specimenJoin.get("id"));
         query.multiselect(
                 root.get("institutionId"),
                 root.get("code"),
                 root.get("name"),
                 root.get("partnerType"),
-                countExpression.alias("specimenCount")
+                cb.count(specimenJoin.get("id"))
         );
 
-        List<Order> sorting = new ArrayList<>();
-
-        if (StringUtils.isNotBlank(typeSort) && StringUtils.isNotBlank(columnSort)) {
-            Expression<?> expression = "specimenCount".equalsIgnoreCase(columnSort) ? countExpression : root.get(columnSort);
-            sorting.add("ASC".equalsIgnoreCase(typeSort) ? cb.asc(expression) : cb.desc(expression));
-        } else {
-            sorting.addAll(List.of(cb.asc(root.get(INSTITUTION_NAME)), cb.asc(root.get(INSTITUTION_CODE))));
-        }
+        List<Order> sorting = List.of(cb.asc(root.get(INSTITUTION_NAME)), cb.asc(root.get(INSTITUTION_CODE)));
 
         ArrayList<Predicate> filters = new ArrayList<>(getFilters(cb, root, searchTerm, partnerType));
 
@@ -346,19 +313,22 @@ public class InstitutionServiceImpl implements InstitutionService {
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
-    public UUID addOrReplaceInstitutionLogo(UUID id, MultipartFile img) {
+    public UUID addLogoIntitution(UUID id, MultipartFile img) {
         var institutionJPA = checkInstExist(id);
         checkAccessToInstitution(institutionJPA);
         log.info("Add logo institution with id : {}", id);
-        Path directoryPath = Path.of(baseDirectory, institutionDirectory, id.toString());
-        if (StringUtils.isNotBlank(institutionJPA.getLogoUrl())) {
-            FileUtil.deleteIfExists(directoryPath.resolve(Path.of(institutionJPA.getLogoUrl())));
+        try {
+            var saveLogo = mediathequeApiClient.savePicture(img);
+            if (Objects.isNull(saveLogo) ||
+                Objects.isNull(saveLogo.getBody())) {
+                throw new CollectionManagerBusinessException(ErrorCode.ERR_NFE_CODE, "Media don't found");
+            }
+            institutionJPA.setLogoUrl(saveLogo.getBody().getMedia().getUrl());
+            institutionRepository.save(institutionJPA);
+        } catch (IOException e) {
+            throw new CollectionManagerBusinessException(HttpStatus.INTERNAL_SERVER_ERROR,
+                    "SERVER_ERROR_CODE", e.getMessage());
         }
-        String fileName = img.getOriginalFilename();
-        String extension = FileUtil.getFileExtension(fileName);
-        String url = uploadFileService.uploadFile("logo." + extension, directoryPath, img);
-        institutionJPA.setLogoUrl(url);
-        institutionRepository.save(institutionJPA);
         return institutionJPA.getInstitutionId();
     }
 
@@ -474,14 +444,12 @@ public class InstitutionServiceImpl implements InstitutionService {
                 .mandatoryDescription(institution.getMandatoryDescription())
                 .optionalDescription(institution.getOptionalDescription())
                 .partnerType(institution.getPartnerType())
-                .logoUrl(institutionJPA.getLogoUrl())
+                .logoUrl(institution.getLogoUrl())
                 .createdAt(institutionJPA.getCreatedAt())
                 .createdBy(institutionJPA.getCreatedBy())
                 .modifiedBy(user)
-                .modifiedAt(LocalDateTime.now(ZoneId.of("UTC")))
-                .url(institution.getUrl())
-                .specimensCount(institution.getSpecimensCount())
-                .build();
+                .modifiedAt(LocalDateTime.now(ZoneId.of("UTC"))).
+                build();
     }
 
     @Override
@@ -510,45 +478,5 @@ public class InstitutionServiceImpl implements InstitutionService {
 
     }
 
-    @Override
-    public InstitutionStatisticsDTO getInstitutionStatistics(UUID institutionId) {
-        InstitutionStatisticProjection projection = institutionRepository.getInstitutionStatistic(institutionId);
-        return institutionMapper.toDto(projection);
-    }
 
-    public void refreshStatisticView() {
-        institutionRepository.refreshMaterializedView();
-    }
-
-    @Override
-    public List<Long> getInstitutionMids(UUID institutionId) {
-        List<MidsGroup> groups = institutionRepository.getInstitutionMids(institutionId);
-
-        Map<Integer, Long> map = groups.stream().collect(Collectors.toMap(MidsGroup::getMids, MidsGroup::getCount));
-
-        return IntStream.range(0, 4).mapToObj(i -> map.getOrDefault(i, 0L)).toList();
-    }
-
-    @Override
-    public FileInfo getLogoById(UUID id) {
-        InstitutionJPA inst = institutionRepository
-                .findInstitutionByInstitutionId(id).orElseThrow(
-                        () ->
-                                new CollectionManagerBusinessException(
-                                        HttpStatus.NOT_FOUND,
-                                        ErrorCode.ERR_NFE_CODE,
-                                        "institutionId not found with idUUID :" + id)
-                );
-        if (inst.getLogoUrl() == null) {
-            return null;
-        }
-        Path logoPath = Path.of(baseDirectory, institutionDirectory, inst.getInstitutionId().toString(), inst.getLogoUrl());
-        try {
-            byte[] data = uploadFileService.getFileBytes(logoPath);
-            MediaType mediaType = uploadFileService.getImageMediaType(inst.getLogoUrl());
-            return FileInfo.builder().data(data).mediaType(mediaType).build();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
 }

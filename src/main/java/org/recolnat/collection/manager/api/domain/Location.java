@@ -16,6 +16,7 @@ public class Location {
 
     private String municipality;
     private String stateProvince;
+    private String region;
     private String county;
     private String country;
     private String continent;

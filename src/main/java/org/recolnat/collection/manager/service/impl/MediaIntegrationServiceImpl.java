@@ -11,11 +11,12 @@ import org.recolnat.collection.manager.connector.api.MediathequeService;
 import org.recolnat.collection.manager.repository.entity.MediaJPA;
 import org.recolnat.collection.manager.repository.entity.SpecimenJPA;
 import org.recolnat.collection.manager.repository.jpa.MediaJPARepository;
+import org.recolnat.collection.manager.repository.jpa.SpecimenJPARepository;
 import org.recolnat.collection.manager.service.AuthenticationService;
 import org.recolnat.collection.manager.service.ElasticService;
 import org.recolnat.collection.manager.service.MediaCreatedEvent;
 import org.recolnat.collection.manager.service.MediaIntegrationService;
-import org.recolnat.collection.manager.service.SpecimenIntegrationService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -26,9 +27,11 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 @Service
@@ -38,12 +41,16 @@ public class MediaIntegrationServiceImpl implements MediaIntegrationService {
 
     private final MediathequeService mediathequeService;
     private final AuthenticationService authenticationService;
+    private final SpecimenJPARepository specimenJPARepository;
     private final MediaJPARepository mediaJPARepository;
     private final ApplicationEventPublisher publisher;
     private final SpecimenIntegrationRule specimenIntegrationRule;
     private final ControlAttribut checkAttribut;
     private final ElasticService elasticService;
-    private final SpecimenIntegrationService specimenIntegrationService;
+
+
+    @Value("${index.specimen}")
+    String indexSpecimen;
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED, isolation = Isolation.READ_COMMITTED, rollbackFor = CollectionManagerBusinessException.class)
@@ -80,7 +87,7 @@ public class MediaIntegrationServiceImpl implements MediaIntegrationService {
     public List<String> addDraft(UUID specimenId, List<MultipartFile> fileName) {
         final var specimenJPA = specimenIntegrationRule.checkSpecimenExist(specimenId);
         var collectionId = specimenJPA.getCollection().getId();
-        checkAttribut.checkUserRightsOnCollection(collectionId);
+        checkAttribut.checkUserAuthAttributesForAnyRole(collectionId);
         final var mediaSaved = addMedia(specimenId, fileName);
         return mediaSaved.stream().map(MediaJPA::getMediaUrl).toList();
     }
@@ -90,8 +97,7 @@ public class MediaIntegrationServiceImpl implements MediaIntegrationService {
     public List<String> addReviewed(UUID specimenId, List<MultipartFile> fileName) {
         final var specimenJPA = specimenIntegrationRule.checkSpecimenExist(specimenId);
         var collectionId = specimenJPA.getCollection().getId();
-        // Tout le monde peut soumettre à publication donc on vérifie juste que l'utilisateur a les droits sur la collection
-        checkAttribut.checkUserRightsOnCollection(collectionId);
+        checkAttribut.checkUserAuthAttributesForRoleAdminCollection(collectionId);
         final var mediaSaved = addMedia(specimenId, fileName);
         return mediaSaved.stream().map(MediaJPA::getMediaUrl).toList();
     }
@@ -144,11 +150,50 @@ public class MediaIntegrationServiceImpl implements MediaIntegrationService {
         // update spec prefer builder
         oldSpec.setModifiedBy(uid);
         oldSpec.setModifiedAt(LocalDateTime.now());
-        var savedSpecimen = specimenIntegrationService.saveSpecimenJPAAndUpdateMids(oldSpec);
+        var savedMedias = specimenJPARepository.save(oldSpec);
 
         //publish event
         publisher.publishEvent(mediasTosave);
-        return savedSpecimen.getMedias().stream().toList();
+        return savedMedias.getMedias().stream().toList();
     }
 
+    private boolean checkMedias(Set<MediaJPA> medias) {
+        if (medias == null || medias.isEmpty()) {
+            log.debug("No media found, skipping cover check.");
+            return false;
+        }
+        return true;
+    }
+
+    private void isMoreThanOneCover(List<MediaJPA> mediaList, int foundCoverIndex) {
+        for (int i = 0; i < mediaList.size(); i++) {
+            MediaJPA media = mediaList.get(i);
+            boolean isCurrentlyCover = Boolean.TRUE.equals(media.getIsCover());
+
+            if (isCurrentlyCover) {
+                if (foundCoverIndex == -1) {
+                    foundCoverIndex = i;
+                } else {
+                    media.setIsCover(false);
+                }
+            } else if (media.getIsCover() == null) {
+                media.setIsCover(false);
+            }
+        }
+    }
+
+    /**
+     * Vérifie qu'il n'y a qu'une image de couverture dans la liste (flag isCover à true).
+     * si aucun alors on ne fait rien,
+     * si il y en a plus qu'une alors on garde la première a isCover: true et
+     * les autres sont mises à false.
+     */
+    public void ensureSingleCoverIsSet(Set<MediaJPA> medias) {
+        if (!checkMedias(medias)) {
+            return;
+        }
+        List<MediaJPA> mediaList = new ArrayList<>(medias);
+        int foundCoverIndex = -1;
+        isMoreThanOneCover(mediaList, foundCoverIndex);
+    }
 }

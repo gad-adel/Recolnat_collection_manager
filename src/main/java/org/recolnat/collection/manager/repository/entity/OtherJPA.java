@@ -23,5 +23,6 @@ public class OtherJPA extends AbstractEntity {
     private String linkOther;
     private String financialAid;
     private String computerizationProgram;
+    private String remarks;
 
 }

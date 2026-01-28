@@ -47,9 +47,6 @@ public class InstitutionJPA {
     private LocalDateTime modifiedAt;
     private LocalDateTime dataChangeTs;
 
-    private String url;
-    private Integer specimensCount;
-
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "institution")
     @ToString.Exclude
     private List<CollectionJPA> collections;

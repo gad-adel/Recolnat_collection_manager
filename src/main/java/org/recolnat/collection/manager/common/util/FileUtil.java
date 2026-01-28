@@ -3,8 +3,6 @@ package org.recolnat.collection.manager.common.util;
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.recolnat.collection.manager.common.exception.CollectionManagerBusinessException;
-import org.recolnat.collection.manager.common.exception.ErrorCode;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -57,24 +55,6 @@ public class FileUtil {
         return headers;
     }
 
-    public static String getFileExtension(String filename) {
-        if (filename == null) {
-            return null;
-        }
-        int dotIndex = filename.lastIndexOf(".");
-        if (dotIndex >= 0) {
-            return filename.substring(dotIndex + 1);
-        }
-        return "";
-    }
-
-    public static void deleteIfExists(Path filePath) {
-        try {
-            Files.deleteIfExists(filePath);
-        } catch (IOException e) {
-            throw new CollectionManagerBusinessException(ErrorCode.ERR_NFE_CODE, "Erreur lors de la suppression du fichier");
-        }
-    }
 
     public record FileResource(String filename, InputStreamResource inputStreamResource) {
     }

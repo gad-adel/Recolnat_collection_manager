@@ -65,6 +65,9 @@ public class CmApiSecurityConfiguration {
     private static final String API_URL_SPECIMENS_POST_DRAFT = API_URL_SPECIMENS + "/draft";
     private static final String API_URL_SPECIMENS_PATCH = API_URL_SPECIMEN + "/medias";
     private static final String API_URL_SPECIMENS_PATCH_DRAFT = API_URL_SPECIMEN + "/medias/draft";
+    private static final String API_URL_SPECIMENS_REVIEW = API_URL_SPECIMEN + "/review";
+    private static final String API_URL_SPECIMENS_POST_REVIEW = API_URL_SPECIMENS + "/review";
+    private static final String API_URL_SPECIMENS_PATCH_REVIEW = API_URL_SPECIMEN + "/medias/review";
     private static final String API_URL_DUPLICATE_SPECIMENS = API_URL_SPECIMEN + "/duplicate/**";
     private static final String API_URL_SPECIMEN_REFRESH = API_URL_SPECIMENS + "/refresh";
     private static final String API_URL_COLLECTION_ALL = "/v1/collections/**";
@@ -89,43 +92,17 @@ public class CmApiSecurityConfiguration {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authorizeRequests -> authorizeRequests
-                        .requestMatchers(HttpMethod.POST, "v1/mids/**")
-                        .hasAnyRole(
-                                RoleEnum.ADMIN.name(),
-                                RoleEnum.ADMIN_INSTITUTION.name(),
-                                RoleEnum.ADMIN_COLLECTION.name(),
-                                RoleEnum.DATA_ENTRY.name())
-                        .requestMatchers(HttpMethod.GET, "v1/doi")
-                        .hasAnyRole(
-                                RoleEnum.ADMIN.name(),
-                                RoleEnum.ADMIN_INSTITUTION.name(),
-                                RoleEnum.ADMIN_COLLECTION.name(),
-                                RoleEnum.DATA_ENTRY.name())
                         .requestMatchers(HttpMethod.POST, "v1/import/specimen/check")
-                        .hasAnyRole(CAN_IMPORT_ROLES)
-                        .requestMatchers(HttpMethod.GET, "v1/import/specimen/template")
-                        .hasAnyRole(CAN_IMPORT_ROLES)
-                        .requestMatchers(HttpMethod.POST, "v1/import/specimen/template/generate")
                         .hasAnyRole(CAN_IMPORT_ROLES)
                         .requestMatchers(HttpMethod.POST, "v1/import/identification/check")
                         .hasAnyRole(CAN_IMPORT_ROLES)
-                        .requestMatchers(HttpMethod.GET, "v1/import/identification/template")
-                        .hasAnyRole(CAN_IMPORT_ROLES)
-                        .requestMatchers(HttpMethod.POST, "v1/import/identification/template/generate")
-                        .hasAnyRole(CAN_IMPORT_ROLES)
                         .requestMatchers(HttpMethod.POST, "v1/import/publication/check")
-                        .hasAnyRole(CAN_IMPORT_ROLES)
-                        .requestMatchers(HttpMethod.GET, "v1/import/publication/template")
-                        .hasAnyRole(CAN_IMPORT_ROLES)
-                        .requestMatchers(HttpMethod.POST, "v1/import/publication/template/generate")
                         .hasAnyRole(CAN_IMPORT_ROLES)
                         .requestMatchers(HttpMethod.POST, "v1/import/check")
                         .hasAnyRole(CAN_IMPORT_ROLES)
                         .requestMatchers(HttpMethod.POST, "v1/import/validate")
                         .hasAnyRole(CAN_IMPORT_ROLES)
                         .requestMatchers(HttpMethod.GET, "v1/import")
-                        .hasAnyRole(CAN_IMPORT_ROLES)
-                        .requestMatchers(HttpMethod.PUT, "v1/import/*/unpublish")
                         .hasAnyRole(CAN_IMPORT_ROLES)
                         .requestMatchers(HttpMethod.GET, "v1/import/file/*/download")
                         .hasAnyRole(CAN_IMPORT_ROLES)
@@ -165,20 +142,12 @@ public class CmApiSecurityConfiguration {
                                 RoleEnum.ADMIN_INSTITUTION.name(),
                                 RoleEnum.ADMIN_COLLECTION.name(),
                                 RoleEnum.DATA_ENTRY.name())
-                        .requestMatchers(HttpMethod.POST, "/v1/specimens/review")
-                        .hasAnyRole(
-                                RoleEnum.ADMIN.name(),
-                                RoleEnum.ADMIN_INSTITUTION.name(),
-                                RoleEnum.ADMIN_COLLECTION.name(),
-                                RoleEnum.DATA_ENTRY.name()
-                        )
-                        .requestMatchers(HttpMethod.PUT, "/v1/specimens/*/review")
-                        .hasAnyRole(
-                                RoleEnum.ADMIN.name(),
-                                RoleEnum.ADMIN_INSTITUTION.name(),
-                                RoleEnum.ADMIN_COLLECTION.name(),
-                                RoleEnum.DATA_ENTRY.name()
-                        )
+                        .requestMatchers(HttpMethod.POST, API_URL_SPECIMENS_REVIEW)
+                        .hasRole(RoleEnum.ADMIN_COLLECTION.name())
+                        .requestMatchers(HttpMethod.POST, API_URL_SPECIMENS_POST_REVIEW)
+                        .hasRole(RoleEnum.ADMIN_COLLECTION.name())
+                        .requestMatchers(HttpMethod.PUT, API_URL_SPECIMENS_REVIEW)
+                        .hasRole(RoleEnum.ADMIN_COLLECTION.name())
                         .requestMatchers(HttpMethod.POST, API_URL_SPECIMENS)
                         .hasAnyRole(
                                 RoleEnum.ADMIN.name(),
@@ -189,13 +158,10 @@ public class CmApiSecurityConfiguration {
                         .hasAnyRole(RoleEnum.ADMIN.name(), RoleEnum.ADMIN_INSTITUTION.name())
                         .requestMatchers(HttpMethod.PUT, API_URL_SPECIMEN)
                         .hasAnyRole(RoleEnum.ADMIN.name(), RoleEnum.ADMIN_INSTITUTION.name(), RoleEnum.ADMIN_COLLECTION.name())
-                        .requestMatchers(HttpMethod.PATCH, "/v1/specimens/*/medias/review")
-                        .hasAnyRole(
-                                RoleEnum.ADMIN.name(),
-                                RoleEnum.ADMIN_INSTITUTION.name(),
-                                RoleEnum.ADMIN_COLLECTION.name(),
-                                RoleEnum.DATA_ENTRY.name()
-                        )
+                        .requestMatchers(HttpMethod.PATCH, API_URL_SPECIMENS_REVIEW)
+                        .hasRole(RoleEnum.ADMIN_COLLECTION.name())
+                        .requestMatchers(HttpMethod.PATCH, API_URL_SPECIMENS_PATCH_REVIEW)
+                        .hasRole(RoleEnum.ADMIN_COLLECTION.name())
                         .requestMatchers(HttpMethod.PATCH, API_URL_SPECIMENS_PATCH_DRAFT)
                         .hasAnyRole(
                                 RoleEnum.ADMIN.name(),
@@ -218,7 +184,6 @@ public class CmApiSecurityConfiguration {
                         .requestMatchers(HttpMethod.DELETE, "/v1/collections/*")
                         .hasAnyRole(RoleEnum.ADMIN.name(), RoleEnum.ADMIN_INSTITUTION.name())
                         .requestMatchers(HttpMethod.GET, API_URL_SPECIMEN).authenticated()
-                        .requestMatchers(HttpMethod.GET, API_URL_SPECIMEN + "/has-to-publish").authenticated()
                         // TODO à modifier ?
                         .requestMatchers(HttpMethod.GET, API_URL_COLLECTION_ALL).authenticated()
                         .requestMatchers(HttpMethod.PUT, API_URL_COLLECTION_ALL).hasAnyRole(

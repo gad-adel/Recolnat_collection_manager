@@ -58,10 +58,6 @@ public interface SpecimenJPARepository extends JpaRepository<SpecimenJPA, UUID>,
     @Query("delete from specimen s where s.id = ?1")
     void deleteSpecimen(UUID specimenId);
 
-    @Modifying
-    @Query(value = "update specimen s set state = 'DRAFT' from specimen_update su where s.id = su.fk_specimen_id and su.fk_import_id = :importId", nativeQuery = true)
-    void unpublishSpecimenByImportId(@Param("importId") UUID importId);
-
     /**
      * @param fromDate
      * @param toDate
@@ -101,16 +97,6 @@ public interface SpecimenJPARepository extends JpaRepository<SpecimenJPA, UUID>,
 
     @Query("select distinct s.nominativeCollection from specimen s where upper(s.nominativeCollection) like upper(:query) order by s.nominativeCollection")
     List<String> findNominativeCollectionsStartingWith(String query, PageRequest of);
-
-    @Query(value = """
-            select distinct s.nominative_collection
-            from specimen s
-            join collection c on c.id = s.fk_id_collection
-            and c.fk_institution_id = :institutionId
-            where s.nominative_collection is not null
-            order by s.nominative_collection
-            """, nativeQuery = true)
-    List<String> findDistinctNominativeCollectionsByInstitutionId(@Param("institutionId") UUID institutionId);
 
     @Query(value = """
             select distinct m.storage_name

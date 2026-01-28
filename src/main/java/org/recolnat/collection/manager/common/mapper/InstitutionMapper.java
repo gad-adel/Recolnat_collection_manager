@@ -7,7 +7,6 @@ import io.recolnat.model.InstitutionDetailResponseDTO;
 import io.recolnat.model.InstitutionOptionDTO;
 import io.recolnat.model.InstitutionRequestDTO;
 import io.recolnat.model.InstitutionResponseDTO;
-import io.recolnat.model.InstitutionStatisticsDTO;
 import io.recolnat.model.InstitutionsProgramResponseDTO;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -17,7 +16,6 @@ import org.recolnat.collection.manager.api.domain.InstitutionDashboard;
 import org.recolnat.collection.manager.api.domain.InstitutionDetail;
 import org.recolnat.collection.manager.api.domain.InstitutionProjection;
 import org.recolnat.collection.manager.api.domain.InstitutionPublicResult;
-import org.recolnat.collection.manager.api.domain.InstitutionStatisticProjection;
 import org.recolnat.collection.manager.api.domain.Result;
 import org.recolnat.collection.manager.api.domain.enums.PartnerType;
 import org.recolnat.collection.manager.repository.entity.InstitutionJPA;
@@ -93,5 +91,5 @@ public interface InstitutionMapper {
         return isNull(partnerType) ? null : partnerType.getPartnerFr();
     }
 
-    InstitutionStatisticsDTO toDto(InstitutionStatisticProjection projection);
+
 }

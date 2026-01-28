@@ -1,8 +1,6 @@
 package org.recolnat.collection.manager.service;
 
-import io.recolnat.model.CollectionDescriptionDTO;
 import io.recolnat.model.CollectionDetailDTO;
-import io.recolnat.model.DomainSpecimenCountDTO;
 import io.recolnat.model.UserCollectionDTO;
 import org.recolnat.collection.manager.api.domain.Collection;
 import org.recolnat.collection.manager.api.domain.CollectionDashboardProjection;
@@ -32,8 +30,4 @@ public interface CollectionRetrieveService {
     List<CollectionProjection> findAllOptions(UUID institutionId);
 
     List<UserCollectionDTO> findUserCollections();
-
-    List<DomainSpecimenCountDTO> getDomainSpecimenCounts(UUID institutionId);
-
-    List<CollectionDescriptionDTO> getCollectionsDescriptions(UUID institutionId, String lng);
 }

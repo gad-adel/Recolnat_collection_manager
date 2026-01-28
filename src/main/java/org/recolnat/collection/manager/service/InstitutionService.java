@@ -1,7 +1,5 @@
 package org.recolnat.collection.manager.service;
 
-import io.recolnat.model.InstitutionStatisticsDTO;
-import org.recolnat.collection.manager.api.domain.FileInfo;
 import org.recolnat.collection.manager.api.domain.Institution;
 import org.recolnat.collection.manager.api.domain.InstitutionDashboard;
 import org.recolnat.collection.manager.api.domain.InstitutionDetail;
@@ -21,7 +19,7 @@ public interface InstitutionService {
 
     Institution getInstitutionPublicByUUID(UUID idUUID, String lng);
 
-    Result<InstitutionDashboard> findAll(int page, int size, String searchTerm, String partnerType, String columnSort, String typeSort);
+    Result<InstitutionDashboard> findAll(int page, int size, String searchTerm, String partnerType);
 
     List<InstitutionProjection> findAllOptions();
 
@@ -31,20 +29,11 @@ public interface InstitutionService {
 
     UUID updateInstitution(UUID id, Institution institution);
 
-    UUID addOrReplaceInstitutionLogo(UUID id, MultipartFile img);
+    UUID addLogoIntitution(UUID id, MultipartFile img);
 
     List<Institution> getInstitutionsByCodes(List<String> codes);
 
     List<Institution> getInstitutionsByIds(List<UUID> ids);
 
     boolean checkAccessToInstitution(UUID id);
-
-    InstitutionStatisticsDTO getInstitutionStatistics(UUID institutionId);
-
-    void refreshStatisticView();
-
-    List<Long> getInstitutionMids(UUID institutionId);
-
-    FileInfo getLogoById(UUID id);
-
 }

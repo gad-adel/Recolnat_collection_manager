@@ -23,10 +23,10 @@ public interface TaxonJPARepository extends JpaRepository<TaxonJPA, UUID> {
     List<String> findFamiliesStartingWith(String query, Pageable pageable);
 
     @Query("SELECT DISTINCT t.genus FROM Taxon t WHERE LOWER(t.genus) LIKE LOWER(:query)"
-            + " AND (:family = '' OR t.family = :family) ORDER BY t.genus")
+           + " AND (:family = '' OR t.family = :family) ORDER BY t.genus")
     List<String> findGenusStartingWithAndFilteredByFamily(String query, String family, Pageable pageable);
 
     @Query("SELECT DISTINCT t.specificEpithet FROM Taxon t WHERE LOWER(t.specificEpithet) LIKE LOWER(:query)"
-            + " AND (:genus = '' OR t.genus = :genus) ORDER BY t.specificEpithet")
+           + " AND (:genus = '' OR t.genus = :genus) ORDER BY t.specificEpithet")
     List<String> findSpecificEpithetsStartingWithAndFilteredBy(String query, String genus, Pageable pageable);
 }

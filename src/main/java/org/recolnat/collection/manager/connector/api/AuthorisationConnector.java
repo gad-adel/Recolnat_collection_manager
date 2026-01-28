@@ -5,5 +5,5 @@ import io.recolnat.model.UserDashboardPageResponseDTO;
 import java.util.UUID;
 
 public interface AuthorisationConnector {
-    UserDashboardPageResponseDTO getUsers(UUID institutionId, Integer page, Integer size, String searchTerm, String columnSort, String typeSort);
+    UserDashboardPageResponseDTO getUsers(UUID institutionId, Integer page, Integer size, String searchTerm);
 }

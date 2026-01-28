@@ -20,10 +20,9 @@ public class UserResource implements RetrieveUsersApi {
     private final AuthorisationConnector authorisationConnector;
 
     @Override
-    public ResponseEntity<UserDashboardPageResponseDTO> getUsers(UUID institutionId, Integer page, Integer size, String searchTerm, String columnSort,
-                                                                 String typeSort) {
+    public ResponseEntity<UserDashboardPageResponseDTO> getUsers(UUID institutionId, Integer page, Integer size, String searchTerm) {
         try {
-            var result = authorisationConnector.getUsers(institutionId, page, size, searchTerm, columnSort, typeSort);
+            var result = authorisationConnector.getUsers(institutionId, page, size, searchTerm);
             return new ResponseEntity<>(result, OK);
         } catch (Exception e) {
             throw new CollectionManagerBusinessException(HttpStatus.CONFLICT, ErrorCode.ERROR_APPLICATIVE, e.getMessage());

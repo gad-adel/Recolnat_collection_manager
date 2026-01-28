@@ -118,12 +118,7 @@ public class ControlAttribut {
         }
     }
 
-    /**
-     * Vérifie que l'utilisateur courant a les droits sur la collection en paramètre. Jette une exception le cas échéant.
-     *
-     * @param colJPA collection à vérifier
-     */
-    public void checkUserRightsOnCollection(CollectionJPA colJPA) {
+    private void checkUserRightsOnCollection(CollectionJPA colJPA) {
         var currentUser = authenticationService.findUserAttributes();
 
         switch (RoleEnum.fromValue(currentUser.getRole())) {
@@ -155,12 +150,8 @@ public class ControlAttribut {
         checkUserRightsOnCollection(colJPA);
     }
 
-    /**
-     * Vérifie que l'utilisateur courant a les droits sur la collection en paramètre. Jette une exception le cas échéant.
-     *
-     * @param collectionId identifiant de la collection à vérifier
-     */
-    public void checkUserRightsOnCollection(UUID collectionId) {
+    // no need to call remote API for institution, u can get it from collection table
+    public void checkUserAuthAttributesForAnyRole(UUID collectionId) {
         var colJPA = collectionJPARepository.findById(collectionId).orElseThrow(
                 () -> new CollectionManagerBusinessException(HttpStatus.NOT_FOUND.value(), ErrorCode.ERR_CODE_CM,
                         COLLECTION_WITH_ID + " :" + collectionId + NOT_FOUND));
@@ -195,6 +186,38 @@ public class ControlAttribut {
             throw exception;
         }
     }
+
+    public void checkUserAuthAttributesForRoleAdminCollection(UUID collectionId) {
+        var colJPA = collectionJPARepository.findById(collectionId).orElseThrow(
+                () -> new CollectionManagerBusinessException(HttpStatus.NOT_FOUND.value(), ErrorCode.ERR_CODE_CM,
+                        COLLECTION_WITH_ID + " :" + collectionId + NOT_FOUND));
+
+        var currentUser = authenticationService.findUserAttributes();
+
+        if (!RoleEnum.ADMIN_COLLECTION.equals(RoleEnum.fromValue(currentUser.getRole()))) {
+            final var exception = new CollectionManagerBusinessException(HttpStatus.FORBIDDEN.value(), HttpStatus.FORBIDDEN.name(), ROLE_NOT_SUPPORTED + currentUser.getRole());
+            log.error(exception.getMessage(), exception);
+            throw exception;
+        }
+
+        var allColByInst = collectionJPARepository.findCollectionsByInstitutionId(currentUser.getInstitution()).stream().map(CollectionJPA::getId).toList();
+        var userCollections = Optional.ofNullable(currentUser.getCollections()).stream().flatMap(Collection::stream).toList();
+
+        if (!(isInstitutionMember(colJPA, currentUser)
+              && (allColByInst.contains(collectionId))
+              && !CollectionUtils.isEmpty(userCollections)
+              && new HashSet<>(allColByInst).containsAll(userCollections))) {
+            var exception = new CollectionManagerBusinessException(HttpStatus.FORBIDDEN.value(), HttpStatus.FORBIDDEN.name(),
+                    "Imcompatible data : your assigned collections: " + userCollections + " all collection for your  institution: " + allColByInst
+                    + " you cannot request" + THIS_COLLECTION + " collectionId");
+
+            log.error(exception.getMessage(), exception);
+            throw exception;
+
+        }
+
+    }
+
 
 }
 

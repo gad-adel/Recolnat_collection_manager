@@ -22,4 +22,6 @@ public class Other extends DomainId {
     private String linkOther;
     private String financialAid;
     private String computerizationProgram;
+    private String remarks;
+
 }

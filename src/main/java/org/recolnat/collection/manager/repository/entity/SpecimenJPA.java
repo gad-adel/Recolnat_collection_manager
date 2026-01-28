@@ -84,9 +84,7 @@ public class SpecimenJPA extends AbstractEntity {
     private String recordNumber;
     private String basisOfRecord;
     private String preparations;
-    private String preparationDetail;
     private String individualCount;
-    private boolean approximateIndividualCount;
     private String sex;
     private String lifeStage;
     private String occurrenceRemarks;
@@ -95,7 +93,6 @@ public class SpecimenJPA extends AbstractEntity {
     private String collectionCode;
     private LocalDateTime dataChangeTs;
     private String nominativeCollection;
-    private Integer mids;
 
     @OneToMany(fetch = LAZY, cascade = ALL, orphanRemoval = true)
     @JoinColumn(name = "FK_ID_SPECIMEN", referencedColumnName = "id")

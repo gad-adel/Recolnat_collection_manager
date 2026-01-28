@@ -38,20 +38,18 @@ public class AuthorisationConnectorImpl implements AuthorisationConnector {
     private String authorisationUrl;
 
     @Override
-    public UserDashboardPageResponseDTO getUsers(UUID institutionId, Integer page, Integer size, String searchTerm, String columnSort, String typeSort) {
-        var userefOut = UserOut.builder().users(List.of()).build();
+    public UserDashboardPageResponseDTO getUsers(UUID institutionId, Integer page, Integer size, String searchTerm) {
+        var taxonRefOut = UserOut.builder().users(List.of()).build();
 
         var authentication = SecurityContextHolder.getContext().getAuthentication();
         final var credentials = (OAuth2AccessToken) authentication.getCredentials();
 
         try {
-            userefOut = getRequestHeadersUriSpec().uri(uriBuilder -> uriBuilder.path(USERS)
+            taxonRefOut = getRequestHeadersUriSpec().uri(uriBuilder -> uriBuilder.path(USERS)
                             .queryParam("page", page)
                             .queryParam("size", size)
                             .queryParam("q", searchTerm)
                             .queryParam("institution_id", institutionId)
-                            .queryParam("columnSort", columnSort)
-                            .queryParam("typeSort", typeSort)
                             .build())
                     .header("Authorization", "Bearer " + credentials.getTokenValue())
                     .retrieve()
@@ -68,15 +66,15 @@ public class AuthorisationConnectorImpl implements AuthorisationConnector {
         }
         var dto = new UserDashboardPageResponseDTO();
 
-        if (userefOut == null) {
+        if (taxonRefOut == null) {
             dto.setData(Collections.emptyList());
             dto.setTotalPages(0);
             dto.setNumberOfElements(0L);
         } else {
-            var users = userefOut.getUsers();
+            var users = taxonRefOut.getUsers();
             dto.setData(userMapper.toUsersDashboardDTO(users));
-            dto.setTotalPages(userefOut.getTotalPages());
-            dto.setNumberOfElements(userefOut.getNumberOfElements());
+            dto.setTotalPages(taxonRefOut.getTotalPages());
+            dto.setNumberOfElements(taxonRefOut.getNumberOfElements());
         }
         return dto;
     }

@@ -103,8 +103,7 @@ mediatheque:
 
 taxonRef:
   api:
-    #base_url: ${TAXON_REF_SERVER_API:#{'http://dock-pas1.arzt.mnhn.fr:8098'}}
-    base_url: ${TAXON_REF_SERVER_API:#{'http://localhost:8098'}}
+    base_url: ${TAXON_REF_SERVER_API:#{'http://dock-pas1.arzt.mnhn.fr:8098'}}
     api_key_name: ${TAXON_REF_SERVER_API_KEY_NAME:API_KEY}
     api_key_value: ${TAXON_REF_SERVER_API_KEY_VALUE:2e33b1d0-8540-420f-80dd-fff973149946}
     mock: ${TAXON_REF_SERVER_MOCK:false}

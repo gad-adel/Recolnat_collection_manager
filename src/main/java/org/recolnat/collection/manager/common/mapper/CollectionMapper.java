@@ -1,7 +1,6 @@
 package org.recolnat.collection.manager.common.mapper;
 
 import io.recolnat.model.CollectionDashboardDTO;
-import io.recolnat.model.CollectionDescriptionDTO;
 import io.recolnat.model.CollectionDetailDTO;
 import io.recolnat.model.CollectionDetailPublicDTO;
 import io.recolnat.model.CollectionIntegrationRequestDTO;
@@ -9,7 +8,6 @@ import io.recolnat.model.CollectionOptionDTO;
 import io.recolnat.model.CollectionPublicDTO;
 import io.recolnat.model.CollectionResponseDTO;
 import io.recolnat.model.CollectionWithCodeDTO;
-import io.recolnat.model.DomainSpecimenCountDTO;
 import io.recolnat.model.NominativeCollectionDashboardDTO;
 import io.recolnat.model.UserCollectionDTO;
 import jakarta.validation.Valid;
@@ -20,9 +18,7 @@ import org.mapstruct.Named;
 import org.recolnat.collection.manager.api.domain.Collection;
 import org.recolnat.collection.manager.api.domain.CollectionCreate;
 import org.recolnat.collection.manager.api.domain.CollectionDashboardProjection;
-import org.recolnat.collection.manager.api.domain.CollectionDescriptionProjection;
 import org.recolnat.collection.manager.api.domain.CollectionProjection;
-import org.recolnat.collection.manager.api.domain.DomainSpecimenCountProjection;
 import org.recolnat.collection.manager.api.domain.NominativeCollectionDashboardProjection;
 import org.recolnat.collection.manager.repository.entity.CollectionJPA;
 
@@ -72,29 +68,10 @@ public interface CollectionMapper {
         return Optional.ofNullable(isFr ? col.getNameFr() : col.getNameEn()).orElse(col.getNameFr());
     }
 
-
     @Named("getCollectionNameFromLang")
     default String getCollectionNameFromLang(CollectionProjection col, @Context boolean isFr) {
         return Optional.ofNullable(isFr ? col.getNameFr() : col.getNameEn()).orElse(col.getNameFr());
     }
-
-    @Named("getCollectionDescriptionFromLang")
-    default String getCollectionDescriptionFromLang(CollectionDescriptionProjection col, @Context boolean isFr) {
-        return Optional.ofNullable(isFr ? col.getDescriptionFr() : col.getDescriptionEn()).orElse(col.getDescriptionFr());
-    }
-
-    @Mapping(source = "uuid", target = "id")
-    @Mapping(
-            target = "name",
-            expression = "java(isFr ? projection.getNameFr() : projection.getNameEn())"
-    )
-    @Mapping(
-            target = "description",
-            expression = "java(isFr ? projection.getDescriptionFr() : projection.getDescriptionEn())"
-    )
-    CollectionDescriptionDTO toDto(CollectionDescriptionProjection projection, @Context boolean isFr);
-
-    List<CollectionDescriptionDTO> toLocalizedCollectionDescriptions(List<CollectionDescriptionProjection> projections, @Context boolean isFr);
 
     @Mapping(target = "name", source = "collection", qualifiedByName = "getCollectionNameFromLang")
     CollectionOptionDTO toCollectionOptionDTO(CollectionProjection collection, @Context boolean isFr);
@@ -117,8 +94,4 @@ public interface CollectionMapper {
     List<UserCollectionDTO> toUserCollectionDtos(List<CollectionProjection> allOptionsByInstitutionId);
 
     List<@Valid NominativeCollectionDashboardDTO> toNominativeCollectionsDashboardResponseDTO(List<NominativeCollectionDashboardProjection> data);
-
-    DomainSpecimenCountDTO projectionToDto(DomainSpecimenCountProjection projection);
-
-    List<DomainSpecimenCountDTO> projectionsToDtos(List<DomainSpecimenCountProjection> projections);
 }

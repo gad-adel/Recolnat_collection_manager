@@ -1,161 +1,71 @@
 package org.recolnat.collection.manager.institution.api.domain.service;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import org.junit.jupiter.api.BeforeEach;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.recolnat.collection.manager.api.domain.MidsGroup;
-import org.recolnat.collection.manager.repository.jpa.InstitutionRepositoryJPA;
+import org.junit.jupiter.api.TestInstance;
+import org.recolnat.collection.manager.api.domain.Collection;
+import org.recolnat.collection.manager.api.domain.Institution;
+import org.recolnat.collection.manager.api.domain.InstitutionDetail;
+import org.recolnat.collection.manager.api.domain.UserAttributes;
+import org.recolnat.collection.manager.api.domain.enums.LanguageEnum;
+import org.recolnat.collection.manager.collection.api.web.AbstractResourceDBTest;
+import org.recolnat.collection.manager.service.CollectionRetrieveService;
 import org.recolnat.collection.manager.service.impl.InstitutionServiceImpl;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.jdbc.Sql;
 
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
-@ExtendWith(MockitoExtension.class)
-class InstitutionServiceImplTest {
+/***
+ * test dans base postgresprofile= int (integration)
+ */
+@ActiveProfiles("int")
+@Sql(scripts = {"classpath:init_data_institution.sql"}, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+@Slf4j
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+class InstitutionServiceImplTest extends AbstractResourceDBTest {
 
-    @Mock
-    private InstitutionRepositoryJPA institutionRepository;
+    @Autowired
+    private InstitutionServiceImpl sut;
 
-    @InjectMocks
-    private InstitutionServiceImpl institutionService;
-
-    private UUID institutionId;
-
-    @BeforeEach
-    void setUp() {
-        institutionId = UUID.randomUUID();
-    }
-
-    @Test
-    void getInstitutionMids_shouldReturnCompleteListWithAllIndices() {
-        // Given
-        List<MidsGroup> groups = Arrays.asList(
-                new TestMidsGroup(0, 10L),
-                new TestMidsGroup(1, 20L),
-                new TestMidsGroup(2, 30L),
-                new TestMidsGroup(3, 40L)
-        );
-        when(institutionRepository.getInstitutionMids(institutionId)).thenReturn(groups);
-
-        // When
-        List<Long> result = institutionService.getInstitutionMids(institutionId);
-
-        // Then
-        assertThat(result).hasSize(4).containsExactly(10L, 20L, 30L, 40L);
-        verify(institutionRepository).getInstitutionMids(institutionId);
-    }
+    @MockBean
+    private CollectionRetrieveService apiClient;
 
     @Test
-    void getInstitutionMids_shouldReturnZeroForMissingIndices() {
+    void retreiveInstitution_should_be_ok() {
         // Given
-        List<MidsGroup> groups = Arrays.asList(
-                new TestMidsGroup(0, 15L),
-                new TestMidsGroup(2, 25L)
-        );
-        when(institutionRepository.getInstitutionMids(institutionId)).thenReturn(groups);
-
+        int id = 2;
         // When
-        List<Long> result = institutionService.getInstitutionMids(institutionId);
+        when(apiClient.retreiveCollectionsByInstitution(id, LanguageEnum.FR.name()))
+                .thenReturn(List.of(Collection.builder().collectionName("collection_code").build()));
 
+        Institution institution = sut.getInstitutionById(id, LanguageEnum.FR.name());
         // Then
-        assertThat(result).hasSize(4).containsExactly(15L, 0L, 25L, 0L);
-        verify(institutionRepository).getInstitutionMids(institutionId);
+        assertThat(institution.getId()).isEqualTo(2);
+        assertThat(institution.getName()).isEqualTo("Conservatoire et jardins botaniques de Nancy");
     }
+
 
     @Test
-    void getInstitutionMids_shouldReturnAllZerosWhenRepositoryReturnsEmptyList() {
+    void retreiveInstitutionbyUUID_should_be_ok() {
         // Given
-        List<MidsGroup> groups = Collections.emptyList();
-        when(institutionRepository.getInstitutionMids(institutionId)).thenReturn(groups);
-
+        UUID id = UUID.fromString("1d5e16d0-4564-4ef4-93ab-ec434a23ae75");
         // When
-        List<Long> result = institutionService.getInstitutionMids(institutionId);
+        when(apiClient.retreiveCollectionsByInstitution(anyInt(), eq(LanguageEnum.FR.name())))
+                .thenReturn(List.of(Collection.builder().collectionName("collection_code").build()));
+        when(authenticationService.findUserAttributes()).thenReturn(UserAttributes.builder()
+                .ui("admin").institution(1).role("ADMIN").build());
 
+        InstitutionDetail institution = sut.getInstitutionByUUID(id, LanguageEnum.FR.name());
         // Then
-        assertThat(result).hasSize(4).containsExactly(0L, 0L, 0L, 0L);
-        verify(institutionRepository).getInstitutionMids(institutionId);
+        assertThat(institution.getName()).isEqualTo("Société nationale des sciences naturelles et mathématiques de Cherbourg(CHE)");
     }
-
-    @Test
-    void getInstitutionMids_shouldHandlePartialData() {
-        // Given
-        List<MidsGroup> groups = Arrays.asList(
-                new TestMidsGroup(1, 100L),
-                new TestMidsGroup(3, 200L)
-        );
-        when(institutionRepository.getInstitutionMids(institutionId)).thenReturn(groups);
-
-        // When
-        List<Long> result = institutionService.getInstitutionMids(institutionId);
-
-        // Then
-        assertThat(result).hasSize(4).containsExactly(0L, 100L, 0L, 200L);
-        verify(institutionRepository).getInstitutionMids(institutionId);
-    }
-
-    @Test
-    void getInstitutionMids_shouldIgnoreIndicesOutsideRange() {
-        // Given
-        List<MidsGroup> groups = Arrays.asList(
-                new TestMidsGroup(0, 10L),
-                new TestMidsGroup(1, 20L),
-                new TestMidsGroup(4, 50L), // Index > 3, should be ignored
-                new TestMidsGroup(-1, 5L)  // Index < 0, should be ignored
-        );
-        when(institutionRepository.getInstitutionMids(institutionId)).thenReturn(groups);
-
-        // When
-        List<Long> result = institutionService.getInstitutionMids(institutionId);
-
-        // Then
-        assertThat(result).hasSize(4).containsExactly(10L, 20L, 0L, 0L);
-        verify(institutionRepository).getInstitutionMids(institutionId);
-    }
-
-    @Test
-    void getInstitutionMids_shouldHandleNullInstitutionId() {
-        // Given
-        when(institutionRepository.getInstitutionMids(null)).thenReturn(Collections.emptyList());
-
-        // When
-        List<Long> result = institutionService.getInstitutionMids(null);
-
-        // Then
-        assertThat(result).hasSize(4).containsExactly(0L, 0L, 0L, 0L);
-        verify(institutionRepository).getInstitutionMids(null);
-    }
-
-    @Test
-    void getInstitutionMids_shouldCallRepositoryOnce() {
-        // Given
-        List<MidsGroup> groups = List.of(new TestMidsGroup(0, 5L));
-        when(institutionRepository.getInstitutionMids(institutionId)).thenReturn(groups);
-
-        // When
-        institutionService.getInstitutionMids(institutionId);
-
-        // Then
-        verify(institutionRepository, times(1)).getInstitutionMids(institutionId);
-    }
-
-    @Getter
-    @AllArgsConstructor
-    static
-    class TestMidsGroup implements MidsGroup {
-        private int mids;
-        private long count;
-    }
-
 }

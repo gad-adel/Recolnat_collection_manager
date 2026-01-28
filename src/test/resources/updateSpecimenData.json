@@ -152,6 +152,7 @@
     "linkBold": "string",
     "linkOther": "string",
     "financialAid": "string",
-    "computerizationProgram": "string"
+    "computerizationProgram": "string",
+    "remarks": "string"
   }
 }

@@ -63,11 +63,5 @@ databaseChangeLog:
       file: db/changelog/db.changelog_create_import_table.yml
   - include:
       file: db/changelog/db.changelog_create_mail_table.yml
-  - include:
-      file: db/changelog/db.changelog-add_column_mids.yml
-  - include:
-      file: db/changelog/db.changelog-add_column_approximate_individual_count.yml
-  - include:
-      file: db/changelog/db.changelog-add_column_preparation_detail.yml
 
 

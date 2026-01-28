@@ -28,6 +28,4 @@ public class InstitutionDetail {
     @NotBlank(message = "partner type may not be empty")
     private String partnerType;
     private String logoUrl;
-    private String url;
-    private Integer specimensCount;
 }

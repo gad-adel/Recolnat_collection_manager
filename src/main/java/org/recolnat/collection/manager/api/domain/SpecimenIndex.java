@@ -94,7 +94,7 @@ public class SpecimenIndex {
 
     @Setter(onMethod = @__(@JsonSetter(value = "continent")))
     @Getter(onMethod = @__(@JsonGetter(value = "continent")))
-    private String[] continent;
+    private String continent;
 
     @Setter(onMethod = @__(@JsonSetter(value = "county")))
     @Getter(onMethod = @__(@JsonGetter(value = "county")))

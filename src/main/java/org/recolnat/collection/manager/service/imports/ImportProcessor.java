@@ -33,7 +33,7 @@ public class ImportProcessor {
     @Value("${filesystem.base-directory}")
     private String baseDirectory;
 
-    @Value("${upload.import}")
+    @Value("${import.directory}")
     private String importDirectory;
 
     @Transactional

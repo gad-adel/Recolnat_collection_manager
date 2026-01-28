@@ -10,7 +10,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.recolnat.collection.manager.api.domain.Mail;
 import org.recolnat.collection.manager.api.domain.enums.MailStatusEnum;
 import org.recolnat.collection.manager.api.domain.enums.imports.ImportFileType;
+import org.recolnat.collection.manager.api.domain.enums.imports.ImportIdentificationColumnEnum;
 import org.recolnat.collection.manager.api.domain.enums.imports.ImportModeEnum;
+import org.recolnat.collection.manager.api.domain.enums.imports.ImportPublicationColumnEnum;
+import org.recolnat.collection.manager.api.domain.enums.imports.ImportSpecimenColumnEnum;
 import org.recolnat.collection.manager.api.domain.enums.imports.ImportStatusEnum;
 import org.recolnat.collection.manager.api.domain.imports.ImportCheckSpecimen;
 import org.recolnat.collection.manager.common.exception.CollectionManagerBusinessException;
@@ -20,7 +23,6 @@ import org.recolnat.collection.manager.repository.entity.ImportFileJPA;
 import org.recolnat.collection.manager.repository.entity.ImportJPA;
 import org.recolnat.collection.manager.repository.jpa.ImportFileJPARepository;
 import org.recolnat.collection.manager.repository.jpa.ImportJPARepository;
-import org.recolnat.collection.manager.repository.jpa.SpecimenJPARepository;
 import org.recolnat.collection.manager.service.AuthenticationService;
 import org.recolnat.collection.manager.service.ElasticService;
 import org.recolnat.collection.manager.service.ImportService;
@@ -36,7 +38,6 @@ import org.springframework.core.io.InputStreamResource;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -58,6 +59,9 @@ import java.util.function.Predicate;
 import static org.recolnat.collection.manager.api.domain.enums.imports.ImportErrorEnum.DUPLICATE;
 import static org.recolnat.collection.manager.api.domain.enums.imports.ImportErrorEnum.INCORRECT;
 import static org.recolnat.collection.manager.api.domain.enums.imports.ImportErrorEnum.REQUIRED;
+import static org.recolnat.collection.manager.api.domain.enums.imports.ImportSpecimenColumnEnum.CATALOG_NUMBER;
+import static org.recolnat.collection.manager.api.domain.enums.imports.ImportSpecimenColumnEnum.COLLECTION_NAME;
+import static org.recolnat.collection.manager.api.domain.enums.imports.ImportSpecimenColumnEnum.SCIENTIFIC_NAME;
 
 @Service
 @RequiredArgsConstructor
@@ -66,6 +70,11 @@ public class ImportServiceImpl implements ImportService {
 
     public static final int MAX_FILE_SIZE = 1024 * 1024 * 50;
     public static final String ACCESS_DENIED = "Access denied";
+
+    // Nom des colonnes
+    private static final List<String> SPECIMEN_REQUIRED_FIELDS = List.of(COLLECTION_NAME.getColumnName(), CATALOG_NUMBER.getColumnName(), SCIENTIFIC_NAME.getColumnName());
+    private static final List<String> DETERMINATION_REQUIRED_FIELDS = List.of(COLLECTION_NAME.getColumnName(), CATALOG_NUMBER.getColumnName(), SCIENTIFIC_NAME.getColumnName());
+    private static final List<String> PUBLICATION_REQUIRED_FIELDS = List.of(COLLECTION_NAME.getColumnName(), CATALOG_NUMBER.getColumnName());
 
     private final InstitutionService institutionService;
     private final AuthenticationService authenticationService;
@@ -83,12 +92,11 @@ public class ImportServiceImpl implements ImportService {
     private final ImportSpecimenFileChecker importSpecimenFileChecker;
     private final ImportIdentificationFileChecker importIdentificationFileChecker;
     private final ImportPublicationFileChecker importPublicationFileChecker;
-    private final SpecimenJPARepository specimenJPARepository;
 
     @Value("${filesystem.base-directory}")
     private String baseDirectory;
 
-    @Value("${upload.import}")
+    @Value("${import.directory}")
     private String importDirectory;
 
     @Override
@@ -112,7 +120,52 @@ public class ImportServiceImpl implements ImportService {
                 log.info("[{}] Import terminé en {} ms", importJPA.getId(), timeElapsed / 1_000_000);
             }
 
-            sendImportMail(importOk, importJPA, dateFormatter, hourFormatter);
+            // TODO prévoir l'anglais
+            String subject = importOk ? "Import exécuté avec succès" : "Erreur lors de l’exécution de l’import";
+
+            String content = importOk ? """
+                    Bonjour,
+                    <br><br>
+                    Nous vous confirmons que votre demande d'import effectuée le %s à %s a été réalisée avec succès.
+                    <br><br>
+                    Récapitulatif de l'import :
+                    <br><br>
+                    Nombre de spécimens ajoutés : %d
+                    <br>
+                    Nombre de spécimens modifiés : %d
+                    <br>
+                    Nombre de déterminations ajoutées : %d
+                    <br>
+                    Nombre de publications ajoutées : %d
+                    <br><br>
+                    Vous pouvez visualiser le détail de l’import ainsi que la liste des spécimens ajoutés ou modifiés en vous connectant à votre espace Recolnat, dans la section <b>Mon institution</b>, onglet <b>Imports</b>.
+                    <br><br>
+                    Cordialement,
+                    <br><br>
+                    L'équipe Recolnat.
+                    """.formatted(importJPA.getTimestamp().format(dateFormatter), importJPA.getTimestamp()
+                    .format(hourFormatter), importJPA.getAddedSpecimenCount(), importJPA.getUpdatedSpecimenCount(), importJPA.getAddedIdentificationCount(), importJPA.getAddedLiteratureCount())
+                    : """
+                    Bonjour,
+                    <br><br>
+                    Une erreur s’est produite lors de l’exécution de l’import effectué le %s à %s.
+                    <br><br>
+                    Vous pouvez contacter l’administrateur de Recolnat pour plus d’information.
+                    <br><br>
+                    Cordialement,
+                    <br><br>
+                    L'équipe Recolnat.
+                    """.formatted(importJPA.getTimestamp().format(dateFormatter), importJPA.getTimestamp().format(hourFormatter));
+
+            Mail mail = Mail.builder().id(UUID.randomUUID())
+                    .from("noreply@recolnat.fr")
+                    .to(importJPA.getEmail())
+                    .subject(subject)
+                    .content(content)
+                    .createdAt(LocalDateTime.now())
+                    .state(MailStatusEnum.PENDING)
+                    .build();
+            mailService.create(mail);
 
             try {
                 elasticService.updateSpecimenFromImport(importJPA.getId(), importJPA.getInstitutionId());
@@ -120,55 +173,6 @@ public class ImportServiceImpl implements ImportService {
                 log.error("Erreurs lors de la mise à jour de l'index ES", e);
             }
         }
-    }
-
-    private void sendImportMail(boolean importOk, ImportJPA importJPA, DateTimeFormatter dateFormatter, DateTimeFormatter hourFormatter) {
-        // TODO prévoir l'anglais
-        String subject = importOk ? "Import exécuté avec succès" : "Erreur lors de l’exécution de l’import";
-
-        String content = importOk ? """
-                Bonjour,
-                <br><br>
-                Nous vous confirmons que votre demande d'import effectuée le %s à %s a été réalisée avec succès.
-                <br><br>
-                Récapitulatif de l'import :
-                <br><br>
-                Nombre de spécimens ajoutés : %d
-                <br>
-                Nombre de spécimens modifiés : %d
-                <br>
-                Nombre de déterminations ajoutées : %d
-                <br>
-                Nombre de publications ajoutées : %d
-                <br><br>
-                Vous pouvez visualiser le détail de l’import ainsi que la liste des spécimens ajoutés ou modifiés en vous connectant à votre espace Recolnat, dans la section <b>Mon institution</b>, onglet <b>Imports</b>.
-                <br><br>
-                Cordialement,
-                <br><br>
-                L'équipe Recolnat.
-                """.formatted(importJPA.getTimestamp().format(dateFormatter), importJPA.getTimestamp()
-                .format(hourFormatter), importJPA.getAddedSpecimenCount(), importJPA.getUpdatedSpecimenCount(), importJPA.getAddedIdentificationCount(), importJPA.getAddedLiteratureCount())
-                : """
-                Bonjour,
-                <br><br>
-                Une erreur s’est produite lors de l’exécution de l’import effectué le %s à %s.
-                <br><br>
-                Vous pouvez contacter l’administrateur de Recolnat pour plus d’information.
-                <br><br>
-                Cordialement,
-                <br><br>
-                L'équipe Recolnat.
-                """.formatted(importJPA.getTimestamp().format(dateFormatter), importJPA.getTimestamp().format(hourFormatter));
-
-        Mail mail = Mail.builder().id(UUID.randomUUID())
-                .from("noreply@recolnat.fr")
-                .to(importJPA.getEmail())
-                .subject(subject)
-                .content(content)
-                .createdAt(LocalDateTime.now())
-                .state(MailStatusEnum.PENDING)
-                .build();
-        mailService.create(mail);
     }
 
     @Override
@@ -224,7 +228,48 @@ public class ImportServiceImpl implements ImportService {
     }
 
     @Override
-    public ImportCheckDataResponseDTO checkFileCommonProperties(MultipartFile file, UUID institutionId) {
+    public ImportCheckDataResponseDTO checkSpecimens(MultipartFile file, UUID institutionId) {
+        var response = checkFileCommonProperties(file, institutionId);
+
+        // Vérification de la présence des colonnes obligatoires dans le fichier
+        if (Boolean.TRUE.equals(response.getFormat())) {
+            response.setStructureErrors(checkSpecimenFileStructure(file));
+        } else {
+            response.setStructureErrors(new ArrayList<>());
+        }
+
+        return response;
+    }
+
+    @Override
+    public ImportCheckDataResponseDTO checkDeterminations(MultipartFile file, UUID institutionId) {
+        var response = checkFileCommonProperties(file, institutionId);
+
+        // Vérification de la présence des colonnes obligatoires dans le fichier
+        if (Boolean.TRUE.equals(response.getFormat())) {
+            response.setStructureErrors(checkDeterminationFileStructure(file));
+        } else {
+            response.setStructureErrors(new ArrayList<>());
+        }
+
+        return response;
+    }
+
+    @Override
+    public ImportCheckDataResponseDTO checkPublications(MultipartFile file, UUID institutionId) {
+        var response = checkFileCommonProperties(file, institutionId);
+
+        // Vérification de la présence des colonnes obligatoires dans le fichier
+        if (Boolean.TRUE.equals(response.getFormat())) {
+            response.setStructureErrors(checkPublicationFileStructure(file));
+        } else {
+            response.setStructureErrors(new ArrayList<>());
+        }
+
+        return response;
+    }
+
+    private ImportCheckDataResponseDTO checkFileCommonProperties(MultipartFile file, UUID institutionId) {
         var response = new ImportCheckDataResponseDTO();
         // Vérification que l'utilisateur courant a bien les droits de faire un import sur l'institution
         if (institutionService.checkAccessToInstitution(institutionId)) {
@@ -297,8 +342,74 @@ public class ImportServiceImpl implements ImportService {
         }
     }
 
-    @Override
-    public void checkDuplicateColumns(String[] columns, List<ImportStructureErrorDTO> errors) {
+    private List<ImportStructureErrorDTO> checkPublicationFileStructure(MultipartFile file) {
+        List<ImportStructureErrorDTO> errors = new ArrayList<>();
+        long start = System.nanoTime();
+        var lines = importHelper.extractDataWithOpenCsv(file);
+        var header = lines.get(0);
+
+        // Si le séparateur n'est pas correct
+        if (header.length == 1) {
+            throw new CollectionManagerBusinessException(HttpStatus.BAD_REQUEST.value(), HttpStatus.BAD_REQUEST.name(), "wrong_separator");
+        }
+
+        checkRequiredColumnNames(header, errors, PUBLICATION_REQUIRED_FIELDS);
+        hasAllColumnsInList(header, errors, column -> ImportPublicationColumnEnum.fromValue(column) == null);
+        checkDuplicateColumns(header, errors);
+        long finish = System.nanoTime();
+        long timeElapsed = finish - start;
+        log.info("ImportSerch::checkPublicationFileStructure : {} ms", timeElapsed);
+
+        return errors;
+    }
+
+    private List<ImportStructureErrorDTO> checkDeterminationFileStructure(MultipartFile file) {
+        List<ImportStructureErrorDTO> errors = new ArrayList<>();
+        long start = System.nanoTime();
+        var lines = importHelper.extractDataWithOpenCsv(file);
+        var header = lines.get(0);
+
+        // Si le séparateur n'est pas correct
+        if (header.length == 1) {
+            throw new CollectionManagerBusinessException(HttpStatus.BAD_REQUEST.value(), HttpStatus.BAD_REQUEST.name(), "wrong_separator");
+        }
+
+        checkRequiredColumnNames(header, errors, DETERMINATION_REQUIRED_FIELDS);
+        hasAllColumnsInList(header, errors, column -> ImportIdentificationColumnEnum.fromValue(column) == null);
+        checkDuplicateColumns(header, errors);
+        long finish = System.nanoTime();
+        long timeElapsed = finish - start;
+        if (log.isInfoEnabled()) {
+            log.info("ImportSerch::checkDeterminationFileStructure : {} ms", timeElapsed);
+        }
+
+        return errors;
+    }
+
+    private List<ImportStructureErrorDTO> checkSpecimenFileStructure(MultipartFile file) {
+        List<ImportStructureErrorDTO> errors = new ArrayList<>();
+        long start = System.nanoTime();
+        var lines = importHelper.extractDataWithOpenCsv(file);
+        var header = lines.get(0);
+
+        // Si le séparateur n'est pas correct
+        if (header.length == 1) {
+            throw new CollectionManagerBusinessException(HttpStatus.BAD_REQUEST.value(), HttpStatus.BAD_REQUEST.name(), "wrong_separator");
+        }
+
+        checkRequiredColumnNames(header, errors, SPECIMEN_REQUIRED_FIELDS);
+        hasAllColumnsInList(header, errors, column -> ImportSpecimenColumnEnum.fromValue(column) == null);
+        checkDuplicateColumns(header, errors);
+        long finish = System.nanoTime();
+        long timeElapsed = finish - start;
+        if (log.isInfoEnabled()) {
+            log.info("ImportSerch::checkSpecimenFileStructure : {} ms", timeElapsed);
+        }
+
+        return errors;
+    }
+
+    private void checkDuplicateColumns(String[] columns, List<ImportStructureErrorDTO> errors) {
         var duplicateColumns = new ArrayList<String>();
         Set<String> uniqueColumns = new HashSet<>();
 
@@ -324,8 +435,7 @@ public class ImportServiceImpl implements ImportService {
      * @param columns tableau de chaines de caractères contenant le nom des colonnes du fichier
      * @param errors  liste des erreurs
      */
-    @Override
-    public void hasAllColumnsInList(String[] columns, List<ImportStructureErrorDTO> errors, Predicate<String> predicate) {
+    private void hasAllColumnsInList(String[] columns, List<ImportStructureErrorDTO> errors, Predicate<String> predicate) {
         var incorrectColumns = new ArrayList<String>();
 
         for (String column : columns) {
@@ -350,8 +460,7 @@ public class ImportServiceImpl implements ImportService {
      * @param errors         liste des erreurs
      * @param requiredFields liste des champs requis
      */
-    @Override
-    public void checkRequiredColumnNames(String[] columns, List<ImportStructureErrorDTO> errors, List<String> requiredFields) {
+    private void checkRequiredColumnNames(String[] columns, List<ImportStructureErrorDTO> errors, List<String> requiredFields) {
         var cols = List.of(columns);
 
         var nonPresentColumns = new ArrayList<String>();
@@ -409,12 +518,6 @@ public class ImportServiceImpl implements ImportService {
             }
         }
         return null;
-    }
-
-    @Transactional
-    @Override
-    public void unpublish(UUID importId) {
-        specimenJPARepository.unpublishSpecimenByImportId(importId);
     }
 
     private @NotNull Path getDirectoryPath() {

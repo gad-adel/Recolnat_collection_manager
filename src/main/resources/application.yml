@@ -160,15 +160,8 @@ fileSystem:
   base-directory: ${FS_BASEDIR:/data}
 
 import:
+  directory: ${IMPORT_DIRECTORY:/imports}
   cron: ${IMPORT_CRON:0 * * * * ?}
 
 mail:
   cron: ${MAIL_CRON:0 * * * * ?}
-
-statistic:
-  cron: ${STATISTIC_CRON:0 0 0 * * ?}
-
-upload:
-  import: ${IMPORT_DIRECTORY:/imports}
-  articles: ${ARTICLE_DIRECTORY:/articles}
-  institutions: ${INSTITUTION_DIRECTORY:/institutions}

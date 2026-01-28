@@ -68,16 +68,6 @@ databaseChangeLog:
                   type: timestamp
                   constraints:
                     nullable: true
-              - column:
-                  name: url
-                  type: varchar(255)
-                  constraints:
-                    nullable: true
-              - column:
-                  name: specimens_count
-                  type: int
-                  constraints:
-                    nullable: true
   - changeSet:
       id: addAutoIncrementId
       author: ZBO

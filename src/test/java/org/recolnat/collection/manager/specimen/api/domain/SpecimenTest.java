@@ -17,6 +17,7 @@ class SpecimenTest {
     void isDraftValid_should_be_ko() {
         var spec = Specimen.builder().build();
         assertThat(spec.isDraftValid()).isFalse();
+        assertThat(Integer.valueOf("5")).isEqualTo(5);
     }
 
 }

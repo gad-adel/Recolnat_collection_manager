@@ -9,6 +9,5 @@ VALUES ('477ee750-5366-4991-8a56-dd3985ae5a4f', 'Arthur Martin', 'Plantae banana
 
 </body>
 </html>
-', 'http://dummyimage.com/116x100.png/cc0000/ffffff', '2022-12-16 12:06:18.792921', 'created_by', null, null, null, 1,
-        now(), 'PUBLISHED');
+', 'urlmedial', '2022-12-16 12:06:18.792921', 'created_by', null, null, null, 1, now(), 'PUBLISHED');
 

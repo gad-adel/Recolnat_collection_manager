@@ -33,8 +33,6 @@ public interface SpecimenMapper {
     @Mapping(target = "createdAt", source = "createdAt", qualifiedByName = "checkCreatedAt")
     @Mapping(target = "createdBy", source = "createdBy", qualifiedByName = "createdByUser")
     @Mapping(target = "dataChangeTs", ignore = true)
-    @Mapping(target = "approximateIndividualCount", source = "approximateIndividualCount")
-    @Mapping(target = "preparationDetail", source = "preparationDetail")
     SpecimenJPA mapToSpecimenJpaForUpdate(Specimen specimen, @Context String uid);
 
     @Named("StringToUUID")
@@ -69,11 +67,8 @@ public interface SpecimenMapper {
         return createdAt;
     }
 
-    // TODO mapping explicite
     @Mapping(target = "modifiedBy", ignore = true)
     @Mapping(target = "modifiedAt", ignore = true)
-    @Mapping(target = "approximateIndividualCount", source = "approximateIndividualCount")
-    @Mapping(target = "preparationDetail", source = "preparationDetail")
     Specimen mapDtoToSpecimen(SpecimenIntegrationRequestDTO specimen);
 
     @Mapping(target = "collectionId", source = "collection.id", qualifiedByName = "UUIDtoString")
